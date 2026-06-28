@@ -3,6 +3,26 @@ const authorsModel = require('../models/authors');
 const pagesModel = require('../models/pages');
 const siteSettingsModel = require('../models/siteSettings');
 
+function cleanExcerpt(text, maxLen = 200) {
+  if (!text) return '';
+  return text
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .trim()
+    .slice(0, maxLen);
+}
+
+function withExcerpt(article) {
+  if (!article) return article;
+  return { ...article, excerpt: cleanExcerpt(article.excerpt || article.body) };
+}
+
 const CATEGORY_PAGE_SIZE = 12;
 const AUTHOR_PAGE_SIZE = 12;
 const SEARCH_PAGE_SIZE = 12;
@@ -20,14 +40,14 @@ async function home(req, res, next) {
       pagesModel.getLatestPublished({ limit: 3 }),
     ]);
 
-    const [lead, ...grid] = latest;
+    const [rawLead, ...rawGrid] = latest;
 
     res.render('public/home', {
       title: 'Assam Portal — Gateway to Assam',
-      lead,
-      grid,
-      mostViewed,
-      onThisDay,
+      lead: withExcerpt(rawLead),
+      grid: rawGrid.map(withExcerpt),
+      mostViewed: mostViewed.map(withExcerpt),
+      onThisDay: onThisDay.map(withExcerpt),
       latestPages,
     });
   } catch (err) {
@@ -50,8 +70,8 @@ async function newsPage(req, res, next) {
 
     res.render('public/news', {
       title: 'Latest Stories — Assam Portal',
-      articles,
-      mostViewed,
+      articles: articles.map(withExcerpt),
+      mostViewed: mostViewed.map(withExcerpt),
       page,
       totalPages,
     });
@@ -119,10 +139,10 @@ async function categoryPage(req, res, next) {
     const totalPages = Math.max(1, Math.ceil(total / CATEGORY_PAGE_SIZE));
 
     res.render('public/category', {
-      title: `${category} — Assam Times`,
+      title: `${category} — Assam Portal`,
       category,
-      articles,
-      mostViewed,
+      articles: articles.map(withExcerpt),
+      mostViewed: mostViewed.map(withExcerpt),
       page,
       totalPages,
     });
@@ -151,10 +171,10 @@ async function authorPage(req, res, next) {
     const totalPages = Math.max(1, Math.ceil(total / AUTHOR_PAGE_SIZE));
 
     res.render('public/author', {
-      title: `${author.display_name || author.username} — Assam Times`,
+      title: `${author.display_name || author.username} — Assam Portal`,
       author,
-      articles,
-      mostViewed,
+      articles: articles.map(withExcerpt),
+      mostViewed: mostViewed.map(withExcerpt),
       page,
       totalPages,
     });
@@ -170,7 +190,7 @@ async function searchPage(req, res, next) {
 
     if (q.length < SEARCH_MIN_LENGTH) {
       return res.render('public/search', {
-        title: 'Search — Assam Times',
+        title: 'Search — Assam Portal',
         q,
         articles: [],
         mostViewed,
@@ -191,10 +211,10 @@ async function searchPage(req, res, next) {
     const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
 
     res.render('public/search', {
-      title: `Search: ${q} — Assam Times`,
+      title: `Search: ${q} — Assam Portal`,
       q,
-      articles,
-      mostViewed,
+      articles: articles.map(withExcerpt),
+      mostViewed: mostViewed.map(withExcerpt),
       page,
       totalPages,
       tooShort: false,
