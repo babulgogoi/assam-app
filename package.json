@@ -1,5 +1,5 @@
 {
-  "name": "assamtimes-app",
+  "name": "assam-org",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "assamtimes.org news site (Express + PostgreSQL)",
+  "description": "assam.org portal (Express + PostgreSQL)",
   "private": true,
   "dependencies": {
     "bcryptjs": "^3.0.3",

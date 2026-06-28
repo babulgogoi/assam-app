@@ -103,7 +103,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
-  console.log(`assamtimes.org server running at http://localhost:${PORT}`);
+  console.log(`assam.org server running at http://localhost:${PORT}`);
 });
 
 function shutdown(signal) {

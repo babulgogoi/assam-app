@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'assamtimes',
+      name: 'assam-org',
       script: 'server.js',
       cwd: __dirname,
       instances: 1,
@@ -9,7 +9,7 @@ module.exports = {
       max_memory_restart: '300M',
       env: {
         NODE_ENV: 'production',
-        PORT: 3002,
+        PORT: 3004,
       },
       out_file: 'logs/pm2-out.log',
       error_file: 'logs/pm2-error.log',
