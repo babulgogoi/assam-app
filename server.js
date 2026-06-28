@@ -75,6 +75,10 @@ app.use('/uploads/documents', express.static(process.env.UPLOADS_DOCUMENTS_DIR))
 app.use('/uploads/defaults', express.static(process.env.UPLOADS_DEFAULTS_DIR));
 app.use('/uploads/branding', express.static(process.env.UPLOADS_BRANDING_DIR));
 app.use('/uploads/authors', express.static(process.env.UPLOADS_AUTHORS_DIR));
+// D9 migrated files — body HTML was rewritten to /uploads/legacy/ during migration.
+app.use('/uploads/legacy', express.static(process.env.UPLOADS_LEGACY_DIR));
+// Fallback: serve D9 original path directly for any URLs that were not rewritten.
+app.use('/sites/assam.org/files', express.static(process.env.D9_FILES_DIR));
 
 app.get('/health', async (req, res) => {
   try {
