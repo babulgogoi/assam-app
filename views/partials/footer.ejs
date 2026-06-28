@@ -1,0 +1,7 @@
+<footer class="site-footer">
+  <% if (typeof footerHtml !== 'undefined' && footerHtml) { %>
+    <%- footerHtml %>
+  <% } else { %>
+    <p>&copy; <%= new Date().getFullYear() %> Assam Times</p>
+  <% } %>
+</footer>

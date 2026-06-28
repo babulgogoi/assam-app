@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (process.env.NODE_ENV === 'production') { %>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3VCJYPSX0"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-W3VCJYPSX0');
+    </script>
+  <% } %>
+  <title><%= typeof title !== 'undefined' ? title : 'Admin' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <span class="admin-header__brand">Assam Times Admin</span>
+    <nav class="admin-header__nav">
+      <a href="/admin/articles">Articles</a>
+      <a href="/admin/pages">Pages</a>
+      <a href="/admin/menu">Menu</a>
+      <a href="/admin/settings">Settings</a>
+      <a href="/admin/authors">Authors</a>
+      <form method="post" action="/admin/logout" class="admin-header__logout">
+        <button type="submit">Logout<% if (typeof authorName !== 'undefined' && authorName) { %> (<%= authorName %>)<% } %></button>
+      </form>
+    </nav>
+  </header>
+  <main class="admin-main">
+    <%- body %>
+  </main>
+</body>
+</html>

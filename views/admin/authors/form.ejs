@@ -1,0 +1,52 @@
+<div class="admin-list-header">
+  <h1><%= author ? 'Edit Author' : 'New Author' %></h1>
+  <% if (author && author.username) { %>
+    <a class="admin-btn admin-btn--primary" href="/author/<%= encodeURIComponent(author.username) %>" target="_blank" rel="noopener">View Author</a>
+  <% } %>
+</div>
+
+<% if (errors && errors.length) { %>
+  <ul class="admin-form-errors">
+    <% errors.forEach(function (e) { %><li><%= e %></li><% }) %>
+  </ul>
+<% } %>
+
+<form class="admin-form" method="post" action="<%= author && author.id ? '/admin/authors/' + author.id : '/admin/authors' %>" enctype="multipart/form-data">
+  <label>
+    Username
+    <input type="text" name="username" value="<%= author ? author.username : '' %>" required>
+  </label>
+
+  <label>
+    Email
+    <input type="email" name="email" value="<%= author ? (author.email || '') : '' %>">
+  </label>
+
+  <label>
+    Display Name
+    <input type="text" name="display_name" value="<%= author ? (author.display_name || '') : '' %>">
+  </label>
+
+  <label>
+    Bio
+    <textarea name="bio" rows="4"><%= author ? (author.bio || '') : '' %></textarea>
+  </label>
+
+  <label>
+    Photo
+    <% if (author && author.photo) { %>
+      <img class="admin-thumb" src="<%= author.photo %>" alt="">
+      <label class="admin-checkbox"><input type="checkbox" name="remove_photo" value="1"> Remove current photo</label>
+      <input type="hidden" name="existing_photo" value="<%= author.photo %>">
+    <% } %>
+    <input type="file" name="photo" accept="image/*">
+  </label>
+
+  <p class="admin-form-hint">
+    Login access isn't managed here. Use
+    <code>node scripts/set-admin-password.js &lt;username&gt; &lt;password&gt;</code>
+    on the server to grant or change admin login for an author.
+  </p>
+
+  <button type="submit" class="admin-btn admin-btn--primary"><%= author ? 'Save Changes' : 'Create Author' %></button>
+</form>

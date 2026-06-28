@@ -1,0 +1,50 @@
+<div class="admin-list-header">
+  <h1>Authors</h1>
+  <a class="admin-btn admin-btn--primary" href="/admin/authors/new">+ New Author</a>
+</div>
+
+<div class="admin-filter-bar">
+  <input type="text" id="authorSearch" placeholder="Search by username or display name...">
+</div>
+
+<table class="admin-table" id="authorsTable">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Username</th>
+      <th>Display Name</th>
+      <th>Articles</th>
+      <th>Can Log In</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% authors.forEach(function (author) { %>
+      <tr data-username="<%= author.username.toLowerCase() %>" data-display-name="<%= (author.display_name || '').toLowerCase() %>">
+        <td><img class="admin-thumb admin-thumb--small" src="<%= author.photo || '/uploads/defaults/avatar.png' %>" alt=""></td>
+        <td><a href="/admin/authors/<%= author.id %>/edit"><%= author.username %></a></td>
+        <td><%= author.display_name || '—' %></td>
+        <td><%= author.article_count %></td>
+        <td><%= author.can_login ? 'Yes' : 'No' %></td>
+      </tr>
+    <% }) %>
+    <% if (!authors.length) { %>
+      <tr><td colspan="5">No authors found.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+<p id="authorSearchEmpty" class="admin-form-hint" hidden>No authors match your search.</p>
+
+<script>
+  document.getElementById('authorSearch').addEventListener('input', function (e) {
+    var query = e.target.value.trim().toLowerCase();
+    var rows = document.querySelectorAll('#authorsTable tbody tr[data-username]');
+    var visibleCount = 0;
+    rows.forEach(function (row) {
+      var matches = row.getAttribute('data-username').indexOf(query) !== -1 ||
+        row.getAttribute('data-display-name').indexOf(query) !== -1;
+      row.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
+    });
+    document.getElementById('authorSearchEmpty').hidden = visibleCount !== 0;
+  });
+</script>

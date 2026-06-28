@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (process.env.NODE_ENV === 'production') { %>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3VCJYPSX0"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-W3VCJYPSX0');
+    </script>
+  <% } %>
+  <title><%= typeof title !== 'undefined' ? title : 'Assam Times' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <% if (typeof adsenseClientId !== 'undefined' && adsenseClientId) { %>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<%= adsenseClientId %>" crossorigin="anonymous"></script>
+  <% } %>
+</head>
+<body>
+  <%- include('partials/ads-header') %>
+  <%- include('partials/header') %>
+
+  <main class="site-main">
+    <%- body %>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script src="/js/header.js" defer></script>
+</body>
+</html>

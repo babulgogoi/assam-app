@@ -1,0 +1,26 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-header__logo" href="/">
+      <img src="/uploads/branding/logo.jpg" alt="Assam Times">
+    </a>
+
+    <button class="site-header__menu-toggle" id="menuToggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="siteNav">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="site-header__nav" id="siteNav">
+      <% if (typeof menuItems !== 'undefined') { %>
+        <% menuItems.forEach(function (item) { %>
+          <% if (item.url) { %>
+            <a href="<%= item.url %>"><%= item.label %></a>
+          <% } %>
+        <% }) %>
+      <% } %>
+    </nav>
+    <form class="site-header__search" action="/search" method="get">
+      <input type="search" name="q" placeholder="Search...">
+    </form>
+  </div>
+</header>

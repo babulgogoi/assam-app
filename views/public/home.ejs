@@ -1,0 +1,46 @@
+<div class="home-layout">
+  <div class="home-main">
+
+    <% if (lead) { %>
+      <article class="lead-story">
+        <a class="lead-story__link" href="/article/<%= lead.slug %>">
+          <img class="lead-story__image" src="<%= lead.featured_image || '/uploads/defaults/at-news.png' %>" alt="<%= lead.title %>">
+          <div class="lead-story__overlay">
+            <h1 class="lead-story__title"><%= lead.title %></h1>
+            <p class="lead-story__date">
+              <%= lead.published_at ? new Date(lead.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
+            </p>
+          </div>
+        </a>
+      </article>
+    <% } %>
+
+    <div class="article-grid">
+      <% grid.forEach(function (article) { %>
+        <article class="article-card">
+          <a href="/article/<%= article.slug %>">
+            <img class="article-card__image" src="<%= article.featured_image || '/uploads/defaults/at-news.png' %>" alt="<%= article.title %>">
+            <h2 class="article-card__title"><%= article.title %></h2>
+          </a>
+          <p class="article-meta">
+            <% if (article.author_username) { %>
+              by <a href="/author/<%= encodeURIComponent(article.author_username) %>"><%= article.author_name %></a>
+            <% } %>
+            <% if (article.category) { %>
+              in <a href="/category/<%= encodeURIComponent(article.category) %>"><%= article.category %></a>
+            <% } %>
+          </p>
+        </article>
+      <% }) %>
+    </div>
+
+    <div class="view-all-news">
+      <a class="view-all-news__btn" href="/news">View All News</a>
+    </div>
+
+  </div>
+
+  <aside class="home-sidebar">
+    <%- include('../partials/sidebar-home') %>
+  </aside>
+</div>
