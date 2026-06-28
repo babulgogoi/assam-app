@@ -342,8 +342,18 @@ function toIntArray(val) {
   return arr.map(v => parseInt(v, 10)).filter(n => !isNaN(n));
 }
 
+async function searchBookAuthors(req, res, next) {
+  try {
+    const q = (req.query.q || '').trim();
+    if (q.length < 2) return res.json([]);
+    const rows = await booksModel.searchAuthors(q);
+    res.json(rows);
+  } catch (err) { next(err); }
+}
+
 module.exports = {
   listBooks, newBookForm, createBook, editBookForm, updateBook, deleteBook,
   listBookAuthors, newBookAuthorForm, createBookAuthor, editBookAuthorForm, updateBookAuthor, deleteBookAuthor,
   listPublishers, newPublisherForm, createPublisher, editPublisherForm, updatePublisher, deletePublisher,
+  searchBookAuthors,
 };

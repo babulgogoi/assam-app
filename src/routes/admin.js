@@ -86,6 +86,7 @@ router.post('/books/:id',           requirePermission('books', 'can_update'), ad
 router.post('/books/:id/delete',    requirePermission('books', 'can_delete'), adminBooksController.deleteBook);
 
 // Book Authors (module: books)
+router.get('/book-authors/search',      requirePermission('books', 'can_read'),   adminBooksController.searchBookAuthors);
 router.get('/book-authors',             requirePermission('books', 'can_read'),   adminBooksController.listBookAuthors);
 router.get('/book-authors/new',         requirePermission('books', 'can_create'), adminBooksController.newBookAuthorForm);
 router.post('/book-authors',            requirePermission('books', 'can_create'), adminBooksController.createBookAuthor);

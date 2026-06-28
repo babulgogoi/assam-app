@@ -17,7 +17,7 @@
 
   <div class="admin-form-row">
     <label>Cover Image URL<input type="url" name="cover_image" value="<%= (book && book.cover_image) || '' %>" placeholder="https://…">
-      <% if (book && book.cover_image) { %><img src="<%= book.cover_image %>" alt="" style="max-width:80px;max-height:110px;margin-top:6px;display:block"><% } %>
+      <% if (book && book.cover_image) { %><img src="<%= book.cover_image.replace(/\.jpg$/, '-sm.jpg') %>" alt="" style="max-width:60px;max-height:84px;margin-top:6px;display:block;border-radius:2px"><% } %>
     </label>
     <label>Cover Alt Text<input type="text" name="cover_image_alt" value="<%= (book && book.cover_image_alt) || '' %>"></label>
   </div>
@@ -76,37 +76,112 @@
     <span>Featured book</span>
   </label>
 
-  <fieldset class="admin-fieldset">
-    <legend>Authors</legend>
-    <% if (authors.length === 0) { %>
-    <p style="font-size:0.85rem;color:#666">No book authors yet. <a href="/admin/book-authors/new" target="_blank">Add one</a>.</p>
-    <% } %>
-    <div class="admin-checkbox-grid">
-    <% authors.forEach(function(a) { %>
-      <label class="admin-checkbox">
-        <input type="checkbox" name="author_ids" value="<%= a.id %>"
-               <%= selectedAuthors.includes(a.id) ? 'checked' : '' %>>
-        <span><%= a.name %></span>
-      </label>
-    <% }) %>
+  <%# ── Authors: tag autocomplete ── %>
+  <div class="form-group" style="margin-bottom:1.25rem">
+    <label style="display:block;margin-bottom:6px;font-weight:600">Authors</label>
+    <div class="author-tags" id="authorTags">
+      <% if (book && book.authors && book.authors.length > 0) { %>
+        <% book.authors.forEach(function(a) { %>
+        <span class="tag-chip" data-id="<%= a.id %>">
+          <%= a.name %><% if (a.role && a.role !== 'author') { %> (<%= a.role %>)<% } %>
+          <button type="button" class="tag-remove" onclick="removeAuthor(this)">×</button>
+          <input type="hidden" name="author_ids[]" value="<%= a.id %>">
+          <input type="hidden" name="author_roles[]" value="<%= a.role || 'author' %>">
+        </span>
+        <% }) %>
+      <% } %>
     </div>
-  </fieldset>
+    <div class="author-search-wrap">
+      <input type="text" id="authorSearch" placeholder="Type 2+ chars to search authors…" autocomplete="off">
+      <div id="authorDropdown" class="autocomplete-dropdown" style="display:none"></div>
+    </div>
+    <small style="color:#888">Type to search, click to add. Multiple authors supported.</small>
+  </div>
 
-  <fieldset class="admin-fieldset">
-    <legend>Categories</legend>
-    <div class="admin-checkbox-grid">
-    <% categories.forEach(function(c) { %>
-      <label class="admin-checkbox">
-        <input type="checkbox" name="category_ids" value="<%= c.id %>"
-               <%= selectedCategories.includes(c.id) ? 'checked' : '' %>>
-        <span><%= c.name %></span>
+  <%# ── Categories: pill toggles ── %>
+  <div class="form-group" style="margin-bottom:1.25rem">
+    <label style="display:block;margin-bottom:6px;font-weight:600">Categories</label>
+    <div class="category-pills" id="categoryPills">
+      <% categories.forEach(function(cat) { %>
+      <% const isSelected = selectedCategories.includes(cat.id); %>
+      <label class="cat-pill-label <%= isSelected ? 'selected' : '' %>">
+        <input type="checkbox"
+               name="category_ids[]"
+               value="<%= cat.id %>"
+               <%= isSelected ? 'checked' : '' %>
+               style="display:none"
+               onchange="this.parentElement.classList.toggle('selected', this.checked)">
+        <%= cat.name %>
       </label>
-    <% }) %>
+      <% }) %>
     </div>
-  </fieldset>
+    <small style="color:#888">Click to select/deselect</small>
+  </div>
 
   <div>
     <button type="submit" class="admin-btn admin-btn--primary"><%= book && book.id ? 'Save Changes' : 'Create Book' %></button>
     <a class="admin-btn" href="/admin/books">Cancel</a>
   </div>
 </form>
+
+<script>
+(function () {
+  const authorSearch   = document.getElementById('authorSearch');
+  const authorDropdown = document.getElementById('authorDropdown');
+  const authorTags     = document.getElementById('authorTags');
+
+  const addedIds = new Set(
+    [...document.querySelectorAll('[name="author_ids[]"]')].map(i => i.value)
+  );
+
+  authorSearch.addEventListener('input', async function () {
+    const q = authorSearch.value.trim();
+    if (q.length < 2) { authorDropdown.style.display = 'none'; return; }
+
+    try {
+      const res = await fetch('/admin/book-authors/search?q=' + encodeURIComponent(q));
+      const authors = await res.json();
+      if (!authors.length) { authorDropdown.style.display = 'none'; return; }
+
+      authorDropdown.innerHTML = authors.map(function (a) {
+        return '<div class="autocomplete-item" data-id="' + a.id + '" data-name="' + a.name.replace(/"/g, '&quot;') + '">'
+          + a.name
+          + (a.nationality ? ' <small>' + a.nationality + '</small>' : '')
+          + '</div>';
+      }).join('');
+      authorDropdown.style.display = 'block';
+
+      authorDropdown.querySelectorAll('.autocomplete-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          const id   = item.dataset.id;
+          const name = item.dataset.name;
+          if (addedIds.has(id)) { authorSearch.value = ''; authorDropdown.style.display = 'none'; return; }
+          addedIds.add(id);
+
+          const chip = document.createElement('span');
+          chip.className = 'tag-chip';
+          chip.dataset.id = id;
+          chip.innerHTML = name
+            + '<button type="button" class="tag-remove" onclick="removeAuthor(this)">×</button>'
+            + '<input type="hidden" name="author_ids[]" value="' + id + '">'
+            + '<input type="hidden" name="author_roles[]" value="author">';
+          authorTags.appendChild(chip);
+
+          authorSearch.value = '';
+          authorDropdown.style.display = 'none';
+        });
+      });
+    } catch (e) { authorDropdown.style.display = 'none'; }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.author-search-wrap')) authorDropdown.style.display = 'none';
+  });
+
+  window.removeAuthor = function (btn) {
+    const chip = btn.closest('.tag-chip');
+    addedIds.delete(chip.dataset.id);
+    chip.remove();
+  };
+})();
+</script>

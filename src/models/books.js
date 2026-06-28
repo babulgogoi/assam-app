@@ -410,6 +410,14 @@ async function getCategoryBySlug(slug) {
   return rows[0] || null;
 }
 
+async function searchAuthors(q) {
+  const { rows } = await db.query(
+    `SELECT id, name, nationality FROM books_authors WHERE name ILIKE $1 ORDER BY name LIMIT 10`,
+    [`%${q}%`]
+  );
+  return rows;
+}
+
 module.exports = {
   slugify,
   getLatest, countActive, getFeatured,
@@ -421,5 +429,5 @@ module.exports = {
   createAuthor, updateAuthor, removeAuthor, authorSlugExists,
   getPublisherBySlug, getPublisherById, listPublishers,
   createPublisher, updatePublisher, removePublisher, publisherSlugExists,
-  listCategories, getCategoryBySlug,
+  listCategories, getCategoryBySlug, searchAuthors,
 };

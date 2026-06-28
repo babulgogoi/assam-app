@@ -1215,3 +1215,89 @@ body {
   .home-books-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .portal-books__all { font-size: 0.78rem; }
 }
+
+/* ── Book form: author tag chips ───────────────────────────────────────────── */
+
+.author-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 8px;
+}
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #2D6A4F;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+.tag-remove {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+}
+.tag-remove:hover { color: #fff; }
+
+.author-search-wrap { position: relative; }
+.author-search-wrap input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  box-sizing: border-box;
+}
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 200;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.autocomplete-item:hover { background: #f0f7f4; }
+.autocomplete-item small { color: #888; font-size: 0.75rem; }
+
+/* ── Book form: category pill toggles ─────────────────────────────────────── */
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.cat-pill-label {
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #2D6A4F;
+  color: #2D6A4F;
+  cursor: pointer;
+  font-size: 0.82rem;
+  user-select: none;
+  transition: background 0.13s, color 0.13s;
+}
+.cat-pill-label:hover { background: #f0f7f4; }
+.cat-pill-label.selected { background: #2D6A4F; color: #fff; }
