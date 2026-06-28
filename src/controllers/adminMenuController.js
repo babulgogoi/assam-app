@@ -7,7 +7,7 @@ async function listMenuItems(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/menu/list', {
       title: 'Menu — Admin',
-      authorName: req.session.authorName,
+      
       items,
     });
   } catch (err) {
@@ -24,7 +24,7 @@ async function newMenuItemForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/menu/form', {
       title: 'New Menu Item — Admin',
-      authorName: req.session.authorName,
+      
       pages,
       items,
       item: null,
@@ -48,7 +48,7 @@ async function editMenuItemForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/menu/form', {
       title: `Edit: ${item.label} — Admin`,
-      authorName: req.session.authorName,
+      
       pages,
       items: items.filter((i) => i.id !== item.id),
       item,
@@ -82,7 +82,7 @@ async function createMenuItem(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/menu/form', {
         title: 'New Menu Item — Admin',
-        authorName: req.session.authorName,
+        
         pages,
         items,
         item: req.body,
@@ -113,7 +113,7 @@ async function updateMenuItem(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/menu/form', {
         title: `Edit: ${item.label} — Admin`,
-        authorName: req.session.authorName,
+        
         pages,
         items: items.filter((i) => i.id !== item.id),
         item: { ...item, ...req.body },

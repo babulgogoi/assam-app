@@ -7,7 +7,7 @@ async function listPages(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/pages/list', {
       title: 'Pages — Admin',
-      authorName: req.session.authorName,
+      
       pages,
     });
   } catch (err) {
@@ -19,7 +19,7 @@ function newPageForm(req, res) {
   res.locals.layout = 'admin/layout';
   res.render('admin/pages/form', {
     title: 'New Page — Admin',
-    authorName: req.session.authorName,
+    
     page: null,
     errors: [],
   });
@@ -34,7 +34,7 @@ async function editPageForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/pages/form', {
       title: `Edit: ${page.title} — Admin`,
-      authorName: req.session.authorName,
+      
       page,
       errors: [],
     });
@@ -70,7 +70,7 @@ async function createPage(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/pages/form', {
         title: 'New Page — Admin',
-        authorName: req.session.authorName,
+        
         page: req.body,
         errors: ['Title and body are required.'],
       });
@@ -95,7 +95,7 @@ async function updatePage(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/pages/form', {
         title: `Edit: ${page.title} — Admin`,
-        authorName: req.session.authorName,
+        
         page: { ...page, ...req.body },
         errors: ['Title and body are required.'],
       });

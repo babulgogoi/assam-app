@@ -6,7 +6,8 @@ const adminAuthorsController = require('../controllers/adminAuthorsController');
 const adminPagesController = require('../controllers/adminPagesController');
 const adminMenuController = require('../controllers/adminMenuController');
 const adminSettingsController = require('../controllers/adminSettingsController');
-const { requireAuth } = require('../middleware/auth');
+const adminUsersController = require('../controllers/adminUsersController');
+const { requireAdmin, requirePermission } = require('../middleware/roleAuth');
 const { uploadArticleFiles, uploadAuthorPhoto } = require('../middleware/upload');
 
 const loginLimiter = rateLimit({
@@ -21,38 +22,58 @@ router.get('/login', adminController.loginForm);
 router.post('/login', loginLimiter, adminController.login);
 router.post('/logout', adminController.logout);
 
-router.use(requireAuth);
+// All routes below require a logged-in admin.
+router.use(requireAdmin);
+
+// Expose adminUser to every admin template.
+router.use((req, res, next) => {
+  res.locals.adminUser = req.session.adminUser;
+  next();
+});
 
 router.get('/', (req, res) => res.redirect('/admin/articles'));
 
-router.get('/articles', adminController.listArticles);
-router.get('/articles/new', adminController.newArticleForm);
-router.post('/articles', uploadArticleFiles, adminController.createArticle);
-router.get('/articles/:id/edit', adminController.editArticleForm);
-router.post('/articles/:id', uploadArticleFiles, adminController.updateArticle);
-router.post('/articles/:id/delete', adminController.deleteArticle);
+// Articles (module: stories)
+router.get('/articles',          requirePermission('stories', 'can_read'),   adminController.listArticles);
+router.get('/articles/new',      requirePermission('stories', 'can_create'), adminController.newArticleForm);
+router.post('/articles',         requirePermission('stories', 'can_create'), uploadArticleFiles, adminController.createArticle);
+router.get('/articles/:id/edit', requirePermission('stories', 'can_read'),   adminController.editArticleForm);
+router.post('/articles/:id',     requirePermission('stories', 'can_update'), uploadArticleFiles, adminController.updateArticle);
+router.post('/articles/:id/delete', requirePermission('stories', 'can_delete'), adminController.deleteArticle);
 
-router.get('/authors', adminAuthorsController.listAuthors);
-router.get('/authors/new', adminAuthorsController.newAuthorForm);
-router.post('/authors', uploadAuthorPhoto, adminAuthorsController.createAuthor);
-router.get('/authors/:id/edit', adminAuthorsController.editAuthorForm);
-router.post('/authors/:id', uploadAuthorPhoto, adminAuthorsController.updateAuthor);
+// Authors (module: authors)
+router.get('/authors',          requirePermission('authors', 'can_read'),   adminAuthorsController.listAuthors);
+router.get('/authors/new',      requirePermission('authors', 'can_create'), adminAuthorsController.newAuthorForm);
+router.post('/authors',         requirePermission('authors', 'can_create'), uploadAuthorPhoto, adminAuthorsController.createAuthor);
+router.get('/authors/:id/edit', requirePermission('authors', 'can_read'),   adminAuthorsController.editAuthorForm);
+router.post('/authors/:id',     requirePermission('authors', 'can_update'), uploadAuthorPhoto, adminAuthorsController.updateAuthor);
 
-router.get('/pages', adminPagesController.listPages);
-router.get('/pages/new', adminPagesController.newPageForm);
-router.post('/pages', adminPagesController.createPage);
-router.get('/pages/:id/edit', adminPagesController.editPageForm);
-router.post('/pages/:id', adminPagesController.updatePage);
-router.post('/pages/:id/delete', adminPagesController.deletePage);
+// Pages (module: pages)
+router.get('/pages',          requirePermission('pages', 'can_read'),   adminPagesController.listPages);
+router.get('/pages/new',      requirePermission('pages', 'can_create'), adminPagesController.newPageForm);
+router.post('/pages',         requirePermission('pages', 'can_create'), adminPagesController.createPage);
+router.get('/pages/:id/edit', requirePermission('pages', 'can_read'),   adminPagesController.editPageForm);
+router.post('/pages/:id',     requirePermission('pages', 'can_update'), adminPagesController.updatePage);
+router.post('/pages/:id/delete', requirePermission('pages', 'can_delete'), adminPagesController.deletePage);
 
-router.get('/menu', adminMenuController.listMenuItems);
-router.get('/menu/new', adminMenuController.newMenuItemForm);
-router.post('/menu', adminMenuController.createMenuItem);
-router.get('/menu/:id/edit', adminMenuController.editMenuItemForm);
-router.post('/menu/:id', adminMenuController.updateMenuItem);
-router.post('/menu/:id/delete', adminMenuController.deleteMenuItem);
+// Menu (module: settings)
+router.get('/menu',          requirePermission('settings', 'can_read'),   adminMenuController.listMenuItems);
+router.get('/menu/new',      requirePermission('settings', 'can_create'), adminMenuController.newMenuItemForm);
+router.post('/menu',         requirePermission('settings', 'can_create'), adminMenuController.createMenuItem);
+router.get('/menu/:id/edit', requirePermission('settings', 'can_read'),   adminMenuController.editMenuItemForm);
+router.post('/menu/:id',     requirePermission('settings', 'can_update'), adminMenuController.updateMenuItem);
+router.post('/menu/:id/delete', requirePermission('settings', 'can_delete'), adminMenuController.deleteMenuItem);
 
-router.get('/settings', adminSettingsController.editSettingsForm);
-router.post('/settings', adminSettingsController.updateSettings);
+// Site settings (module: settings)
+router.get('/settings',  requirePermission('settings', 'can_read'),   adminSettingsController.editSettingsForm);
+router.post('/settings', requirePermission('settings', 'can_update'), adminSettingsController.updateSettings);
+
+// User management (module: users — superadmin only in practice)
+router.get('/users',             requirePermission('users', 'can_read'),   adminUsersController.listUsers);
+router.get('/users/new',         requirePermission('users', 'can_create'), adminUsersController.newUserForm);
+router.post('/users',            requirePermission('users', 'can_create'), adminUsersController.createUser);
+router.get('/users/:id/edit',    requirePermission('users', 'can_read'),   adminUsersController.editUserForm);
+router.post('/users/:id',        requirePermission('users', 'can_update'), adminUsersController.updateUser);
+router.post('/users/:id/delete', requirePermission('users', 'can_delete'), adminUsersController.deleteUser);
 
 module.exports = router;

@@ -1,0 +1,63 @@
+<h1><%= user ? `Edit User: ${user.username}` : 'New User' %></h1>
+
+<% if (errors && errors.length) { %>
+  <div class="admin-form-errors">
+    <% errors.forEach(e => { %><p><%= e %></p><% }) %>
+  </div>
+<% } %>
+
+<form method="post" action="<%= user ? `/admin/users/${user.id}` : '/admin/users' %>" class="admin-form">
+
+  <div class="admin-form-row">
+    <label>
+      Username *
+      <input type="text" name="username" value="<%= (user && user.username) || '' %>" required>
+    </label>
+    <label>
+      Display Name
+      <input type="text" name="display_name" value="<%= (user && user.display_name) || '' %>">
+    </label>
+  </div>
+
+  <label>
+    Email
+    <input type="email" name="email" value="<%= (user && user.email) || '' %>">
+  </label>
+
+  <div class="admin-form-row">
+    <label>
+      Password <%= user ? '(leave blank to keep current)' : '*' %>
+      <input type="password" name="password" autocomplete="new-password">
+    </label>
+    <label>
+      Confirm Password
+      <input type="password" name="password_confirm" autocomplete="new-password">
+    </label>
+  </div>
+
+  <label>
+    Status
+    <select name="status">
+      <option value="active"   <%= (!user || user.status === 'active')    ? 'selected' : '' %>>Active</option>
+      <option value="inactive" <%= (user && user.status === 'inactive')   ? 'selected' : '' %>>Inactive</option>
+    </select>
+  </label>
+
+  <fieldset class="admin-fieldset">
+    <legend>Roles</legend>
+    <% roles.forEach(function(role) { %>
+      <label class="admin-checkbox">
+        <input type="checkbox" name="role_ids" value="<%= role.id %>"
+          <%= selectedRoles.includes(role.id) ? 'checked' : '' %>>
+        <span><strong><%= role.name %></strong><% if (role.description) { %> — <%= role.description %><% } %></span>
+      </label>
+    <% }) %>
+  </fieldset>
+
+  <div>
+    <button type="submit" class="admin-btn admin-btn--primary">
+      <%= user ? 'Save Changes' : 'Create User' %>
+    </button>
+    <a class="admin-btn" href="/admin/users">Cancel</a>
+  </div>
+</form>

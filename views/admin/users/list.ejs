@@ -1,0 +1,46 @@
+<div class="admin-list-header">
+  <h1>Admin Users</h1>
+  <a class="admin-btn admin-btn--primary" href="/admin/users/new">+ New User</a>
+</div>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Display Name</th>
+      <th>Email</th>
+      <th>Roles</th>
+      <th>Status</th>
+      <th>Last Login</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% users.forEach(function(user) { %>
+      <tr>
+        <td><strong><%= user.username %></strong></td>
+        <td><%= user.display_name || '—' %></td>
+        <td><%= user.email || '—' %></td>
+        <td><%= user.roles %></td>
+        <td>
+          <span class="admin-badge admin-badge--<%= user.status === 'active' ? 'published' : 'draft' %>">
+            <%= user.status %>
+          </span>
+        </td>
+        <td><%= user.last_login ? new Date(user.last_login).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Never' %></td>
+        <td>
+          <a class="admin-btn" href="/admin/users/<%= user.id %>/edit">Edit</a>
+          <% if (adminUser.id !== user.id) { %>
+            <form method="post" action="/admin/users/<%= user.id %>/delete" style="display:inline"
+                  onsubmit="return confirm('Delete user <%= user.username %>?')">
+              <button class="admin-btn admin-btn--danger">Delete</button>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    <% if (!users.length) { %>
+      <tr><td colspan="7">No admin users yet.</td></tr>
+    <% } %>
+  </tbody>
+</table>

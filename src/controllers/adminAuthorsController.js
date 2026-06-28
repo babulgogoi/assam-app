@@ -7,7 +7,7 @@ async function listAuthors(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/authors/list', {
       title: 'Authors — Admin',
-      authorName: req.session.authorName,
+      
       authors,
     });
   } catch (err) {
@@ -19,7 +19,7 @@ function newAuthorForm(req, res) {
   res.locals.layout = 'admin/layout';
   res.render('admin/authors/form', {
     title: 'New Author — Admin',
-    authorName: req.session.authorName,
+    
     author: null,
     errors: [],
   });
@@ -34,7 +34,7 @@ async function editAuthorForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/authors/form', {
       title: `Edit: ${author.display_name || author.username} — Admin`,
-      authorName: req.session.authorName,
+      
       author,
       errors: [],
     });
@@ -68,7 +68,7 @@ async function createAuthor(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/authors/form', {
         title: 'New Author — Admin',
-        authorName: req.session.authorName,
+        
         author: req.body,
         errors,
       });
@@ -106,7 +106,7 @@ async function updateAuthor(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/authors/form', {
         title: `Edit: ${author.display_name || author.username} — Admin`,
-        authorName: req.session.authorName,
+        
         author: { ...author, ...req.body },
         errors,
       });

@@ -9,7 +9,7 @@ async function editSettingsForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/settings/form', {
       title: 'Settings — Admin',
-      authorName: req.session.authorName,
+      
       footerHtml,
       featuredCategory,
     });

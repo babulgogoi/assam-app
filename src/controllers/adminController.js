@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const adminUsersModel = require('../models/adminUsers');
 const authorsModel = require('../models/authors');
 const articlesModel = require('../models/articles');
 const slugify = require('../utils/slugify');
@@ -31,7 +32,7 @@ function cleanupAllFiles(article) {
 }
 
 function loginForm(req, res) {
-  if (req.session && req.session.authorId) {
+  if (req.session && req.session.adminUser) {
     return res.redirect('/admin');
   }
   res.render('admin/login', { title: 'Admin Login', error: null, layout: false });
@@ -40,15 +41,34 @@ function loginForm(req, res) {
 async function login(req, res, next) {
   try {
     const { username, password } = req.body;
-    const author = await authorsModel.getByUsernameForAuth(username || '');
+    const user = await adminUsersModel.getByUsername(username || '');
 
-    const invalid = !author || !author.password_hash || !(await bcrypt.compare(password || '', author.password_hash));
+    const invalid =
+      !user ||
+      user.status !== 'active' ||
+      !(await bcrypt.compare(password || '', user.password_hash));
+
     if (invalid) {
-      return res.status(401).render('admin/login', { title: 'Admin Login', error: 'Invalid username or password.', layout: false });
+      return res.status(401).render('admin/login', {
+        title: 'Admin Login',
+        error: 'Invalid username or password.',
+        layout: false,
+      });
     }
 
-    req.session.authorId = author.id;
-    req.session.authorName = author.display_name || author.username;
+    const { roles, permissions, isSuperAdmin } = await adminUsersModel.loadPermissions(user.id);
+
+    req.session.adminUser = {
+      id: user.id,
+      username: user.username,
+      displayName: user.display_name || user.username,
+      email: user.email,
+      roles,
+      permissions,
+      isSuperAdmin,
+    };
+
+    await adminUsersModel.updateLastLogin(user.id);
     res.redirect('/admin');
   } catch (err) {
     next(err);
@@ -79,7 +99,7 @@ async function listArticles(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/articles/list', {
       title: 'Articles — Admin',
-      authorName: req.session.authorName,
+      
       articles,
       q,
       status,
@@ -97,7 +117,7 @@ async function newArticleForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/articles/form', {
       title: 'New Article — Admin',
-      authorName: req.session.authorName,
+      
       authors,
       categories: CATEGORIES,
       article: null,
@@ -118,7 +138,7 @@ async function editArticleForm(req, res, next) {
     res.locals.layout = 'admin/layout';
     res.render('admin/articles/form', {
       title: `Edit: ${article.title} — Admin`,
-      authorName: req.session.authorName,
+      
       authors,
       categories: CATEGORIES,
       article,
@@ -236,7 +256,7 @@ async function createArticle(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/articles/form', {
         title: 'New Article — Admin',
-        authorName: req.session.authorName,
+        
         authors,
         categories: CATEGORIES,
         article: req.body,
@@ -264,7 +284,7 @@ async function updateArticle(req, res, next) {
       res.locals.layout = 'admin/layout';
       return res.status(400).render('admin/articles/form', {
         title: `Edit: ${article.title} — Admin`,
-        authorName: req.session.authorName,
+        
         authors,
         categories: CATEGORIES,
         article: { ...article, ...req.body },

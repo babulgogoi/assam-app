@@ -82,7 +82,7 @@ async function articleDetail(req, res, next) {
       title: article.title,
       article,
       related,
-      isAdmin: !!(req.session && req.session.authorId),
+      isAdmin: !!(req.session && req.session.adminUser),
       canonicalUrl: `${process.env.SITE_URL}/article/${article.slug}`,
     });
   } catch (err) {
