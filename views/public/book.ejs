@@ -2,7 +2,7 @@
   <div class="book-detail__top">
     <div class="book-detail__cover">
       <% if (book.cover_image) { %>
-      <img src="<%= book.cover_image %>" alt="<%= book.cover_image_alt || book.title %>">
+      <img src="<%= book.cover_image %>" alt="<%= book.cover_image_alt || book.title %>" width="200">
       <% } else { %>
       <div class="book-detail__no-cover"><%= book.title.slice(0, 2).toUpperCase() %></div>
       <% } %>

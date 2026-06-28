@@ -88,7 +88,30 @@
   </div>
 </section>
 
-<%# ── Section 4: In Depth ─────────────────────────────── %>
+<%# ── Section 4: Books Spotlight ──────────────────────── %>
+<% if (typeof homeBooks !== 'undefined' && homeBooks && homeBooks.length) { %>
+<section class="portal-books">
+  <div class="portal-books__header">
+    <h2 class="portal-section-title">Books About Assam</h2>
+    <a href="/books" class="portal-books__all">Browse all <%= homeBooks.length < 15 ? homeBooks.length : '587' %> books &rarr;</a>
+  </div>
+  <div class="home-books-grid">
+    <% homeBooks.forEach(function(book) { %>
+    <a href="/book/<%= book.slug %>" class="home-book-thumb">
+      <% if (book.cover_image) { %>
+      <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
+           alt="<%= book.cover_image_alt || book.title %>" loading="lazy">
+      <% } else { %>
+      <div class="home-book-no-cover"><%= book.title.slice(0, 2).toUpperCase() %></div>
+      <% } %>
+      <p><%= book.title.length > 40 ? book.title.slice(0, 38) + '…' : book.title %></p>
+    </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<%# ── Section 5: In Depth ─────────────────────────────── %>
 <% if (typeof latestPages !== 'undefined' && latestPages && latestPages.length) { %>
 <section class="portal-indepth">
   <h2 class="portal-section-title">In Depth</h2>

@@ -25,6 +25,7 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "pg": "^8.22.0",
+    "sharp": "^0.35.2",
     "tinymce": "^8.6.0"
   },
   "devDependencies": {

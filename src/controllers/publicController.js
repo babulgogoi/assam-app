@@ -2,6 +2,7 @@ const articlesModel = require('../models/articles');
 const authorsModel = require('../models/authors');
 const pagesModel = require('../models/pages');
 const siteSettingsModel = require('../models/siteSettings');
+const booksModel = require('../models/books');
 
 function cleanExcerpt(text, maxLen = 200) {
   if (!text) return '';
@@ -33,11 +34,12 @@ const FEATURED_ARTICLES_SIZE = 5;
 
 async function home(req, res, next) {
   try {
-    const [latest, mostViewed, onThisDay, latestPages] = await Promise.all([
+    const [latest, mostViewed, onThisDay, latestPages, homeBooks] = await Promise.all([
       articlesModel.getLatestPublished({ limit: 7 }),
       articlesModel.getMostViewed({ limit: 3 }),
       articlesModel.getOnThisDay({ limit: 4 }),
       pagesModel.getLatestPublished({ limit: 3 }),
+      booksModel.getLatest({ limit: 15 }),
     ]);
 
     const [rawLead, ...rawGrid] = latest;
@@ -49,6 +51,7 @@ async function home(req, res, next) {
       mostViewed: mostViewed.map(withExcerpt),
       onThisDay: onThisDay.map(withExcerpt),
       latestPages,
+      homeBooks,
     });
   } catch (err) {
     next(err);

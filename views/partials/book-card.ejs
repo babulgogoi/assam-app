@@ -1,7 +1,8 @@
 <div class="book-card">
   <a href="/book/<%= book.slug %>" class="book-card__cover">
     <% if (book.cover_image) { %>
-    <img src="<%= book.cover_image %>" alt="<%= book.cover_image_alt || book.title %>" loading="lazy">
+    <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
+         alt="<%= book.cover_image_alt || book.title %>" loading="lazy">
     <% } else { %>
     <div class="book-card__no-cover">
       <span><%= book.title.slice(0, 2).toUpperCase() %></span>

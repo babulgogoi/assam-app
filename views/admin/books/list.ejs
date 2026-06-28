@@ -23,7 +23,7 @@
     <tr>
       <td style="width:50px">
         <% if (book.cover_image) { %>
-        <img src="<%= book.cover_image %>" alt="" style="width:40px;height:56px;object-fit:cover;border-radius:2px">
+        <img src="<%= book.cover_image.replace(/\.jpg$/, '-sm.jpg') %>" alt="" style="width:40px;height:56px;object-fit:cover;border-radius:2px">
         <% } else { %>
         <div style="width:40px;height:56px;background:#2D6A4F;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700"><%= book.title.slice(0,2).toUpperCase() %></div>
         <% } %>
