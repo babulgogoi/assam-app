@@ -1,0 +1,27 @@
+<main class="books-main">
+  <div class="books-header">
+    <p class="books-breadcrumb"><a href="/books">Books</a> › Publishers</p>
+    <div class="books-author-profile">
+      <% if (publisher.logo) { %>
+      <img src="<%= publisher.logo %>" alt="<%= publisher.name %>" class="books-author-photo">
+      <% } %>
+      <div>
+        <h1><%= publisher.name %></h1>
+        <% if (publisher.location) { %><p class="books-author-meta"><%= publisher.location %><% if (publisher.founded_year) { %> · est. <%= publisher.founded_year %><% } %></p><% } %>
+        <% if (publisher.description) { %><div class="books-author-bio"><%- publisher.description %></div><% } %>
+        <% if (publisher.website) { %><div class="books-author-links"><a href="<%= publisher.website %>" target="_blank" rel="noopener">Website</a></div><% } %>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="books-section-heading">Books by <%= publisher.name %> (<%= books.length %>)</h2>
+  <% if (books.length > 0) { %>
+  <div class="books-grid">
+    <% books.forEach(function(book) { %>
+      <%- include('../partials/book-card', { book: book }) %>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <p class="books-empty">No books listed for this publisher yet.</p>
+  <% } %>
+</main>

@@ -1,0 +1,116 @@
+<main class="book-detail">
+  <div class="book-detail__top">
+    <div class="book-detail__cover">
+      <% if (book.cover_image) { %>
+      <img src="<%= book.cover_image %>" alt="<%= book.cover_image_alt || book.title %>">
+      <% } else { %>
+      <div class="book-detail__no-cover"><%= book.title.slice(0, 2).toUpperCase() %></div>
+      <% } %>
+    </div>
+
+    <div class="book-detail__info">
+      <h1><%= book.title %></h1>
+      <% if (book.subtitle) { %><p class="book-detail__subtitle"><%= book.subtitle %></p><% } %>
+
+      <% if (book.authors && book.authors.length > 0) { %>
+      <p class="book-detail__authors">
+        by
+        <% book.authors.forEach(function(a, i) { %>
+        <a href="/books/author/<%= a.slug %>"><%= a.name %></a><% if (a.role && a.role !== 'author') { %> (<%= a.role %>)<% } %><% if (i < book.authors.length - 1) { %>, <% } %>
+        <% }) %>
+      </p>
+      <% } %>
+
+      <% if (book.avg_rating) { %>
+      <div class="book-detail__rating">
+        <% for (let i = 1; i <= 5; i++) { %>
+        <span class="<%= i <= Math.round(book.avg_rating) ? 'star-filled' : 'star-empty' %>">★</span>
+        <% } %>
+        <strong><%= book.avg_rating %></strong> (<%= book.rating_count %> ratings)
+      </div>
+      <% } %>
+
+      <table class="book-detail__meta">
+        <% if (book.publisher_name) { %>
+        <tr><th>Publisher</th><td><a href="/books/publisher/<%= book.publisher_slug %>"><%= book.publisher_name %></a></td></tr>
+        <% } %>
+        <% if (book.published_year) { %><tr><th>Year</th><td><%= book.published_year %></td></tr><% } %>
+        <% if (book.pages) { %><tr><th>Pages</th><td><%= book.pages %></td></tr><% } %>
+        <% if (book.language) { %><tr><th>Language</th><td><%= book.language %></td></tr><% } %>
+        <% if (book.format) { %><tr><th>Format</th><td><%= book.format.charAt(0).toUpperCase() + book.format.slice(1) %></td></tr><% } %>
+        <% if (book.isbn) { %><tr><th>ISBN</th><td><%= book.isbn %></td></tr><% } %>
+        <% if (book.isbn13) { %><tr><th>ISBN-13</th><td><%= book.isbn13 %></td></tr><% } %>
+        <% if (book.edition) { %><tr><th>Edition</th><td><%= book.edition %></td></tr><% } %>
+      </table>
+
+      <% if (book.price) { %><p class="book-detail__price">₹<%= book.price %></p><% } %>
+
+      <% if (book.buy_url) { %>
+      <a href="<%= book.buy_url %>" target="_blank" rel="noopener noreferrer" class="btn-buy">Buy Now →</a>
+      <% } %>
+
+      <div class="book-rate">
+        <p>Rate this book:</p>
+        <div class="rate-stars" data-book-id="<%= book.id %>">
+          <% for (let i = 1; i <= 5; i++) { %>
+          <span class="rate-star" data-rating="<%= i %>">★</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if (book.description) { %>
+  <section class="book-detail__description">
+    <h2>About this book</h2>
+    <div class="book-description-body"><%- book.description %></div>
+  </section>
+  <% } %>
+
+  <% if (book.categories && book.categories.length > 0) { %>
+  <div class="book-detail__categories">
+    <strong>Categories:</strong>
+    <% book.categories.forEach(function(cat) { %>
+    <a href="/books/category/<%= cat.slug %>" class="book-cat-tag"><%= cat.name %></a>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <% if (book.tags && book.tags.length > 0) { %>
+  <div class="book-detail__tags">
+    <% book.tags.forEach(function(tag) { %>
+    <span class="book-tag"><%= tag %></span>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <% if (related.length > 0) { %>
+  <section class="book-related">
+    <h2>More by this author</h2>
+    <div class="books-grid books-grid--small">
+      <% related.forEach(function(b) { %>
+        <%- include('../partials/book-card', { book: b }) %>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+</main>
+
+<script>
+document.querySelectorAll('.rate-star').forEach(function(star) {
+  star.addEventListener('click', async function() {
+    const rating = parseInt(this.dataset.rating, 10);
+    const bookId = this.closest('.rate-stars').dataset.bookId;
+    try {
+      await fetch('/book/' + bookId + '/rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating }),
+      });
+      this.closest('.rate-stars').querySelectorAll('.rate-star').forEach(function(s, i) {
+        s.style.color = i < rating ? '#f59e0b' : '#ccc';
+      });
+    } catch (e) {}
+  });
+});
+</script>

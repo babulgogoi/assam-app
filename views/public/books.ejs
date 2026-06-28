@@ -1,0 +1,46 @@
+<main class="books-main">
+  <div class="books-header">
+    <h1>Books About Assam</h1>
+    <p class="books-count"><%= total %> books in catalogue</p>
+    <div class="books-categories">
+      <a href="/books" class="books-cat-pill active">All</a>
+      <% categories.forEach(function(cat) { %>
+        <% if (cat.book_count > 0) { %>
+        <a href="/books/category/<%= cat.slug %>" class="books-cat-pill"><%= cat.name %> <span class="books-cat-count">(<%= cat.book_count %>)</span></a>
+        <% } %>
+      <% }) %>
+    </div>
+  </div>
+
+  <% if (featured.length > 0) { %>
+  <section class="books-featured">
+    <h2 class="books-section-heading">Featured Books</h2>
+    <div class="books-featured-grid">
+      <% featured.forEach(function(book) { %>
+        <%- include('../partials/book-card', { book: book }) %>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <section class="books-grid-section">
+    <h2 class="books-section-heading">All Books</h2>
+    <% if (books.length > 0) { %>
+    <div class="books-grid">
+      <% books.forEach(function(book) { %>
+        <%- include('../partials/book-card', { book: book }) %>
+      <% }) %>
+    </div>
+    <% } else { %>
+    <p class="books-empty">No books in catalogue yet.</p>
+    <% } %>
+  </section>
+
+  <% if (totalPages > 1) { %>
+  <div class="pagination">
+    <% if (page > 1) { %><a href="/books?page=<%= page - 1 %>">← Previous</a><% } %>
+    <span>Page <%= page %> of <%= totalPages %></span>
+    <% if (page < totalPages) { %><a href="/books?page=<%= page + 1 %>">Next →</a><% } %>
+  </div>
+  <% } %>
+</main>

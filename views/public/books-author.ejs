@@ -1,0 +1,30 @@
+<main class="books-main">
+  <div class="books-header">
+    <p class="books-breadcrumb"><a href="/books">Books</a> › Authors</p>
+    <div class="books-author-profile">
+      <% if (author.photo) { %>
+      <img src="<%= author.photo %>" alt="<%= author.name %>" class="books-author-photo">
+      <% } %>
+      <div>
+        <h1><%= author.name %></h1>
+        <% if (author.nationality) { %><p class="books-author-meta"><%= author.nationality %><% if (author.birth_year) { %> · b. <%= author.birth_year %><% } %></p><% } %>
+        <% if (author.bio) { %><div class="books-author-bio"><%- author.bio %></div><% } %>
+        <div class="books-author-links">
+          <% if (author.website) { %><a href="<%= author.website %>" target="_blank" rel="noopener">Website</a><% } %>
+          <% if (author.wikipedia_url) { %><a href="<%= author.wikipedia_url %>" target="_blank" rel="noopener">Wikipedia</a><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="books-section-heading">Books by <%= author.name %> (<%= books.length %>)</h2>
+  <% if (books.length > 0) { %>
+  <div class="books-grid">
+    <% books.forEach(function(book) { %>
+      <%- include('../partials/book-card', { book: book }) %>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <p class="books-empty">No books listed for this author yet.</p>
+  <% } %>
+</main>

@@ -1,0 +1,33 @@
+<div class="admin-list-header">
+  <h1>Book Authors</h1>
+  <a class="admin-btn admin-btn--primary" href="/admin/book-authors/new">+ New Author</a>
+</div>
+
+<form class="admin-filter-form" method="get">
+  <input type="text" name="q" value="<%= q %>" placeholder="Search name…">
+  <button type="submit" class="admin-btn">Search</button>
+  <a class="admin-btn" href="/admin/book-authors">Reset</a>
+</form>
+
+<table class="admin-table">
+  <thead>
+    <tr><th>Name</th><th>Nationality</th><th>Books</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% authors.forEach(function(a) { %>
+    <tr>
+      <td><strong><%= a.name %></strong><br><small style="color:#888">/books/author/<%= a.slug %></small></td>
+      <td><%= a.nationality || '—' %></td>
+      <td><%= a.book_count %></td>
+      <td>
+        <a class="admin-btn" href="/admin/book-authors/<%= a.id %>/edit">Edit</a>
+        <form method="post" action="/admin/book-authors/<%= a.id %>/delete" style="display:inline"
+              onsubmit="return confirm('Delete author <%= a.name %>?')">
+          <button class="admin-btn admin-btn--danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!authors.length) { %><tr><td colspan="4">No book authors yet.</td></tr><% } %>
+  </tbody>
+</table>

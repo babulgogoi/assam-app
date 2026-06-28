@@ -34,6 +34,10 @@
         <a href="/admin/settings">Settings</a>
       <% } %>
 
+      <% if (su || (p.books && p.books.can_read)) { %>
+        <a href="/admin/books">Books</a>
+      <% } %>
+
       <% if (su || (p.users && p.users.can_read)) { %>
         <a href="/admin/users">Users</a>
       <% } %>

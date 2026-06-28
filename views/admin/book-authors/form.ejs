@@ -1,0 +1,26 @@
+<h1><%= author ? `Edit Author: ${author.name}` : 'New Book Author' %></h1>
+
+<% if (errors && errors.length) { %>
+<div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
+<% } %>
+
+<form method="post" action="<%= author && author.id ? `/admin/book-authors/${author.id}` : '/admin/book-authors' %>" class="admin-form">
+  <div class="admin-form-row">
+    <label>Name *<input type="text" name="name" value="<%= (author && author.name) || '' %>" required></label>
+    <label>Slug<input type="text" name="slug" value="<%= (author && author.slug) || '' %>" placeholder="auto-generated"></label>
+  </div>
+  <label>Bio<textarea name="bio" rows="4"><%= (author && author.bio) || '' %></textarea></label>
+  <div class="admin-form-row">
+    <label>Nationality<input type="text" name="nationality" value="<%= (author && author.nationality) || 'Indian' %>"></label>
+    <label>Birth Year<input type="number" name="birth_year" min="1800" max="2010" value="<%= (author && author.birth_year) || '' %>"></label>
+  </div>
+  <div class="admin-form-row">
+    <label>Photo URL<input type="url" name="photo" value="<%= (author && author.photo) || '' %>"></label>
+    <label>Website<input type="url" name="website" value="<%= (author && author.website) || '' %>"></label>
+  </div>
+  <label>Wikipedia URL<input type="url" name="wikipedia_url" value="<%= (author && author.wikipedia_url) || '' %>"></label>
+  <div>
+    <button type="submit" class="admin-btn admin-btn--primary"><%= author && author.id ? 'Save Changes' : 'Create Author' %></button>
+    <a class="admin-btn" href="/admin/book-authors">Cancel</a>
+  </div>
+</form>

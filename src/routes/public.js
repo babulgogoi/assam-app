@@ -2,6 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const publicController = require('../controllers/publicController');
+const publicBooksController = require('../controllers/publicBooksController');
 const menuItemsModel = require('../models/menuItems');
 const siteSettingsModel = require('../models/siteSettings');
 
@@ -35,5 +36,13 @@ router.get('/category/:category', publicController.categoryPage);
 router.get('/author/:username', publicController.authorPage);
 router.get('/search', publicController.searchPage);
 router.get('/page/:slug', publicController.pageDetail);
+
+// Books — specific routes before wildcard
+router.get('/books', publicBooksController.catalogue);
+router.get('/books/category/:slug', publicBooksController.categoryPage);
+router.get('/books/author/:slug', publicBooksController.authorPage);
+router.get('/books/publisher/:slug', publicBooksController.publisherPage);
+router.get('/book/:slug', publicBooksController.bookDetail);
+router.post('/book/:id/rate', publicBooksController.rateBook);
 
 module.exports = router;

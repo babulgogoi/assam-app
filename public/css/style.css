@@ -970,3 +970,180 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Books Module ────────────────────────────────────────────────────────────── */
+
+.books-main {
+  max-width: 1084px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.books-header { margin-bottom: 28px; }
+.books-header h1 { font-size: 1.8rem; margin: 0 0 4px; }
+.books-breadcrumb { font-size: 0.82rem; color: #888; margin: 0 0 8px; }
+.books-breadcrumb a { color: #2D6A4F; text-decoration: none; }
+.books-count { color: #666; font-size: 0.88rem; margin: 0 0 12px; }
+.books-section-heading { font-size: 1.1rem; color: #333; border-bottom: 2px solid #2D6A4F; padding-bottom: 6px; margin: 24px 0 16px; }
+.books-empty { color: #888; font-style: italic; }
+
+.books-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.books-cat-pill {
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid #2D6A4F;
+  color: #2D6A4F;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+.books-cat-pill:hover, .books-cat-pill.active { background: #2D6A4F; color: #fff; }
+.books-cat-count { font-weight: 400; }
+
+.books-featured { margin-bottom: 32px; }
+.books-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+.books-grid--small {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+.book-card { display: flex; flex-direction: column; }
+.book-card__cover {
+  display: block;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.15);
+  background: #f0f0f0;
+  margin-bottom: 10px;
+  text-decoration: none;
+}
+.book-card__cover img { width: 100%; height: 100%; object-fit: cover; }
+.book-card__no-cover {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2D6A4F, #1d5238);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 900;
+}
+.book-card__title { font-size: 0.85rem; margin: 0 0 4px; line-height: 1.35; }
+.book-card__title a { color: #1a1a1a; text-decoration: none; }
+.book-card__title a:hover { color: #2D6A4F; }
+.book-card__authors { font-size: 0.76rem; color: #666; margin: 0 0 4px; }
+.book-card__authors a { color: #2D6A4F; text-decoration: none; }
+.book-card__rating { font-size: 0.74rem; color: #888; }
+.book-card__rating { color: #f59e0b; }
+.book-card__price { font-size: 0.82rem; font-weight: 700; color: #2D6A4F; margin: 2px 0 0; }
+
+/* Book detail page */
+.book-detail { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+.book-detail__top { display: flex; gap: 32px; margin-bottom: 32px; }
+.book-detail__cover img {
+  width: 200px;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 4px 8px 20px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.book-detail__no-cover {
+  width: 200px;
+  height: 280px;
+  background: linear-gradient(135deg, #2D6A4F, #1d5238);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 3rem;
+  font-weight: 900;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.book-detail__info h1 { font-size: 1.7rem; margin: 0 0 8px; }
+.book-detail__subtitle { font-size: 1rem; color: #555; font-style: italic; margin: 0 0 12px; }
+.book-detail__authors { font-size: 1rem; color: #444; margin: 0 0 12px; }
+.book-detail__authors a { color: #2D6A4F; font-weight: 600; text-decoration: none; }
+.book-detail__rating { margin-bottom: 16px; }
+.star-filled { color: #f59e0b; }
+.star-empty { color: #ddd; }
+.book-detail__meta { border-collapse: collapse; margin-bottom: 20px; font-size: 0.88rem; }
+.book-detail__meta th { text-align: left; color: #888; padding: 4px 16px 4px 0; font-weight: 600; width: 100px; }
+.book-detail__meta td { color: #333; padding: 4px 0; }
+.book-detail__meta a { color: #2D6A4F; text-decoration: none; }
+.book-detail__price { font-size: 1.15rem; font-weight: 700; color: #2D6A4F; margin: 0 0 12px; }
+.btn-buy {
+  display: inline-block;
+  background: #2D6A4F;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+.btn-buy:hover { background: #1d5238; }
+.book-detail__description { border-top: 1px solid #eee; padding-top: 24px; margin-bottom: 24px; }
+.book-detail__categories, .book-detail__tags { margin-bottom: 16px; }
+.book-cat-tag {
+  display: inline-block;
+  background: #f0f7f4;
+  color: #2D6A4F;
+  border: 1px solid #2D6A4F;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  text-decoration: none;
+  margin: 2px;
+}
+.book-cat-tag:hover { background: #2D6A4F; color: #fff; }
+.book-tag {
+  display: inline-block;
+  background: #f5f5f5;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  margin: 2px;
+}
+.book-related { border-top: 1px solid #eee; padding-top: 24px; }
+.book-rate { margin: 16px 0; }
+.book-rate p { margin: 0 0 6px; font-size: 0.88rem; color: #666; }
+.rate-stars { font-size: 1.6rem; cursor: pointer; display: inline-flex; gap: 4px; }
+.rate-star { color: #ddd; transition: color 0.1s; }
+.rate-star:hover { color: #f59e0b; }
+
+/* Books author/publisher profile */
+.books-author-profile { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px; }
+.books-author-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.books-author-meta { font-size: 0.85rem; color: #888; margin: 4px 0; }
+.books-author-bio { font-size: 0.9rem; color: #444; margin: 8px 0; line-height: 1.6; }
+.books-author-links { display: flex; gap: 12px; margin-top: 8px; }
+.books-author-links a { color: #2D6A4F; font-size: 0.85rem; text-decoration: none; }
+
+@media (max-width: 600px) {
+  .book-detail__top { flex-direction: column; }
+  .book-detail__cover img, .book-detail__no-cover { width: 150px; height: 210px; }
+  .books-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .books-featured-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}

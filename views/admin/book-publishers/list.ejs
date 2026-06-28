@@ -1,0 +1,27 @@
+<div class="admin-list-header">
+  <h1>Publishers</h1>
+  <a class="admin-btn admin-btn--primary" href="/admin/book-publishers/new">+ New Publisher</a>
+</div>
+
+<table class="admin-table">
+  <thead>
+    <tr><th>Name</th><th>Location</th><th>Books</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% publishers.forEach(function(p) { %>
+    <tr>
+      <td><strong><%= p.name %></strong><% if (p.website) { %><br><small><a href="<%= p.website %>" target="_blank"><%= p.website %></a></small><% } %></td>
+      <td><%= p.location || '—' %><% if (p.founded_year) { %><br><small>est. <%= p.founded_year %></small><% } %></td>
+      <td><%= p.book_count %></td>
+      <td>
+        <a class="admin-btn" href="/admin/book-publishers/<%= p.id %>/edit">Edit</a>
+        <form method="post" action="/admin/book-publishers/<%= p.id %>/delete" style="display:inline"
+              onsubmit="return confirm('Delete publisher <%= p.name %>?')">
+          <button class="admin-btn admin-btn--danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!publishers.length) { %><tr><td colspan="4">No publishers yet.</td></tr><% } %>
+  </tbody>
+</table>

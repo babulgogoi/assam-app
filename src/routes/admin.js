@@ -7,6 +7,7 @@ const adminPagesController = require('../controllers/adminPagesController');
 const adminMenuController = require('../controllers/adminMenuController');
 const adminSettingsController = require('../controllers/adminSettingsController');
 const adminUsersController = require('../controllers/adminUsersController');
+const adminBooksController = require('../controllers/adminBooksController');
 const { requireAdmin, requirePermission } = require('../middleware/roleAuth');
 const { uploadArticleFiles, uploadAuthorPhoto } = require('../middleware/upload');
 
@@ -75,5 +76,29 @@ router.post('/users',            requirePermission('users', 'can_create'), admin
 router.get('/users/:id/edit',    requirePermission('users', 'can_read'),   adminUsersController.editUserForm);
 router.post('/users/:id',        requirePermission('users', 'can_update'), adminUsersController.updateUser);
 router.post('/users/:id/delete', requirePermission('users', 'can_delete'), adminUsersController.deleteUser);
+
+// Books (module: books)
+router.get('/books',                requirePermission('books', 'can_read'),   adminBooksController.listBooks);
+router.get('/books/new',            requirePermission('books', 'can_create'), adminBooksController.newBookForm);
+router.post('/books',               requirePermission('books', 'can_create'), adminBooksController.createBook);
+router.get('/books/:id/edit',       requirePermission('books', 'can_read'),   adminBooksController.editBookForm);
+router.post('/books/:id',           requirePermission('books', 'can_update'), adminBooksController.updateBook);
+router.post('/books/:id/delete',    requirePermission('books', 'can_delete'), adminBooksController.deleteBook);
+
+// Book Authors (module: books)
+router.get('/book-authors',             requirePermission('books', 'can_read'),   adminBooksController.listBookAuthors);
+router.get('/book-authors/new',         requirePermission('books', 'can_create'), adminBooksController.newBookAuthorForm);
+router.post('/book-authors',            requirePermission('books', 'can_create'), adminBooksController.createBookAuthor);
+router.get('/book-authors/:id/edit',    requirePermission('books', 'can_read'),   adminBooksController.editBookAuthorForm);
+router.post('/book-authors/:id',        requirePermission('books', 'can_update'), adminBooksController.updateBookAuthor);
+router.post('/book-authors/:id/delete', requirePermission('books', 'can_delete'), adminBooksController.deleteBookAuthor);
+
+// Book Publishers (module: books)
+router.get('/book-publishers',             requirePermission('books', 'can_read'),   adminBooksController.listPublishers);
+router.get('/book-publishers/new',         requirePermission('books', 'can_create'), adminBooksController.newPublisherForm);
+router.post('/book-publishers',            requirePermission('books', 'can_create'), adminBooksController.createPublisher);
+router.get('/book-publishers/:id/edit',    requirePermission('books', 'can_read'),   adminBooksController.editPublisherForm);
+router.post('/book-publishers/:id',        requirePermission('books', 'can_update'), adminBooksController.updatePublisher);
+router.post('/book-publishers/:id/delete', requirePermission('books', 'can_delete'), adminBooksController.deletePublisher);
 
 module.exports = router;

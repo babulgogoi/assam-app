@@ -1,0 +1,66 @@
+<div class="admin-list-header">
+  <h1>Books</h1>
+  <a class="admin-btn admin-btn--primary" href="/admin/books/new">+ New Book</a>
+</div>
+
+<form class="admin-filter-form" method="get">
+  <input type="text" name="q" value="<%= q %>" placeholder="Search title or ISBN…">
+  <select name="status">
+    <option value="">All statuses</option>
+    <option value="active"   <%= status === 'active'   ? 'selected' : '' %>>Active</option>
+    <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+  </select>
+  <button type="submit" class="admin-btn">Filter</button>
+  <a class="admin-btn" href="/admin/books">Reset</a>
+</form>
+
+<table class="admin-table">
+  <thead>
+    <tr><th>Cover</th><th>Title / Author</th><th>Format</th><th>Price</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% books.forEach(function(book) { %>
+    <tr>
+      <td style="width:50px">
+        <% if (book.cover_image) { %>
+        <img src="<%= book.cover_image %>" alt="" style="width:40px;height:56px;object-fit:cover;border-radius:2px">
+        <% } else { %>
+        <div style="width:40px;height:56px;background:#2D6A4F;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700"><%= book.title.slice(0,2).toUpperCase() %></div>
+        <% } %>
+      </td>
+      <td>
+        <strong><%= book.title %></strong>
+        <% if (book.author_names && book.author_names !== '—') { %><br><small><%= book.author_names %></small><% } %>
+        <% if (book.is_featured) { %> <span class="admin-badge admin-badge--published">Featured</span><% } %>
+      </td>
+      <td><%= book.format || '—' %></td>
+      <td><%= book.price ? '₹' + book.price : '—' %></td>
+      <td>
+        <span class="admin-badge admin-badge--<%= book.status === 'active' ? 'published' : 'draft' %>"><%= book.status %></span>
+      </td>
+      <td>
+        <a class="admin-btn" href="/admin/books/<%= book.id %>/edit">Edit</a>
+        <form method="post" action="/admin/books/<%= book.id %>/delete" style="display:inline"
+              onsubmit="return confirm('Delete this book?')">
+          <button class="admin-btn admin-btn--danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!books.length) { %>
+    <tr><td colspan="6">No books yet. <a href="/admin/books/new">Add one</a> or run the WooCommerce migration.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<% if (totalPages > 1) { %>
+<div class="admin-pagination">
+  <% if (page > 1) { %><a class="admin-btn" href="/admin/books?page=<%= page - 1 %>&q=<%= q %>&status=<%= status %>">← Prev</a><% } %>
+  <span>Page <%= page %> of <%= totalPages %></span>
+  <% if (page < totalPages) { %><a class="admin-btn" href="/admin/books?page=<%= page + 1 %>&q=<%= q %>&status=<%= status %>">Next →</a><% } %>
+</div>
+<% } %>
+
+<p style="margin-top:2rem;color:#666;font-size:0.85rem">
+  Also manage: <a href="/admin/book-authors">Book Authors</a> · <a href="/admin/book-publishers">Publishers</a>
+</p>

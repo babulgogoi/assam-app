@@ -1,0 +1,25 @@
+<h1><%= publisher ? `Edit Publisher: ${publisher.name}` : 'New Publisher' %></h1>
+
+<% if (errors && errors.length) { %>
+<div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
+<% } %>
+
+<form method="post" action="<%= publisher && publisher.id ? `/admin/book-publishers/${publisher.id}` : '/admin/book-publishers' %>" class="admin-form">
+  <div class="admin-form-row">
+    <label>Name *<input type="text" name="name" value="<%= (publisher && publisher.name) || '' %>" required></label>
+    <label>Slug<input type="text" name="slug" value="<%= (publisher && publisher.slug) || '' %>" placeholder="auto-generated"></label>
+  </div>
+  <label>Description<textarea name="description" rows="3"><%= (publisher && publisher.description) || '' %></textarea></label>
+  <div class="admin-form-row">
+    <label>Location<input type="text" name="location" value="<%= (publisher && publisher.location) || '' %>"></label>
+    <label>Founded Year<input type="number" name="founded_year" min="1700" max="2100" value="<%= (publisher && publisher.founded_year) || '' %>"></label>
+  </div>
+  <div class="admin-form-row">
+    <label>Website<input type="url" name="website" value="<%= (publisher && publisher.website) || '' %>"></label>
+    <label>Logo URL<input type="url" name="logo" value="<%= (publisher && publisher.logo) || '' %>"></label>
+  </div>
+  <div>
+    <button type="submit" class="admin-btn admin-btn--primary"><%= publisher && publisher.id ? 'Save Changes' : 'Create Publisher' %></button>
+    <a class="admin-btn" href="/admin/book-publishers">Cancel</a>
+  </div>
+</form>

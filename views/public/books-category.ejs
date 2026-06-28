@@ -1,0 +1,25 @@
+<main class="books-main">
+  <div class="books-header">
+    <p class="books-breadcrumb"><a href="/books">Books</a> › <%= category.name %></p>
+    <h1><%= category.name %></h1>
+    <% if (category.description) { %><p class="books-count"><%= category.description %></p><% } %>
+  </div>
+
+  <% if (books.length > 0) { %>
+  <div class="books-grid">
+    <% books.forEach(function(book) { %>
+      <%- include('../partials/book-card', { book: book }) %>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <p class="books-empty">No books in this category yet.</p>
+  <% } %>
+
+  <% if (totalPages > 1) { %>
+  <div class="pagination">
+    <% if (page > 1) { %><a href="/books/category/<%= category.slug %>?page=<%= page - 1 %>">← Previous</a><% } %>
+    <span>Page <%= page %> of <%= totalPages %></span>
+    <% if (page < totalPages) { %><a href="/books/category/<%= category.slug %>?page=<%= page + 1 %>">Next →</a><% } %>
+  </div>
+  <% } %>
+</main>

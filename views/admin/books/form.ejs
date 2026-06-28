@@ -1,0 +1,112 @@
+<h1><%= book ? `Edit Book: ${book.title}` : 'New Book' %></h1>
+
+<% if (errors && errors.length) { %>
+<div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
+<% } %>
+
+<form method="post" action="<%= book && book.id ? `/admin/books/${book.id}` : '/admin/books' %>" class="admin-form">
+
+  <div class="admin-form-row">
+    <label>Title *<input type="text" name="title" value="<%= (book && book.title) || '' %>" required></label>
+    <label>Slug<input type="text" name="slug" value="<%= (book && book.slug) || '' %>" placeholder="auto-generated"></label>
+  </div>
+
+  <label>Subtitle<input type="text" name="subtitle" value="<%= (book && book.subtitle) || '' %>"></label>
+
+  <label>Description<textarea name="description" rows="6"><%= (book && book.description) || '' %></textarea></label>
+
+  <div class="admin-form-row">
+    <label>Cover Image URL<input type="url" name="cover_image" value="<%= (book && book.cover_image) || '' %>" placeholder="https://…">
+      <% if (book && book.cover_image) { %><img src="<%= book.cover_image %>" alt="" style="max-width:80px;max-height:110px;margin-top:6px;display:block"><% } %>
+    </label>
+    <label>Cover Alt Text<input type="text" name="cover_image_alt" value="<%= (book && book.cover_image_alt) || '' %>"></label>
+  </div>
+
+  <div class="admin-form-row">
+    <label>Price (INR)<input type="number" name="price" step="0.01" min="0" value="<%= (book && book.price) || '' %>"></label>
+    <label>Buy URL<input type="url" name="buy_url" value="<%= (book && book.buy_url) || '' %>" placeholder="https://…"></label>
+  </div>
+
+  <div class="admin-form-row">
+    <label>ISBN<input type="text" name="isbn" value="<%= (book && book.isbn) || '' %>"></label>
+    <label>ISBN-13<input type="text" name="isbn13" value="<%= (book && book.isbn13) || '' %>"></label>
+  </div>
+
+  <div class="admin-form-row">
+    <label>Pages<input type="number" name="pages" min="1" value="<%= (book && book.pages) || '' %>"></label>
+    <label>Published Year<input type="number" name="published_year" min="1000" max="2100" value="<%= (book && book.published_year) || '' %>"></label>
+  </div>
+
+  <div class="admin-form-row">
+    <label>Language
+      <input type="text" name="language" value="<%= (book && book.language) || 'English' %>">
+    </label>
+    <label>Edition<input type="text" name="edition" value="<%= (book && book.edition) || '' %>"></label>
+  </div>
+
+  <div class="admin-form-row">
+    <label>Format
+      <select name="format">
+        <% ['paperback','hardcover','ebook','audio'].forEach(function(fmt) { %>
+        <option value="<%= fmt %>" <%= (book && book.format === fmt) ? 'selected' : '' %>><%= fmt.charAt(0).toUpperCase() + fmt.slice(1) %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="active"   <%= (!book || book.status === 'active')   ? 'selected' : '' %>>Active</option>
+        <option value="inactive" <%= (book && book.status === 'inactive')  ? 'selected' : '' %>>Inactive</option>
+      </select>
+    </label>
+  </div>
+
+  <label>Tags (comma-separated)<input type="text" name="tags" value="<%= (book && book.tags) ? (Array.isArray(book.tags) ? book.tags.join(', ') : book.tags) : '' %>"></label>
+
+  <label>Publisher
+    <select name="publisher_id">
+      <option value="">— None —</option>
+      <% publishers.forEach(function(p) { %>
+      <option value="<%= p.id %>" <%= (book && book.publisher_id == p.id) ? 'selected' : '' %>><%= p.name %></option>
+      <% }) %>
+    </select>
+  </label>
+
+  <label class="admin-checkbox" style="margin-bottom:1rem">
+    <input type="checkbox" name="is_featured" value="1" <%= (book && book.is_featured) ? 'checked' : '' %>>
+    <span>Featured book</span>
+  </label>
+
+  <fieldset class="admin-fieldset">
+    <legend>Authors</legend>
+    <% if (authors.length === 0) { %>
+    <p style="font-size:0.85rem;color:#666">No book authors yet. <a href="/admin/book-authors/new" target="_blank">Add one</a>.</p>
+    <% } %>
+    <div class="admin-checkbox-grid">
+    <% authors.forEach(function(a) { %>
+      <label class="admin-checkbox">
+        <input type="checkbox" name="author_ids" value="<%= a.id %>"
+               <%= selectedAuthors.includes(a.id) ? 'checked' : '' %>>
+        <span><%= a.name %></span>
+      </label>
+    <% }) %>
+    </div>
+  </fieldset>
+
+  <fieldset class="admin-fieldset">
+    <legend>Categories</legend>
+    <div class="admin-checkbox-grid">
+    <% categories.forEach(function(c) { %>
+      <label class="admin-checkbox">
+        <input type="checkbox" name="category_ids" value="<%= c.id %>"
+               <%= selectedCategories.includes(c.id) ? 'checked' : '' %>>
+        <span><%= c.name %></span>
+      </label>
+    <% }) %>
+    </div>
+  </fieldset>
+
+  <div>
+    <button type="submit" class="admin-btn admin-btn--primary"><%= book && book.id ? 'Save Changes' : 'Create Book' %></button>
+    <a class="admin-btn" href="/admin/books">Cancel</a>
+  </div>
+</form>
