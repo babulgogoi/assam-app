@@ -30,6 +30,17 @@ async function getAllPublished() {
   return rows;
 }
 
+async function getLatestPublished({ limit = 3 } = {}) {
+  const { rows } = await pool.query(
+    `SELECT id, slug, title, body FROM pages
+     WHERE status = 'published'
+     ORDER BY updated_at DESC NULLS LAST
+     LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
 async function slugExists(slug, excludeId = null) {
   const params = excludeId ? [slug, excludeId] : [slug];
   const { rows } = await pool.query(
@@ -65,6 +76,7 @@ module.exports = {
   getById,
   getAllForAdmin,
   getAllPublished,
+  getLatestPublished,
   slugExists,
   create,
   update,

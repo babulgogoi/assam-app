@@ -13,22 +13,22 @@ const FEATURED_ARTICLES_SIZE = 5;
 
 async function home(req, res, next) {
   try {
-    const featuredCategory = await siteSettingsModel.getFeaturedCategory();
-
-    const [latest, mostViewed, featuredArticles] = await Promise.all([
-      articlesModel.getLatestPublished({ limit: HOME_GRID_SIZE + 1 }),
-      articlesModel.getMostViewed({ limit: 5 }),
-      articlesModel.getByCategory({ category: featuredCategory, limit: FEATURED_ARTICLES_SIZE }),
+    const [latest, mostViewed, onThisDay, latestPages] = await Promise.all([
+      articlesModel.getLatestPublished({ limit: 7 }),
+      articlesModel.getMostViewed({ limit: 3 }),
+      articlesModel.getOnThisDay({ limit: 4 }),
+      pagesModel.getLatestPublished({ limit: 3 }),
     ]);
 
     const [lead, ...grid] = latest;
 
     res.render('public/home', {
-      title: 'Assam Times',
+      title: 'Assam Portal — Gateway to Assam',
       lead,
       grid,
       mostViewed,
-      featuredArticles,
+      onThisDay,
+      latestPages,
     });
   } catch (err) {
     next(err);
@@ -49,7 +49,7 @@ async function newsPage(req, res, next) {
     const totalPages = Math.max(1, Math.ceil(total / NEWS_PAGE_SIZE));
 
     res.render('public/news', {
-      title: 'Latest News — Assam Times',
+      title: 'Latest Stories — Assam Portal',
       articles,
       mostViewed,
       page,

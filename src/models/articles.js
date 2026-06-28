@@ -57,6 +57,22 @@ async function getBySlug(slug) {
   return rows[0] || null;
 }
 
+async function getOnThisDay({ limit = 4 } = {}) {
+  const { rows } = await pool.query(
+    `SELECT ${ARTICLE_CARD_FIELDS}
+     FROM articles a
+     LEFT JOIN authors au ON au.id = a.author_id
+     WHERE a.status = 'published'
+       AND EXTRACT(MONTH FROM a.published_at) = EXTRACT(MONTH FROM CURRENT_DATE)
+       AND EXTRACT(DAY   FROM a.published_at) = EXTRACT(DAY   FROM CURRENT_DATE)
+       AND EXTRACT(YEAR  FROM a.published_at) < EXTRACT(YEAR  FROM CURRENT_DATE)
+     ORDER BY a.published_at DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
 async function getRelatedByCategory({ category, excludeId, limit }) {
   const { rows } = await pool.query(
     `SELECT id, slug, title, featured_image
@@ -264,6 +280,7 @@ module.exports = {
   getLatestPublished,
   countPublished,
   getMostViewed,
+  getOnThisDay,
   getBySlug,
   getRelatedByCategory,
   incrementViewCount,

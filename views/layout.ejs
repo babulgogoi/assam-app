@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <% if (process.env.NODE_ENV === 'production') { %>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3VCJYPSX0"></script>
+  <% if (process.env.NODE_ENV === 'production' && process.env.GA4_MEASUREMENT_ID) { %>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GA4_MEASUREMENT_ID %>"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-W3VCJYPSX0');
+      gtag('config', '<%= process.env.GA4_MEASUREMENT_ID %>');
     </script>
   <% } %>
-  <title><%= typeof title !== 'undefined' ? title : 'Assam Times' %></title>
+  <title><%= typeof title !== 'undefined' ? title : 'Assam Portal' %></title>
   <link rel="stylesheet" href="/css/style.css">
   <% if (typeof adsenseClientId !== 'undefined' && adsenseClientId) { %>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<%= adsenseClientId %>" crossorigin="anonymous"></script>

@@ -1,46 +1,109 @@
-<div class="home-layout">
-  <div class="home-main">
+<%# ── Section 1: Hero ──────────────────────────────────── %>
+<% if (lead) { %>
+<section class="portal-hero">
+  <a class="portal-hero__link" href="/article/<%= lead.slug %>">
+    <img class="portal-hero__image"
+         src="<%= lead.featured_image || '/uploads/defaults/at-news.png' %>"
+         alt="<%= lead.title %>">
+    <div class="portal-hero__overlay">
+      <% if (lead.category) { %>
+        <span class="portal-hero__cat"><%= lead.category %></span>
+      <% } %>
+      <h1 class="portal-hero__title"><%= lead.title %></h1>
+      <% if (lead.excerpt) { %>
+        <p class="portal-hero__excerpt"><%= lead.excerpt.replace(/<[^>]+>/g, '').slice(0, 220) %></p>
+      <% } %>
+      <p class="portal-hero__meta">
+        <% if (lead.author_name) { %>by <%= lead.author_name %><% } %>
+        <% if (lead.published_at) { %> &middot; <%= new Date(lead.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %><% } %>
+      </p>
+    </div>
+  </a>
+</section>
+<% } %>
 
-    <% if (lead) { %>
-      <article class="lead-story">
-        <a class="lead-story__link" href="/article/<%= lead.slug %>">
-          <img class="lead-story__image" src="<%= lead.featured_image || '/uploads/defaults/at-news.png' %>" alt="<%= lead.title %>">
-          <div class="lead-story__overlay">
-            <h1 class="lead-story__title"><%= lead.title %></h1>
-            <p class="lead-story__date">
-              <%= lead.published_at ? new Date(lead.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
-            </p>
-          </div>
-        </a>
-      </article>
-    <% } %>
-
-    <div class="article-grid">
-      <% grid.forEach(function (article) { %>
+<%# ── Section 2: Two-column ────────────────────────────── %>
+<div class="portal-columns">
+  <main class="portal-columns__main">
+    <h2 class="portal-section-title">Latest Stories</h2>
+    <div class="portal-grid">
+      <% grid.slice(0, 6).forEach(function(article) { %>
         <article class="article-card">
           <a href="/article/<%= article.slug %>">
-            <img class="article-card__image" src="<%= article.featured_image || '/uploads/defaults/at-news.png' %>" alt="<%= article.title %>">
-            <h2 class="article-card__title"><%= article.title %></h2>
+            <img class="article-card__image"
+                 src="<%= article.featured_image || '/uploads/defaults/at-news.png' %>"
+                 alt="<%= article.title %>">
+            <h3 class="article-card__title"><%= article.title %></h3>
           </a>
           <p class="article-meta">
-            <% if (article.author_username) { %>
-              by <a href="/author/<%= encodeURIComponent(article.author_username) %>"><%= article.author_name %></a>
-            <% } %>
-            <% if (article.category) { %>
-              in <a href="/category/<%= encodeURIComponent(article.category) %>"><%= article.category %></a>
+            <% if (article.published_at) { %>
+              <%= new Date(article.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
             <% } %>
           </p>
         </article>
       <% }) %>
     </div>
-
     <div class="view-all-news">
-      <a class="view-all-news__btn" href="/news">View All News</a>
+      <a class="view-all-news__btn" href="/news">View All Stories</a>
     </div>
+  </main>
 
-  </div>
+  <aside class="portal-columns__sidebar">
+    <% if (typeof onThisDay !== 'undefined' && onThisDay && onThisDay.length) { %>
+      <section class="sidebar-block">
+        <h3 class="sidebar-block__title">On This Day</h3>
+        <ul class="sidebar-block__list">
+          <% onThisDay.slice(0, 4).forEach(function(a) { %>
+            <li>
+              <a href="/article/<%= a.slug %>"><%= a.title %></a>
+              <% if (a.published_at) { %>
+                <span class="sidebar-block__year">(<%= new Date(a.published_at).getFullYear() %>)</span>
+              <% } %>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+    <% } %>
 
-  <aside class="home-sidebar">
-    <%- include('../partials/sidebar-home') %>
+    <section class="sidebar-block">
+      <h3 class="sidebar-block__title">Most Read</h3>
+      <ol class="sidebar-block__list sidebar-block__list--numbered">
+        <% mostViewed.slice(0, 3).forEach(function(a) { %>
+          <li><a href="/article/<%= a.slug %>"><%= a.title %></a></li>
+        <% }) %>
+      </ol>
+    </section>
   </aside>
 </div>
+
+<%# ── Section 3: Browse Topics ────────────────────────── %>
+<section class="portal-categories">
+  <h2 class="portal-section-title">Browse Topics</h2>
+  <div class="portal-categories__pills">
+    <% ['Culture', 'Economy', 'Geography', 'History', 'Education', 'Language',
+        'Travel', 'Politics', 'Environment', 'Health', 'Sports', 'Technology',
+        'Society', 'Literature', 'Music', 'Film'].forEach(function(cat) { %>
+      <a href="/category/<%= encodeURIComponent(cat) %>" class="portal-cat-pill"><%= cat %></a>
+    <% }) %>
+  </div>
+</section>
+
+<%# ── Section 4: In Depth ─────────────────────────────── %>
+<% if (typeof latestPages !== 'undefined' && latestPages && latestPages.length) { %>
+<section class="portal-indepth">
+  <h2 class="portal-section-title">In Depth</h2>
+  <div class="portal-indepth__grid">
+    <% latestPages.forEach(function(page) { %>
+      <article class="indepth-card">
+        <h3 class="indepth-card__title">
+          <a href="/page/<%= page.slug %>"><%= page.title %></a>
+        </h3>
+        <% if (page.body) { %>
+          <p class="indepth-card__excerpt"><%= page.body.replace(/<[^>]+>/g, '').slice(0, 180) %>…</p>
+        <% } %>
+        <a href="/page/<%= page.slug %>" class="indepth-card__link">Read more &rarr;</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+<% } %>
