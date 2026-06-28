@@ -131,8 +131,9 @@ async function migrate() {
   for (const a of aliases) {
     const nid = a.path.replace('/node/', '');
     const cleanAlias = a.alias
-      .replace(/^\/(pages|content|story|node)\//, '')
+      .replace(/^\/(pages|content|story|node|news)\//, '')
       .replace(/[^a-z0-9-]/gi, '-')
+      .replace(/^-+|-+$/g, '')
       .toLowerCase();
     aliasMap[nid] = cleanAlias;
   }
