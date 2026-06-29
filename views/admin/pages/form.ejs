@@ -1,3 +1,4 @@
+<script>window.ADMIN_MODULE = 'pages';</script>
 <div class="admin-list-header">
   <h1><%= page ? 'Edit Page' : 'New Page' %></h1>
   <% if (page && page.id && page.slug) { %>
@@ -50,6 +51,18 @@
     </label>
   </div>
 
+  <div class="form-group" style="margin-bottom:1.25rem">
+    <label style="display:block;margin-bottom:6px;font-weight:600">Author</label>
+    <div class="author-search-wrap" style="position:relative">
+      <input type="text" id="authorSearchInput" autocomplete="off"
+             placeholder="Type to search authors…"
+             value="<%= (page && (page.author_name || page.author_username)) || '' %>">
+      <div id="authorDropdown" class="autocomplete-dropdown" style="display:none"></div>
+    </div>
+    <input type="hidden" name="author_id" id="authorIdInput" value="<%= (page && page.author_id) || '' %>">
+    <small style="color:#888">Links to the story authors table — same authors as articles.</small>
+  </div>
+
   <div class="form-group cover-image-group">
     <label style="display:block;margin-bottom:6px;font-weight:600">Featured Image</label>
     <div class="cover-preview" id="featuredPreview" style="<%= (page && page.featured_image) ? 'display:flex' : 'display:none' %>">
@@ -93,6 +106,40 @@
 </form>
 
 <script>
+(function () {
+  var authorInput    = document.getElementById('authorSearchInput');
+  var authorDropdown = document.getElementById('authorDropdown');
+  var authorIdInput  = document.getElementById('authorIdInput');
+
+  authorInput.addEventListener('input', async function () {
+    var q = authorInput.value.trim();
+    if (q.length < 2) { authorDropdown.style.display = 'none'; return; }
+    try {
+      var res     = await fetch('/admin/authors/search?q=' + encodeURIComponent(q));
+      var authors = await res.json();
+      if (!authors.length) { authorDropdown.style.display = 'none'; return; }
+      authorDropdown.innerHTML = authors.map(function (a) {
+        var name = a.display_name || a.username;
+        return '<div class="autocomplete-item" data-id="' + a.id + '" data-name="' + name.replace(/"/g,'&quot;') + '">'
+          + name + (a.username ? ' <small style="color:#aaa">@' + a.username + '</small>' : '')
+          + '</div>';
+      }).join('');
+      authorDropdown.style.display = 'block';
+      authorDropdown.querySelectorAll('.autocomplete-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          authorIdInput.value  = item.dataset.id;
+          authorInput.value    = item.dataset.name;
+          authorDropdown.style.display = 'none';
+        });
+      });
+    } catch (_) { authorDropdown.style.display = 'none'; }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.author-search-wrap')) authorDropdown.style.display = 'none';
+  });
+})();
+
 (function () {
   function previewFeatured(input) {
     if (!input.files || !input.files[0]) return;

@@ -83,7 +83,8 @@ async function buildPageData(req, existingPage) {
     featured_image_caption: body.featured_image_caption || null,
     references_text: body.references_text || null,
     tags: [],
-    topic_id: body.topic_id ? parseInt(body.topic_id, 10) : null,
+    topic_id:  body.topic_id  ? parseInt(body.topic_id, 10)  : null,
+    author_id: body.author_id ? parseInt(body.author_id, 10) : null,
   };
 }
 

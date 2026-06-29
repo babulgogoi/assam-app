@@ -3,11 +3,13 @@ const pool = require('../config/db');
 const PAGE_SELECT = `
   SELECT p.id, p.slug, p.title, p.body, p.status,
          p.excerpt, p.featured_image, p.featured_image_caption,
-         p.references_text, p.tags, p.topic_id,
+         p.references_text, p.tags, p.topic_id, p.author_id,
          p.created_at, p.updated_at,
-         pt.name AS topic_name, pt.slug AS topic_slug, pt.icon AS topic_icon
+         pt.name AS topic_name, pt.slug AS topic_slug, pt.icon AS topic_icon,
+         a.display_name AS author_name, a.username AS author_username
   FROM pages p
   LEFT JOIN page_topics pt ON pt.id = p.topic_id
+  LEFT JOIN authors a ON a.id = p.author_id
 `;
 
 async function getBySlug(slug) {
@@ -91,33 +93,33 @@ async function slugExists(slug, excludeId = null) {
 }
 
 async function create({ slug, title, body, status, excerpt, featured_image,
-  featured_image_caption, references_text, tags, topic_id }) {
+  featured_image_caption, references_text, tags, topic_id, author_id }) {
   const { rows } = await pool.query(
     `INSERT INTO pages
        (slug, title, body, status, excerpt, featured_image,
-        featured_image_caption, references_text, tags, topic_id,
+        featured_image_caption, references_text, tags, topic_id, author_id,
         created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,now(),now())
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now())
      RETURNING id`,
     [slug, title, body, status, excerpt || null, featured_image || null,
      featured_image_caption || null, references_text || null,
-     tags || [], topic_id || null]
+     tags || [], topic_id || null, author_id || null]
   );
   return rows[0].id;
 }
 
 async function update(id, { slug, title, body, status, excerpt, featured_image,
-  featured_image_caption, references_text, tags, topic_id }) {
+  featured_image_caption, references_text, tags, topic_id, author_id }) {
   await pool.query(
     `UPDATE pages SET
        slug=$1, title=$2, body=$3, status=$4,
        excerpt=$5, featured_image=$6, featured_image_caption=$7,
-       references_text=$8, tags=$9, topic_id=$10,
+       references_text=$8, tags=$9, topic_id=$10, author_id=$11,
        updated_at=now()
-     WHERE id=$11`,
+     WHERE id=$12`,
     [slug, title, body, status, excerpt || null, featured_image || null,
      featured_image_caption || null, references_text || null,
-     tags || [], topic_id || null, id]
+     tags || [], topic_id || null, author_id || null, id]
   );
 }
 

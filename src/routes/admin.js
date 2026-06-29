@@ -51,25 +51,50 @@ router.use((req, res, next) => {
 
 router.get('/', (req, res) => res.redirect('/admin/articles'));
 
-// TinyMCE inline image upload endpoint
+// TinyMCE inline image upload endpoint — module-aware
+const INLINE_UPLOAD_TARGETS = {
+  articles: { dir: () => process.env.UPLOADS_ARTICLES_DIR || '/home/assam/web/assam.org/public_html/uploads/articles', url: '/uploads/articles' },
+  pages:    { dir: () => process.env.UPLOADS_PAGES_DIR    || '/home/assam/web/assam.org/public_html/uploads/pages',    url: '/uploads/pages'    },
+  books:    { dir: () => process.env.UPLOADS_BOOKS_DIR    || '/home/assam/web/assam.org/public_html/uploads/books',    url: '/uploads/books'    },
+  authors:  { dir: () => process.env.UPLOADS_AUTHORS_DIR  || '/home/assam/web/assam.org/public_html/uploads/authors',  url: '/uploads/authors'  },
+};
+
 router.post('/upload-image', inlineImageUpload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file' });
-    const uploadDir = process.env.UPLOADS_ARTICLES_DIR || '/home/assam/web/assam.org/public_html/uploads/articles';
-    const urlPrefix = '/uploads/articles';
-    const filename  = `inline-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.jpg`;
-    const outPath   = path.join(uploadDir, filename);
-    const tmpPath   = outPath + '.tmp';
+    const mod    = INLINE_UPLOAD_TARGETS[req.query.module] ? req.query.module : 'articles';
+    const target = INLINE_UPLOAD_TARGETS[mod];
+    const dir    = target.dir();
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const filename = `inline-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.jpg`;
+    const outPath  = path.join(dir, filename);
+    const tmpPath  = outPath + '.tmp';
     await sharp(req.file.buffer)
       .resize(1200, null, { withoutEnlargement: true, fit: 'inside' })
       .jpeg({ quality: 85, progressive: true })
       .toFile(tmpPath);
     fs.renameSync(tmpPath, outPath);
-    res.json({ location: `${urlPrefix}/${filename}` });
+    res.json({ location: `${target.url}/${filename}` });
   } catch (err) {
     console.error('TinyMCE image upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
   }
+});
+
+// Author search for autocomplete (pages, etc.)
+router.get('/authors/search', async (req, res, next) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (q.length < 2) return res.json([]);
+    const db = require('../config/db');
+    const { rows } = await db.query(
+      `SELECT id, username, display_name FROM authors
+       WHERE username ILIKE $1 OR display_name ILIKE $1
+       ORDER BY display_name, username LIMIT 10`,
+      [`%${q}%`]
+    );
+    res.json(rows);
+  } catch (err) { next(err); }
 });
 
 // Articles (module: stories)

@@ -34,11 +34,12 @@
       { title: 'Blockquote', block: 'blockquote' },
       { title: 'Code', inline: 'code' },
     ],
-    images_upload_url: '/admin/upload-image',
+    images_upload_url: '/admin/upload-image?module=' + (window.ADMIN_MODULE || 'articles'),
     images_upload_handler: async (blobInfo, progress) => {
       const formData = new FormData();
       formData.append('file', blobInfo.blob(), blobInfo.filename());
-      const response = await fetch('/admin/upload-image', { method: 'POST', body: formData });
+      const mod = window.ADMIN_MODULE || 'articles';
+      const response = await fetch('/admin/upload-image?module=' + mod, { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
       return data.location;

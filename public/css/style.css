@@ -1909,3 +1909,15 @@ body {
   .research-topics-grid { grid-template-columns: repeat(3, 1fr); }
   .research-featured-grid { grid-template-columns: 1fr; }
 }
+
+.wiki-page__byline {
+  font-size: 0.82rem;
+  color: #888;
+  margin-bottom: 20px;
+}
+.wiki-page__byline a {
+  color: #2D6A4F;
+  text-decoration: none;
+  font-weight: 600;
+}
+.wiki-page__byline a:hover { text-decoration: underline; }
