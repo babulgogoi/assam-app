@@ -2142,3 +2142,45 @@ body {
   .hero__headline { font-size: 1.4rem; }
   .home-topics-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ══ Search page ══ */
+.search-page__hero {
+  background: linear-gradient(135deg, #1a3d2b 0%, #2D6A4F 100%);
+  padding: 40px 16px 36px;
+  text-align: center;
+}
+.search-page__title {
+  color: #fff;
+  font-size: 1.5rem;
+  margin: 0 0 20px;
+  font-weight: 700;
+}
+.search-page__form { max-width: 600px; margin: 0 auto; }
+.search-page__input-wrap {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+.search-page__input-wrap input {
+  flex: 1;
+  padding: 14px 18px;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  color: #1a1a1a;
+}
+.search-page__input-wrap button {
+  background: #52b788;
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.search-page__input-wrap button:hover { background: #40916c; }
+.search-page__hint { color: #888; padding: 24px 0; font-size: 0.95rem; }
+.search-page__count { font-size: 0.82rem; color: #888; margin-bottom: 20px; }
+.article-card__excerpt { font-size: 0.82rem; color: #666; margin: 4px 0 0; line-height: 1.5; }
