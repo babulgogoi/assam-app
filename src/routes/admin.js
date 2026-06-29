@@ -140,6 +140,66 @@ router.post('/settings',         requirePermission('settings', 'can_update'), ad
 router.get('/settings/homepage', requirePermission('settings', 'can_read'),   adminSettingsController.editHomepageForm);
 router.post('/settings/homepage',requirePermission('settings', 'can_update'), uploadHeroImage, adminSettingsController.updateHomepage);
 
+// URL Redirects (module: settings)
+router.get('/redirects', requirePermission('settings', 'can_read'), async (req, res, next) => {
+  try {
+    const db = require('../config/db');
+    const page  = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = 50;
+    const offset = (page - 1) * limit;
+    const q = (req.query.q || '').trim();
+    const params = q ? [`%${q}%`] : [];
+    const where  = q ? `WHERE old_url ILIKE $1 OR new_url ILIKE $1` : '';
+    const [rows, countRow] = await Promise.all([
+      db.query(
+        `SELECT * FROM redirects ${where} ORDER BY hits DESC, old_url LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset]
+      ),
+      db.query(`SELECT COUNT(*) FROM redirects ${where}`, params),
+    ]);
+    const total = parseInt(countRow.rows[0].count, 10);
+    res.locals.layout = 'admin/layout';
+    res.render('admin/redirects', {
+      title: 'URL Redirects — Admin',
+      redirects: rows.rows,
+      total, q,
+      currentPage: page,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      saved: req.query.saved === '1',
+    });
+  } catch (err) { next(err); }
+});
+
+router.post('/redirects', requirePermission('settings', 'can_update'), async (req, res, next) => {
+  try {
+    const db = require('../config/db');
+    const { invalidateCache } = require('../middleware/redirects');
+    let old_url = (req.body.old_url || '').trim();
+    if (!old_url.startsWith('/')) old_url = '/' + old_url;
+    const new_url = (req.body.new_url || '').trim();
+    const type = parseInt(req.body.type, 10) === 302 ? 302 : 301;
+    if (!old_url || !new_url) return res.redirect('/admin/redirects');
+    await db.query(
+      `INSERT INTO redirects (old_url, new_url, type)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (old_url) DO UPDATE SET new_url = EXCLUDED.new_url, type = EXCLUDED.type`,
+      [old_url, new_url, type]
+    );
+    invalidateCache();
+    res.redirect('/admin/redirects?saved=1');
+  } catch (err) { next(err); }
+});
+
+router.post('/redirects/:id/delete', requirePermission('settings', 'can_update'), async (req, res, next) => {
+  try {
+    const db = require('../config/db');
+    const { invalidateCache } = require('../middleware/redirects');
+    await db.query('DELETE FROM redirects WHERE id = $1', [req.params.id]);
+    invalidateCache();
+    res.redirect('/admin/redirects');
+  } catch (err) { next(err); }
+});
+
 // User management (module: users — superadmin only in practice)
 router.get('/users',             requirePermission('users', 'can_read'),   adminUsersController.listUsers);
 router.get('/users/new',         requirePermission('users', 'can_create'), adminUsersController.newUserForm);

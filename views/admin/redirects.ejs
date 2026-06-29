@@ -1,0 +1,73 @@
+<div class="admin-list-header">
+  <h1>URL Redirects <span class="admin-badge" style="font-size:0.75rem;vertical-align:middle;"><%= total %></span></h1>
+</div>
+
+<% if (saved) { %>
+<div class="admin-flash admin-flash--success">Redirect saved.</div>
+<% } %>
+
+<div class="admin-settings-section" style="margin-bottom:20px;">
+  <h2 style="font-size:0.9rem;margin:0 0 14px;">Add / update redirect</h2>
+  <form method="post" action="/admin/redirects" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <input type="text" name="old_url" placeholder="/node/123 or /old-d9-slug" required
+           style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
+    <span style="color:#999;">→</span>
+    <input type="text" name="new_url" placeholder="/article/slug or /page/slug" required
+           style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
+    <select name="type" style="padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
+      <option value="301">301 Permanent</option>
+      <option value="302">302 Temporary</option>
+    </select>
+    <button type="submit" class="admin-btn admin-btn--primary">+ Add</button>
+  </form>
+</div>
+
+<form method="get" style="margin-bottom:16px;display:flex;gap:8px;max-width:440px;">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search old or new URL…"
+         style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
+  <button type="submit" class="admin-btn">Filter</button>
+  <% if (q) { %><a href="/admin/redirects" class="admin-btn">Clear</a><% } %>
+</form>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Old URL (D9)</th>
+      <th>New URL</th>
+      <th style="width:60px;">Type</th>
+      <th style="width:60px;">Hits</th>
+      <th style="width:70px;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% redirects.forEach(function(r) { %>
+    <tr>
+      <td><code style="font-size:0.75rem;color:#555;"><%= r.old_url %></code></td>
+      <td><a href="<%= r.new_url %>" target="_blank" style="font-size:0.82rem;color:#2D6A4F;"><%= r.new_url %></a></td>
+      <td><span class="admin-badge admin-badge--published" style="font-size:0.7rem;"><%= r.type %></span></td>
+      <td style="color:#888;font-size:0.82rem;"><%= r.hits %></td>
+      <td>
+        <form method="post" action="/admin/redirects/<%= r.id %>/delete"
+              onsubmit="return confirm('Delete this redirect?');">
+          <button type="submit" class="admin-btn admin-btn--danger" style="padding:4px 10px;font-size:0.78rem;">Del</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!redirects.length) { %>
+    <tr><td colspan="5" style="color:#aaa;font-style:italic;">No redirects found.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<% if (totalPages > 1) { %>
+<div class="admin-pagination" style="margin-top:16px;display:flex;gap:8px;align-items:center;">
+  <% if (currentPage > 1) { %>
+  <a href="/admin/redirects?page=<%= currentPage - 1 %>&q=<%= q %>" class="admin-btn">← Prev</a>
+  <% } %>
+  <span style="font-size:0.85rem;color:#666;">Page <%= currentPage %> of <%= totalPages %></span>
+  <% if (currentPage < totalPages) { %>
+  <a href="/admin/redirects?page=<%= currentPage + 1 %>&q=<%= q %>" class="admin-btn">Next →</a>
+  <% } %>
+</div>
+<% } %>
