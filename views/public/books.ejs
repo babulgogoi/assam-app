@@ -1,46 +1,118 @@
 <main class="books-main">
-  <div class="books-header">
-    <h1>Books About Assam</h1>
-    <p class="books-count"><%= total %> books in catalogue</p>
-    <div class="books-categories">
-      <a href="/books" class="books-cat-pill active">All</a>
-      <% categories.forEach(function(cat) { %>
-        <% if (cat.book_count > 0) { %>
-        <a href="/books/category/<%= cat.slug %>" class="books-cat-pill"><%= cat.name %> <span class="books-cat-count">(<%= cat.book_count %>)</span></a>
-        <% } %>
-      <% }) %>
+
+  <div class="books-page-header">
+    <div class="books-page-header__left">
+      <h1><% if (q) { %>Search: "<%= q %>"<% } else { %>Books<% } %></h1>
+      <p class="books-total-count"><%= total %> book<%= total !== 1 ? 's' : '' %><% if (q) { %> found<% } else { %> in catalogue<% } %></p>
+    </div>
+    <div class="books-page-header__right">
+      <form action="/books/search" method="GET" class="books-search-form">
+        <div class="books-search-input-wrap">
+          <input type="text" name="q" value="<%= q || '' %>"
+                 placeholder="Search books, authors, ISBN…"
+                 aria-label="Search books">
+          <button type="submit" aria-label="Search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <% if (featured.length > 0) { %>
-  <section class="books-featured">
-    <h2 class="books-section-heading">Featured Books</h2>
-    <div class="books-featured-grid">
-      <% featured.forEach(function(book) { %>
-        <%- include('../partials/book-card', { book: book }) %>
-      <% }) %>
-    </div>
-  </section>
+  <% if (!q) { %>
+  <div class="books-filter-bar">
+    <a href="/books" class="books-filter-pill active">All</a>
+    <% categories.forEach(function(cat) { %>
+    <a href="/books/category/<%= cat.slug %>" class="books-filter-pill">
+      <%= cat.name %> <span class="pill-count"><%= cat.book_count %></span>
+    </a>
+    <% }) %>
+  </div>
   <% } %>
 
-  <section class="books-grid-section">
-    <h2 class="books-section-heading">All Books</h2>
-    <% if (books.length > 0) { %>
-    <div class="books-grid">
-      <% books.forEach(function(book) { %>
-        <%- include('../partials/book-card', { book: book }) %>
-      <% }) %>
+  <% if (books.length > 0) { %>
+  <div class="books-catalogue-grid">
+    <% books.forEach(function(book) { %>
+    <div class="books-catalogue-item">
+      <a href="/book/<%= book.slug %>" class="books-catalogue-cover">
+        <% if (book.cover_image) { %>
+        <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
+             alt="<%= book.title %>" loading="lazy" width="200" height="280">
+        <% } else { %>
+        <div class="books-catalogue-cover__placeholder">
+          <%= book.title.slice(0, 2).toUpperCase() %>
+        </div>
+        <% } %>
+      </a>
+      <div class="books-catalogue-info">
+        <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
+        <% if (book.authors && book.authors.length > 0) { %>
+        <p class="books-catalogue-author">
+          <% book.authors.slice(0, 2).forEach(function(a, i) { %>
+          <a href="/books/author/<%= a.slug %>"><%= a.name %></a><%= i < Math.min(book.authors.length, 2) - 1 ? ', ' : '' %>
+          <% }) %>
+        </p>
+        <% } %>
+        <div class="books-catalogue-meta">
+          <% if (book.avg_rating) { %>
+          <span class="books-catalogue-rating">★ <%= book.avg_rating %></span>
+          <% } %>
+          <% if (book.price) { %>
+          <span class="books-catalogue-price">₹<%= book.price %></span>
+          <% } %>
+        </div>
+      </div>
     </div>
-    <% } else { %>
-    <p class="books-empty">No books in catalogue yet.</p>
-    <% } %>
-  </section>
+    <% }) %>
+  </div>
 
   <% if (totalPages > 1) { %>
-  <div class="pagination">
-    <% if (page > 1) { %><a href="/books?page=<%= page - 1 %>">← Previous</a><% } %>
-    <span>Page <%= page %> of <%= totalPages %></span>
-    <% if (page < totalPages) { %><a href="/books?page=<%= page + 1 %>">Next →</a><% } %>
+  <nav class="books-pagination" aria-label="Books pages">
+    <% if (currentPage > 1) { %>
+    <a href="/books?page=<%= currentPage - 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+       class="books-page-btn">← Prev</a>
+    <% } else { %>
+    <span class="books-page-btn books-page-btn--disabled">← Prev</span>
+    <% } %>
+
+    <div class="books-page-numbers">
+      <%
+        var delta = 2;
+        var pages = [];
+        for (var i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+            pages.push(i);
+          }
+        }
+        var prevP = null;
+      %>
+      <% pages.forEach(function(p) { %>
+        <% if (prevP !== null && p - prevP > 1) { %>
+        <span class="books-page-ellipsis">…</span>
+        <% } %>
+        <a href="/books?page=<%= p %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+           class="books-page-num <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+        <% prevP = p; }) %>
+    </div>
+
+    <% if (currentPage < totalPages) { %>
+    <a href="/books?page=<%= currentPage + 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+       class="books-page-btn">Next →</a>
+    <% } else { %>
+    <span class="books-page-btn books-page-btn--disabled">Next →</span>
+    <% } %>
+  </nav>
+  <% } %>
+
+  <% } else { %>
+  <div class="books-empty">
+    <p>No books found<% if (q) { %> for "<%= q %>"<% } %>.</p>
+    <% if (q) { %><a href="/books">← Back to all books</a><% } %>
   </div>
   <% } %>
+
 </main>

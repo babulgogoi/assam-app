@@ -39,6 +39,7 @@ router.get('/page/:slug', publicController.pageDetail);
 
 // Books — specific routes before wildcard
 router.get('/books', publicBooksController.catalogue);
+router.get('/books/search', publicBooksController.searchCatalogue);
 router.get('/books/category/:slug', publicBooksController.categoryPage);
 router.get('/books/author/:slug', publicBooksController.authorPage);
 router.get('/books/publisher/:slug', publicBooksController.publisherPage);

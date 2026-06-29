@@ -404,9 +404,22 @@ async function listCategories() {
      FROM books_categories c
      LEFT JOIN books_book_categories bbc ON bbc.category_id = c.id
      GROUP BY c.id
+     HAVING COUNT(bbc.book_id) > 0
      ORDER BY c.sort_order, c.name`
   );
   return rows;
+}
+
+async function searchCount(query) {
+  const { rows } = await db.query(
+    `SELECT COUNT(DISTINCT b.id) FROM books b
+     LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+     LEFT JOIN books_authors ba ON ba.id = bba.author_id
+     WHERE b.status = 'active'
+       AND (b.title ILIKE $1 OR b.isbn ILIKE $1 OR ba.name ILIKE $1)`,
+    [`%${query}%`]
+  );
+  return parseInt(rows[0].count, 10);
 }
 
 async function getCategoryBySlug(slug) {
@@ -483,5 +496,5 @@ module.exports = {
   createAuthor, updateAuthor, removeAuthor, authorSlugExists,
   getPublisherBySlug, getPublisherById, listPublishers,
   createPublisher, updatePublisher, removePublisher, publisherSlugExists,
-  listCategories, getCategoryBySlug, searchAuthors, getRelatedBooks,
+  listCategories, searchCount, getCategoryBySlug, searchAuthors, getRelatedBooks,
 };

@@ -2,29 +2,37 @@
 
 const booksModel = require('../models/books');
 
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 15; // 3 rows × 5 columns
 
 async function catalogue(req, res, next) {
   try {
-    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const offset = (page - 1) * PAGE_SIZE;
+    const currentPage = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const q = (req.query.q || '').trim();
+    const offset = (currentPage - 1) * PAGE_SIZE;
 
-    const [books, featured, categories, total] = await Promise.all([
-      booksModel.getLatest({ limit: PAGE_SIZE, offset }),
-      booksModel.getFeatured({ limit: 4 }),
+    const [books, total, categories] = await Promise.all([
+      q ? booksModel.search(q, { limit: PAGE_SIZE, offset })
+        : booksModel.getLatest({ limit: PAGE_SIZE, offset }),
+      q ? booksModel.searchCount(q)
+        : booksModel.countActive(),
       booksModel.listCategories(),
-      booksModel.countActive(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
     res.render('public/books', {
-      title: 'Books About Assam — Assam Portal',
-      books, featured, categories, total, page, totalPages,
+      title: q ? `"${q}" — Books — Assam Portal` : 'Books About Assam — Assam Portal',
+      books, categories, total, currentPage, totalPages, q,
     });
   } catch (err) {
     next(err);
   }
+}
+
+async function searchCatalogue(req, res) {
+  const q = (req.query.q || '').trim();
+  if (!q) return res.redirect('/books');
+  res.redirect(`/books?q=${encodeURIComponent(q)}`);
 }
 
 async function bookDetail(req, res, next) {
@@ -113,4 +121,4 @@ async function rateBook(req, res, next) {
   }
 }
 
-module.exports = { catalogue, bookDetail, categoryPage, authorPage, publisherPage, rateBook };
+module.exports = { catalogue, searchCatalogue, bookDetail, categoryPage, authorPage, publisherPage, rateBook };
