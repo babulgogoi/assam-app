@@ -49,7 +49,18 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/', (req, res) => res.redirect('/admin/articles'));
+router.get('/', (req, res) => {
+  const u = req.session.adminUser;
+  if (!u) return res.redirect('/admin/login');
+  if (u.isSuperAdmin) return res.redirect('/admin/articles');
+  const p = u.permissions || {};
+  if (p.stories?.can_read)  return res.redirect('/admin/articles');
+  if (p.pages?.can_read)    return res.redirect('/admin/pages');
+  if (p.books?.can_read)    return res.redirect('/admin/books');
+  if (p.settings?.can_read) return res.redirect('/admin/settings');
+  if (p.users?.can_read)    return res.redirect('/admin/users');
+  return res.redirect('/admin/articles'); // fallback
+});
 
 // TinyMCE inline image upload endpoint — module-aware
 const INLINE_UPLOAD_TARGETS = {
