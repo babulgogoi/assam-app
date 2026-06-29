@@ -11,13 +11,15 @@
     </button>
 
     <nav class="site-header__nav" id="siteNav">
-      <% if (typeof menuItems !== 'undefined') { %>
-        <% menuItems.forEach(function (item) { %>
-          <% if (item.url) { %>
-            <a href="<%= item.url %>"><%= item.label %></a>
-          <% } %>
-        <% }) %>
-      <% } %>
+      <% var navItems = (typeof menuItems !== 'undefined' && menuItems) ? menuItems : []; %>
+      <% navItems.forEach(function (item) { %>
+        <% if (item.url) { %>
+        <a href="<%= item.url %>"
+           class="<%= (locals.currentUrl === item.url || (item.url !== '/' && locals.currentUrl && locals.currentUrl.startsWith(item.url))) ? 'nav-active' : '' %>">
+          <%= item.label %>
+        </a>
+        <% } %>
+      <% }) %>
     </nav>
     <form class="site-header__search" action="/search" method="get">
       <input type="search" name="q" placeholder="Search..." value="<%= typeof q !== 'undefined' ? q : '' %>">

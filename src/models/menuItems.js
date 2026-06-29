@@ -1,5 +1,16 @@
 const pool = require('../config/db');
 
+// Short-lived cache so a DB hiccup doesn't wipe the public nav.
+// Admin writes call invalidateCache() so changes appear on the next request.
+let _cache = null;
+let _cacheAt = 0;
+const TTL = 60 * 1000; // 60 seconds
+
+function invalidateCache() {
+  _cache = null;
+  _cacheAt = 0;
+}
+
 async function getAllForAdmin() {
   const { rows } = await pool.query(
     `SELECT m.id, m.label, m.page_id, m.custom_url, m.sort_order, m.parent_id, m.is_active,
@@ -13,14 +24,23 @@ async function getAllForAdmin() {
 
 // Resolves each item's final href server-side so the template just needs item.url.
 async function getActiveOrdered() {
+  const now = Date.now();
+  if (_cache && now - _cacheAt < TTL) return _cache;
+
   const { rows } = await pool.query(
     `SELECT m.id, m.label, m.sort_order, m.parent_id,
-            CASE WHEN m.page_id IS NOT NULL THEN '/page/' || p.slug ELSE m.custom_url END AS url
+            CASE
+              WHEN m.page_id IS NOT NULL AND p.slug IS NOT NULL THEN '/page/' || p.slug
+              ELSE m.custom_url
+            END AS url
      FROM menu_items m
      LEFT JOIN pages p ON p.id = m.page_id
      WHERE m.is_active = true
      ORDER BY m.sort_order ASC, m.id ASC`
   );
+
+  _cache = rows;
+  _cacheAt = now;
   return rows;
 }
 
@@ -35,6 +55,7 @@ async function create({ label, pageId, customUrl, sortOrder, parentId, isActive 
      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
     [label, pageId, customUrl, sortOrder, parentId, isActive]
   );
+  invalidateCache();
   return rows[0].id;
 }
 
@@ -45,10 +66,12 @@ async function update(id, { label, pageId, customUrl, sortOrder, parentId, isAct
      WHERE id = $7`,
     [label, pageId, customUrl, sortOrder, parentId, isActive, id]
   );
+  invalidateCache();
 }
 
 async function remove(id) {
   await pool.query('DELETE FROM menu_items WHERE id = $1', [id]);
+  invalidateCache();
 }
 
 module.exports = {
@@ -58,4 +81,5 @@ module.exports = {
   create,
   update,
   remove,
+  invalidateCache,
 };

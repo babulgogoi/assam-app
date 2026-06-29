@@ -15,15 +15,22 @@ const likeLimiter = rateLimit({
 });
 
 router.use(async (req, res, next) => {
+  res.locals.currentUrl = req.path;
   res.locals.adsenseClientId = process.env.ADSENSE_CLIENT_ID;
   res.locals.adsenseSlotHeader = process.env.ADSENSE_SLOT_HEADER;
   res.locals.adsenseSlotSidebar = process.env.ADSENSE_SLOT_SIDEBAR;
   res.locals.adsenseSlotInArticle = process.env.ADSENSE_SLOT_IN_ARTICLE;
   try {
     res.locals.menuItems = await menuItemsModel.getActiveOrdered();
+  } catch (err) {
+    console.error('Menu load error:', err.message);
+    res.locals.menuItems = [];
+  }
+  try {
     res.locals.footerHtml = await siteSettingsModel.getFooterHtml();
   } catch (err) {
-    return next(err);
+    console.error('Footer load error:', err.message);
+    res.locals.footerHtml = null;
   }
   next();
 });

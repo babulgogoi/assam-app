@@ -5,10 +5,12 @@ async function listMenuItems(req, res, next) {
   try {
     const items = await menuItemsModel.getAllForAdmin();
     res.locals.layout = 'admin/layout';
+    const flash = req.session.flash || null;
+    delete req.session.flash;
     res.render('admin/menu/list', {
       title: 'Menu — Admin',
-      
       items,
+      flash,
     });
   } catch (err) {
     next(err);
@@ -91,6 +93,7 @@ async function createMenuItem(req, res, next) {
     }
 
     await menuItemsModel.create(data);
+    req.session.flash = { type: 'success', message: `"${data.label}" added to menu.` };
     res.redirect('/admin/menu');
   } catch (err) {
     next(err);
@@ -122,6 +125,7 @@ async function updateMenuItem(req, res, next) {
     }
 
     await menuItemsModel.update(item.id, data);
+    req.session.flash = { type: 'success', message: `"${data.label}" saved.` };
     res.redirect('/admin/menu');
   } catch (err) {
     next(err);

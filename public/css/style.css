@@ -2184,3 +2184,9 @@ body {
 .search-page__hint { color: #888; padding: 24px 0; font-size: 0.95rem; }
 .search-page__count { font-size: 0.82rem; color: #888; margin-bottom: 20px; }
 .article-card__excerpt { font-size: 0.82rem; color: #666; margin: 4px 0 0; line-height: 1.5; }
+
+.site-header__nav a.nav-active {
+  color: #fff;
+  border-bottom: 2px solid rgba(255,255,255,0.7);
+  padding-bottom: 2px;
+}
