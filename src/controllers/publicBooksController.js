@@ -32,15 +32,13 @@ async function bookDetail(req, res, next) {
     const book = await booksModel.getBySlug(req.params.slug);
     if (!book) return res.status(404).render('public/404', { title: 'Book Not Found' });
 
-    let related = [];
-    if (book.authors && book.authors.length > 0) {
-      const all = await booksModel.getByAuthor(book.authors[0].slug, { limit: 5 });
-      related = all.filter(b => b.id !== book.id).slice(0, 4);
-    }
+    const authorIds   = (book.authors   || []).map(a => a.id);
+    const categoryIds = (book.categories || []).map(c => c.id);
+    const relatedBooks = await booksModel.getRelatedBooks(book.id, authorIds, categoryIds);
 
     res.render('public/book', {
       title: `${book.title} — Assam Portal Books`,
-      book, related,
+      book, relatedBooks,
     });
   } catch (err) {
     next(err);

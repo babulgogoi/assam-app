@@ -27,6 +27,21 @@
     <label>Buy URL<input type="url" name="buy_url" value="<%= (book && book.buy_url) || '' %>" placeholder="https://…"></label>
   </div>
 
+  <label>Author Interview URL
+    <input type="url" name="author_interview_url" value="<%= (book && book.author_interview_url) || '' %>" placeholder="https://…">
+    <small style="color:#888;font-size:0.8rem">Link to an interview with the author about this book</small>
+  </label>
+
+  <label>Blog / Review URL
+    <input type="url" name="blog_url" value="<%= (book && book.blog_url) || '' %>" placeholder="https://…">
+    <small style="color:#888;font-size:0.8rem">Link to a blog post or review about this book</small>
+  </label>
+
+  <label>Video URL (YouTube / Facebook)
+    <input type="url" name="video_url" value="<%= (book && book.video_url) || '' %>" placeholder="https://youtube.com/…">
+    <small style="color:#888;font-size:0.8rem">Book trailer, reading, or discussion video</small>
+  </label>
+
   <div class="admin-form-row">
     <label>ISBN<input type="text" name="isbn" value="<%= (book && book.isbn) || '' %>"></label>
     <label>ISBN-13<input type="text" name="isbn13" value="<%= (book && book.isbn13) || '' %>"></label>
@@ -118,8 +133,11 @@
     <small style="color:#888">Click to select/deselect</small>
   </div>
 
-  <div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <button type="submit" class="admin-btn admin-btn--primary"><%= book && book.id ? 'Save Changes' : 'Create Book' %></button>
+    <% if (book && book.id && book.slug) { %>
+    <a class="admin-btn" href="/book/<%= book.slug %>" target="_blank" rel="noopener">View →</a>
+    <% } %>
     <a class="admin-btn" href="/admin/books">Cancel</a>
   </div>
 </form>

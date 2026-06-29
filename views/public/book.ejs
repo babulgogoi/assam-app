@@ -49,6 +49,24 @@
       <a href="<%= book.buy_url %>" target="_blank" rel="noopener noreferrer" class="btn-buy">Buy Now →</a>
       <% } %>
 
+      <% if (book.author_interview_url || book.blog_url || book.video_url) { %>
+      <div class="book-extra-links">
+        <h4>More about this book</h4>
+        <% if (book.author_interview_url) { %>
+        <a href="<%= book.author_interview_url %>" target="_blank" rel="noopener"
+           class="book-extra-link book-extra-link--interview">🎤 Author Interview</a>
+        <% } %>
+        <% if (book.blog_url) { %>
+        <a href="<%= book.blog_url %>" target="_blank" rel="noopener"
+           class="book-extra-link book-extra-link--blog">📝 Read Blog / Review</a>
+        <% } %>
+        <% if (book.video_url) { %>
+        <a href="<%= book.video_url %>" target="_blank" rel="noopener"
+           class="book-extra-link book-extra-link--video">▶ Watch Video</a>
+        <% } %>
+      </div>
+      <% } %>
+
       <div class="book-rate">
         <p>Rate this book:</p>
         <div class="rate-stars" data-book-id="<%= book.id %>">
@@ -84,12 +102,30 @@
   </div>
   <% } %>
 
-  <% if (related.length > 0) { %>
-  <section class="book-related">
-    <h2>More by this author</h2>
-    <div class="books-grid books-grid--small">
-      <% related.forEach(function(b) { %>
-        <%- include('../partials/book-card', { book: b }) %>
+  <% if (relatedBooks && relatedBooks.length > 0) { %>
+  <section class="book-related-section">
+    <h2 class="book-related-heading">You May Also Like</h2>
+    <div class="book-related-grid">
+      <% relatedBooks.forEach(function(rb) { %>
+      <a href="/book/<%= rb.slug %>" class="book-related-card">
+        <div class="book-related-card__cover">
+          <% if (rb.cover_image) { %>
+          <img src="<%= rb.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
+               alt="<%= rb.title %>" loading="lazy" width="160" height="220">
+          <% } else { %>
+          <div class="book-related-card__no-cover"><%= rb.title.slice(0, 2).toUpperCase() %></div>
+          <% } %>
+        </div>
+        <div class="book-related-card__info">
+          <h3><%= rb.title %></h3>
+          <% if (rb.authors && rb.authors.length > 0) { %>
+          <p class="book-related-card__author"><%= rb.authors[0].name %></p>
+          <% } %>
+          <% if (rb.price) { %>
+          <p class="book-related-card__price">₹<%= rb.price %></p>
+          <% } %>
+        </div>
+      </a>
       <% }) %>
     </div>
   </section>

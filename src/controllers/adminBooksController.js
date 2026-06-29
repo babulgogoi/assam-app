@@ -159,6 +159,9 @@ async function buildBookData(body, excludeId = null) {
     is_featured: !!body.is_featured,
     author_ids: toIntArray(body.author_ids),
     category_ids: toIntArray(body.category_ids),
+    author_interview_url: (body.author_interview_url || '').trim() || null,
+    blog_url: (body.blog_url || '').trim() || null,
+    video_url: (body.video_url || '').trim() || null,
   };
 }
 

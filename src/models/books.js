@@ -167,8 +167,9 @@ async function create(data) {
        (title, slug, subtitle, description, cover_image, cover_image_alt,
         price, currency, buy_url, isbn, isbn13, pages, language,
         published_year, edition, format, tags, publisher_id,
-        status, is_featured, woo_product_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+        status, is_featured, woo_product_id,
+        author_interview_url, blog_url, video_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
      RETURNING id`,
     [
       data.title, data.slug, data.subtitle || null, data.description || null,
@@ -180,6 +181,7 @@ async function create(data) {
       data.tags || [], data.publisher_id || null,
       data.status || 'active', data.is_featured || false,
       data.woo_product_id || null,
+      data.author_interview_url || null, data.blog_url || null, data.video_url || null,
     ]
   );
   const bookId = rows[0].id;
@@ -195,8 +197,9 @@ async function update(id, data) {
        cover_image_alt=$6, price=$7, currency=$8, buy_url=$9, isbn=$10,
        isbn13=$11, pages=$12, language=$13, published_year=$14, edition=$15,
        format=$16, tags=$17, publisher_id=$18, status=$19, is_featured=$20,
+       author_interview_url=$21, blog_url=$22, video_url=$23,
        updated_at=NOW()
-     WHERE id=$21`,
+     WHERE id=$24`,
     [
       data.title, data.slug, data.subtitle || null, data.description || null,
       data.cover_image || null, data.cover_image_alt || null,
@@ -206,6 +209,7 @@ async function update(id, data) {
       data.edition || null, data.format || 'paperback',
       data.tags || [], data.publisher_id || null,
       data.status || 'active', data.is_featured || false,
+      data.author_interview_url || null, data.blog_url || null, data.video_url || null,
       id,
     ]
   );
@@ -410,6 +414,56 @@ async function getCategoryBySlug(slug) {
   return rows[0] || null;
 }
 
+async function getRelatedBooks(bookId, authorIds, categoryIds) {
+  let relatedA = [];
+  if (authorIds && authorIds.length > 0) {
+    const { rows } = await db.query(
+      `SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
+         COALESCE(
+           json_agg(json_build_object('name', ba.name, 'slug', ba.slug) ORDER BY bba.sort_order)
+           FILTER (WHERE ba.id IS NOT NULL), '[]'
+         ) AS authors
+       FROM books b
+       JOIN books_book_authors bba ON bba.book_id = b.id
+       JOIN books_authors ba ON ba.id = bba.author_id
+       WHERE ba.id = ANY($1::int[])
+         AND b.id != $2
+         AND b.status = 'active'
+       GROUP BY b.id
+       ORDER BY b.published_year DESC NULLS LAST
+       LIMIT 4`,
+      [authorIds, bookId]
+    );
+    relatedA = rows;
+  }
+
+  if (relatedA.length >= 4 || !categoryIds || categoryIds.length === 0) return relatedA;
+
+  const remaining = 4 - relatedA.length;
+  const excludeIds = [bookId, ...relatedA.map(b => b.id)];
+
+  const { rows: relatedB } = await db.query(
+    `SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
+       COALESCE(
+         json_agg(json_build_object('name', ba.name, 'slug', ba.slug))
+         FILTER (WHERE ba.id IS NOT NULL), '[]'
+       ) AS authors
+     FROM books b
+     JOIN books_book_categories bbc ON bbc.book_id = b.id
+     LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+     LEFT JOIN books_authors ba ON ba.id = bba.author_id
+     WHERE bbc.category_id = ANY($1::int[])
+       AND b.id != ALL($2::int[])
+       AND b.status = 'active'
+     GROUP BY b.id
+     ORDER BY RANDOM()
+     LIMIT $3`,
+    [categoryIds, excludeIds, remaining]
+  );
+
+  return [...relatedA, ...relatedB];
+}
+
 async function searchAuthors(q) {
   const { rows } = await db.query(
     `SELECT id, name, nationality FROM books_authors WHERE name ILIKE $1 ORDER BY name LIMIT 10`,
@@ -429,5 +483,5 @@ module.exports = {
   createAuthor, updateAuthor, removeAuthor, authorSlugExists,
   getPublisherBySlug, getPublisherById, listPublishers,
   createPublisher, updatePublisher, removePublisher, publisherSlugExists,
-  listCategories, getCategoryBySlug, searchAuthors,
+  listCategories, getCategoryBySlug, searchAuthors, getRelatedBooks,
 };
