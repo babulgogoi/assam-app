@@ -1666,3 +1666,246 @@ body {
   font-weight: 600;
 }
 .contextual-edit-btn:hover { text-decoration: underline; }
+
+/* ══════════════════════════════════════════════════════
+   WIKI / PAGE template
+   ══════════════════════════════════════════════════════ */
+.wiki-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+}
+.wiki-breadcrumb {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.wiki-breadcrumb a { color: #2D6A4F; text-decoration: none; }
+.wiki-breadcrumb a:hover { text-decoration: underline; }
+
+.wiki-page__title {
+  font-size: 2rem;
+  font-weight: 700;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
+  margin: 0 0 20px;
+  line-height: 1.25;
+}
+
+/* Featured image (floats right like Wikipedia) */
+.wiki-page__featured-image {
+  float: right;
+  clear: right;
+  margin: 0 0 16px 24px;
+  max-width: 300px;
+  border: 1px solid #ddd;
+  padding: 4px;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.75rem;
+  color: #666;
+}
+.wiki-page__featured-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+}
+.wiki-page__featured-image figcaption {
+  padding: 5px 2px 2px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* TOC */
+.page-toc {
+  float: right;
+  clear: right;
+  background: #f9fbf9;
+  border: 1px solid #d0e8d8;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 0 0 20px 24px;
+  min-width: 180px;
+  max-width: 260px;
+  font-size: 0.82rem;
+}
+.page-toc h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 8px;
+}
+.page-toc ol { margin: 0; padding-left: 18px; }
+.page-toc li { margin: 3px 0; }
+.page-toc li a { color: #2D6A4F; text-decoration: none; line-height: 1.4; }
+.page-toc li a:hover { text-decoration: underline; }
+.page-toc .toc-sub { margin-left: 14px; list-style-type: circle; font-size: 0.77rem; }
+
+/* Body content */
+.wiki-page__body { line-height: 1.8; color: #333; font-size: 0.97rem; }
+.wiki-page__body h2 {
+  font-size: 1.3rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin: 32px 0 12px;
+  clear: both;
+}
+.wiki-page__body h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+.wiki-page__body p  { margin: 0 0 14px; }
+.wiki-page__body img { max-width: 100%; height: auto; border-radius: 4px; }
+.wiki-page__body blockquote {
+  border-left: 3px solid #2D6A4F;
+  margin: 16px 0;
+  padding: 8px 16px;
+  background: #f9fbf9;
+  color: #555;
+  font-style: italic;
+}
+.wiki-page__body table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.88rem; }
+.wiki-page__body td,
+.wiki-page__body th { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+.wiki-page__body th { background: #f0f7f4; font-weight: 700; }
+.wiki-page__body ul,
+.wiki-page__body ol { padding-left: 1.5rem; margin: 0 0 14px; }
+.wiki-page__body li  { margin-bottom: 4px; }
+
+/* References */
+.wiki-page__references { margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; }
+.wiki-page__references h2 { font-size: 1.1rem; margin: 0 0 12px; border: none; padding: 0; }
+.references-list { font-size: 0.82rem; color: #555; line-height: 1.7; padding-left: 20px; }
+
+/* Category + footer */
+.wiki-page__categories {
+  margin-top: 24px;
+  padding: 10px 14px;
+  background: #f9fbf9;
+  border: 1px solid #d4e8dd;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+.wiki-cat-link { color: #2D6A4F; text-decoration: none; font-weight: 600; }
+.wiki-page__footer { margin-top: 14px; font-size: 0.75rem; color: #aaa; }
+
+/* ══════════════════════════════════════════════════════
+   RESEARCH INDEX
+   ══════════════════════════════════════════════════════ */
+.research-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+}
+.research-hero {
+  text-align: center;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 32px;
+}
+.research-hero h1 { font-size: 1.8rem; margin: 0 0 8px; }
+.research-hero__sub { color: #666; font-size: 1rem; margin: 0; }
+.research-section-title {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+/* Topic cards grid */
+.research-topics { margin-bottom: 40px; }
+.research-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.research-topic-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 12px;
+  background: #fff;
+  border: 1px solid #e0e8e4;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.research-topic-card:hover { border-color: #2D6A4F; box-shadow: 0 2px 10px rgba(45,106,79,.1); }
+.rtc-icon { font-size: 1.8rem; line-height: 1; }
+.rtc-name { font-weight: 600; font-size: 0.88rem; color: #222; }
+.rtc-count { font-size: 0.75rem; color: #888; }
+
+/* Featured/recently updated */
+.research-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.research-featured-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.research-featured-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+.rfc-img { height: 140px; overflow: hidden; background: #f0f0f0; }
+.rfc-img img { width: 100%; height: 100%; object-fit: cover; }
+.rfc-body { padding: 14px; display: flex; flex-direction: column; gap: 5px; }
+.rfc-topic { font-size: 0.72rem; color: #2D6A4F; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.rfc-title { font-size: 0.92rem; font-weight: 700; color: #222; margin: 0; line-height: 1.4; }
+.rfc-excerpt { font-size: 0.8rem; color: #666; margin: 0; line-height: 1.5;
+               display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ══════════════════════════════════════════════════════
+   RESEARCH TOPIC PAGE
+   ══════════════════════════════════════════════════════ */
+.research-topic-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0 24px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 28px;
+}
+.rth-icon { font-size: 2.5rem; line-height: 1; flex-shrink: 0; }
+.rth-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 4px; }
+.rth-desc  { color: #666; font-size: 0.9rem; margin: 0 0 6px; }
+.rth-count { font-size: 0.78rem; color: #888; background: #f0f0f0; padding: 2px 8px; border-radius: 20px; }
+
+/* Article list on topic page */
+.research-page-list { display: flex; flex-direction: column; gap: 0; }
+.rpl-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  text-decoration: none;
+  align-items: flex-start;
+  transition: background 0.12s;
+}
+.rpl-item:hover { background: #fafdf9; padding-left: 8px; }
+.rpl-img { width: 100px; height: 70px; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+.rpl-img img { width: 100%; height: 100%; object-fit: cover; }
+.rpl-img--placeholder { background: #e8e8e8; }
+.rpl-body { flex: 1; }
+.rpl-title { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin: 0 0 5px; line-height: 1.4; }
+.rpl-excerpt { font-size: 0.82rem; color: #666; margin: 0 0 5px; line-height: 1.5; }
+.rpl-date { font-size: 0.72rem; color: #aaa; }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .wiki-page__featured-image,
+  .page-toc { float: none; margin: 0 0 16px 0; max-width: 100%; }
+  .wiki-page__title { font-size: 1.5rem; }
+  .research-topics-grid { grid-template-columns: repeat(3, 1fr); }
+  .research-featured-grid { grid-template-columns: 1fr; }
+}

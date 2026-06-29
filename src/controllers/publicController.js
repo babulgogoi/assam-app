@@ -230,27 +230,46 @@ async function searchPage(req, res, next) {
 async function pageDetail(req, res, next) {
   try {
     const page = await pagesModel.getBySlug(req.params.slug);
-
     if (!page || page.status !== 'published') {
       return res.status(404).render('public/404', { title: 'Page Not Found' });
     }
-
     res.render('public/page', {
       title: page.title,
       page,
+      adminUser: req.session?.adminUser || null,
     });
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
+}
+
+async function researchIndex(req, res, next) {
+  try {
+    const [topics, featured] = await Promise.all([
+      pagesModel.listTopics(),
+      pagesModel.getLatestPublished({ limit: 6 }),
+    ]);
+    res.render('public/research', {
+      title: 'Research & Knowledge Base | Assam Portal',
+      topics,
+      featured,
+    });
+  } catch (err) { next(err); }
+}
+
+async function researchTopic(req, res, next) {
+  try {
+    const topic = await pagesModel.getTopicBySlug(req.params.topicSlug);
+    if (!topic) return res.status(404).render('public/404', { title: 'Topic Not Found' });
+    const pages = await pagesModel.getByTopicSlug(req.params.topicSlug);
+    res.render('public/research-topic', {
+      title: `${topic.name} | Research | Assam Portal`,
+      topic,
+      pages,
+    });
+  } catch (err) { next(err); }
 }
 
 module.exports = {
-  home,
-  newsPage,
-  articleDetail,
-  likeArticle,
-  categoryPage,
-  authorPage,
-  searchPage,
-  pageDetail,
+  home, newsPage, articleDetail, likeArticle,
+  categoryPage, authorPage, searchPage, pageDetail,
+  researchIndex, researchTopic,
 };

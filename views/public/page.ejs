@@ -1,6 +1,90 @@
-<div class="static-page">
-  <h1 class="page-title"><%= page.title %></h1>
-  <div class="static-page__body">
-    <%- page.body %>
+<main class="wiki-page">
+
+  <nav class="wiki-breadcrumb">
+    <a href="/">Home</a> ›
+    <a href="/research">Research</a>
+    <% if (page.topic) { %>
+    › <a href="/research/<%= page.topic.slug %>"><%= page.topic.icon %> <%= page.topic.name %></a>
+    <% } %>
+    › <span><%= page.title %></span>
+  </nav>
+
+  <% if (locals.adminUser && (adminUser.isSuperAdmin || adminUser.permissions?.pages?.can_update)) { %>
+  <div class="contextual-edit-bar">
+    <a href="/admin/pages/<%= page.id %>/edit" class="contextual-edit-btn">✏️ Edit this page</a>
+    <a href="/admin/page-topics" class="contextual-edit-btn">🏷️ Manage topics</a>
   </div>
-</div>
+  <% } %>
+
+  <div class="wiki-page__layout">
+    <div class="wiki-page__main">
+
+      <h1 class="wiki-page__title"><%= page.title %></h1>
+
+      <% if (page.featured_image) { %>
+      <figure class="wiki-page__featured-image">
+        <img src="<%= page.featured_image %>" alt="<%= page.title %>" loading="lazy">
+        <% if (page.featured_image_caption) { %>
+        <figcaption><%= page.featured_image_caption %></figcaption>
+        <% } %>
+      </figure>
+      <% } %>
+
+      <div id="tocContainer" class="page-toc" style="display:none">
+        <h4>Contents</h4>
+        <ol id="tocList"></ol>
+      </div>
+
+      <div class="wiki-page__body page-body-content">
+        <%- page.body %>
+      </div>
+
+      <% if (page.references_text && page.references_text.trim()) { %>
+      <section class="wiki-page__references">
+        <h2>References</h2>
+        <ol class="references-list">
+          <% page.references_text.split('\n').filter(function(r){ return r.trim(); }).forEach(function(ref) { %>
+          <li><%= ref.replace(/^\d+\.\s*/, '') %></li>
+          <% }) %>
+        </ol>
+      </section>
+      <% } %>
+
+      <% if (page.topic) { %>
+      <div class="wiki-page__categories">
+        <strong>Category:</strong>
+        <a href="/research/<%= page.topic.slug %>" class="wiki-cat-link">
+          <%= page.topic.icon %> <%= page.topic.name %>
+        </a>
+      </div>
+      <% } %>
+
+      <div class="wiki-page__footer">
+        Last updated: <%= new Date(page.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var body    = document.querySelector('.page-body-content');
+  var tocList = document.getElementById('tocList');
+  var tocCont = document.getElementById('tocContainer');
+  if (!body || !tocList) return;
+
+  var headings = body.querySelectorAll('h2, h3');
+  if (headings.length < 3) return;
+
+  tocCont.style.display = 'block';
+  headings.forEach(function (h, i) {
+    var id = 'section-' + (i + 1);
+    h.id = id;
+    var li = document.createElement('li');
+    li.className = h.tagName === 'H3' ? 'toc-sub' : 'toc-main';
+    li.innerHTML = '<a href="#' + id + '">' + h.textContent + '</a>';
+    tocList.appendChild(li);
+  });
+});
+</script>

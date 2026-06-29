@@ -1,4 +1,9 @@
-<h1><%= page ? 'Edit Page' : 'New Page' %></h1>
+<div class="admin-list-header">
+  <h1><%= page ? 'Edit Page' : 'New Page' %></h1>
+  <% if (page && page.id && page.slug) { %>
+  <a class="admin-btn" href="/page/<%= page.slug %>" target="_blank" rel="noopener">View →</a>
+  <% } %>
+</div>
 
 <% if (errors && errors.length) { %>
   <ul class="admin-form-errors">
@@ -6,42 +11,105 @@
   </ul>
 <% } %>
 
-<form class="admin-form" method="post" action="<%= page && page.id ? '/admin/pages/' + page.id : '/admin/pages' %>">
-  <label>
-    Title
-    <input type="text" name="title" value="<%= page ? page.title : '' %>" required>
+<form class="admin-form" method="post"
+      action="<%= page && page.id ? '/admin/pages/' + page.id : '/admin/pages' %>"
+      enctype="multipart/form-data">
+
+  <div class="admin-form-row">
+    <label>Title *
+      <input type="text" name="title" value="<%= page ? page.title : '' %>" required>
+    </label>
+    <label>Slug <span class="admin-form-hint">(auto-generated from title)</span>
+      <input type="text" name="slug" value="<%= page ? page.slug : '' %>">
+    </label>
+  </div>
+
+  <label>Excerpt <span class="admin-form-hint">(100–150 chars, shown in cards)</span>
+    <input type="text" name="excerpt"
+           value="<%= (page && page.excerpt) || '' %>"
+           maxlength="500"
+           placeholder="Brief description of this page…">
   </label>
 
-  <label>
-    Slug <span class="admin-form-hint">(leave blank to auto-generate from title)</span>
-    <input type="text" name="slug" value="<%= page ? page.slug : '' %>">
+  <div class="admin-form-row">
+    <label>Topic / Category
+      <select name="topic_id">
+        <option value="">— Select topic —</option>
+        <% (typeof topics !== 'undefined' ? topics : []).forEach(function(t) { %>
+        <option value="<%= t.id %>" <%= (page && page.topic_id == t.id) ? 'selected' : '' %>>
+          <%= t.icon %> <%= t.name %>
+        </option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="draft"      <%= page && page.status === 'draft'      ? 'selected' : '' %>>Draft</option>
+        <option value="published"  <%= !page || page.status === 'published' ? 'selected' : '' %>>Published</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="form-group cover-image-group">
+    <label style="display:block;margin-bottom:6px;font-weight:600">Featured Image</label>
+    <div class="cover-preview" id="featuredPreview" style="<%= (page && page.featured_image) ? 'display:flex' : 'display:none' %>">
+      <img src="<%= (page && page.featured_image) || '' %>" alt="" width="120"
+           id="featuredPreviewImg" style="border-radius:3px;box-shadow:1px 2px 6px rgba(0,0,0,.15)">
+      <div class="cover-preview-actions">
+        <button type="button" class="btn-remove-cover" onclick="removeFeatured()">× Remove</button>
+      </div>
+    </div>
+    <input type="hidden" name="featured_image_remove" id="featuredImageRemove" value="0">
+    <div class="cover-upload-area">
+      <input type="file" name="featured_image" id="featuredImageFile"
+             accept="image/jpeg,image/png,image/webp" onchange="previewFeatured(this)">
+      <label for="featuredImageFile" class="cover-upload-label">
+        <%= (page && page.featured_image) ? '📁 Replace image' : '📁 Upload image' %>
+      </label>
+      <small style="color:#888;font-size:0.75rem">JPG or PNG · shown at top of page</small>
+    </div>
+    <input type="text" name="featured_image_caption"
+           value="<%= (page && page.featured_image_caption) || '' %>"
+           placeholder="Image caption (optional)"
+           style="margin-top:8px">
+  </div>
+
+  <label>Body Content
+    <textarea name="body" id="body" class="tinymce" rows="20" required><%- page ? page.body : '' %></textarea>
   </label>
 
-  <label>
-    Body
-    <textarea name="body" id="body" rows="14" required><%= page ? page.body : '' %></textarea>
+  <label>References &amp; Citations <span class="admin-form-hint">(APA style, one per line)</span>
+    <textarea name="references_text" rows="5"
+              placeholder="1. Author, A. (Year). Title. Publisher."><%= (page && page.references_text) || '' %></textarea>
   </label>
 
-  <label>
-    Status
-    <select name="status">
-      <option value="draft" <%= page && page.status === 'draft' ? 'selected' : '' %>>Draft</option>
-      <option value="published" <%= !page || page.status === 'published' ? 'selected' : '' %>>Published</option>
-    </select>
-  </label>
-
-  <button type="submit" class="admin-btn admin-btn--primary"><%= page ? 'Save Changes' : 'Create Page' %></button>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:1rem">
+    <button type="submit" class="admin-btn admin-btn--primary"><%= page && page.id ? 'Save Changes' : 'Create Page' %></button>
+    <% if (page && page.id && page.slug) { %>
+    <a class="admin-btn" href="/page/<%= page.slug %>" target="_blank" rel="noopener">View →</a>
+    <% } %>
+    <a class="admin-btn" href="/admin/pages">Cancel</a>
+  </div>
 </form>
 
-<script src="/vendor/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-  tinymce.init({
-    selector: '#body',
-    license_key: 'gpl',
-    height: 500,
-    menubar: false,
-    promotion: false,
-    plugins: 'lists link image table code fullscreen wordcount',
-    toolbar: 'undo redo | blocks | bold italic underline strikethrough | bullist numlist | blockquote link image table | code fullscreen',
-  });
+(function () {
+  function previewFeatured(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById('featuredPreviewImg').src = e.target.result;
+      document.getElementById('featuredPreview').style.display = 'flex';
+      document.getElementById('featuredImageRemove').value = '0';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+  function removeFeatured() {
+    document.getElementById('featuredPreview').style.display = 'none';
+    document.getElementById('featuredImageFile').value = '';
+    document.getElementById('featuredImageRemove').value = '1';
+  }
+  window.previewFeatured = previewFeatured;
+  window.removeFeatured  = removeFeatured;
+})();
 </script>

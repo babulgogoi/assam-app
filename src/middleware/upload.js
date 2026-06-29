@@ -116,8 +116,9 @@ module.exports = {
     { name: 'audio_file', maxCount: 1 },
     { name: 'pdf_file', maxCount: 1 },
   ]),
-  uploadAuthorPhoto: upload.fields([{ name: 'photo', maxCount: 1 }]),
-  uploadBookCover: memUpload.single('cover_image'),
+  uploadAuthorPhoto:   upload.fields([{ name: 'photo', maxCount: 1 }]),
+  uploadBookCover:     memUpload.single('cover_image'),
+  uploadPageFeatured:  memUpload.single('featured_image'),
   urlFor,
   deleteUploadedFile,
 };

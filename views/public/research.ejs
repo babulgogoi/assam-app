@@ -1,0 +1,49 @@
+<main class="research-page">
+
+  <div class="research-hero">
+    <h1>Research & Knowledge Base</h1>
+    <p class="research-hero__sub">In-depth articles on Assam — geography, history, culture, and more.</p>
+  </div>
+
+  <% if (topics && topics.length) { %>
+  <section class="research-topics">
+    <h2 class="research-section-title">Browse by Topic</h2>
+    <div class="research-topics-grid">
+      <% topics.forEach(function(topic) { %>
+      <a href="/research/<%= topic.slug %>" class="research-topic-card">
+        <span class="rtc-icon"><%= topic.icon || '📄' %></span>
+        <span class="rtc-name"><%= topic.name %></span>
+        <span class="rtc-count"><%= topic.page_count %> article<%= topic.page_count !== 1 ? 's' : '' %></span>
+      </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (featured && featured.length) { %>
+  <section class="research-featured">
+    <h2 class="research-section-title">Recently Updated</h2>
+    <div class="research-featured-grid">
+      <% featured.forEach(function(p) { %>
+      <a href="/page/<%= p.slug %>" class="research-featured-card">
+        <% if (p.featured_image) { %>
+        <div class="rfc-img">
+          <img src="<%= p.featured_image %>" alt="<%= p.title %>" loading="lazy">
+        </div>
+        <% } %>
+        <div class="rfc-body">
+          <% if (p.topic_name) { %>
+          <span class="rfc-topic"><%= p.topic_icon %> <%= p.topic_name %></span>
+          <% } %>
+          <h3 class="rfc-title"><%= p.title %></h3>
+          <% if (p.excerpt) { %>
+          <p class="rfc-excerpt"><%= p.excerpt %></p>
+          <% } %>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+</main>

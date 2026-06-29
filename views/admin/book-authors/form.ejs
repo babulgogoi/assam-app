@@ -26,7 +26,7 @@
     </label>
   </div>
 
-  <label>Bio<textarea name="bio" rows="5"><%= (author && author.bio) || '' %></textarea></label>
+  <label>Bio<textarea name="bio" class="tinymce" rows="5"><%= (author && author.bio) || '' %></textarea></label>
 
   <div class="admin-form-row">
     <label>Nationality<input type="text" name="nationality" value="<%= (author && author.nationality) || 'Indian' %>"></label>

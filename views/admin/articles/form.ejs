@@ -33,7 +33,7 @@
 
   <label>
     Body
-    <textarea name="body" id="body" rows="14" required><%= article ? article.body : '' %></textarea>
+    <textarea name="body" id="body" class="tinymce" rows="14" required><%= article ? article.body : '' %></textarea>
   </label>
 
   <div class="admin-form-row">
@@ -144,18 +144,7 @@
   <button type="submit" class="admin-btn admin-btn--primary"><%= article ? 'Save Changes' : 'Create Article' %></button>
 </form>
 
-<script src="/vendor/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-  tinymce.init({
-    selector: '#body',
-    license_key: 'gpl',
-    height: 500,
-    menubar: false,
-    promotion: false,
-    plugins: 'lists link image table code fullscreen wordcount',
-    toolbar: 'undo redo | blocks | bold italic underline strikethrough | bullist numlist | blockquote link image table | code fullscreen',
-  });
-
   (function () {
     var authorSelect = document.getElementById('author_id');
     var newAuthorFields = document.getElementById('new-author-fields');

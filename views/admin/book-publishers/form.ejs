@@ -9,7 +9,7 @@
     <label>Name *<input type="text" name="name" value="<%= (publisher && publisher.name) || '' %>" required></label>
     <label>Slug<input type="text" name="slug" value="<%= (publisher && publisher.slug) || '' %>" placeholder="auto-generated"></label>
   </div>
-  <label>Description<textarea name="description" rows="3"><%= (publisher && publisher.description) || '' %></textarea></label>
+  <label>Description<textarea name="description" class="tinymce" rows="3"><%= (publisher && publisher.description) || '' %></textarea></label>
   <div class="admin-form-row">
     <label>Location<input type="text" name="location" value="<%= (publisher && publisher.location) || '' %>"></label>
     <label>Founded Year<input type="number" name="founded_year" min="1700" max="2100" value="<%= (publisher && publisher.founded_year) || '' %>"></label>

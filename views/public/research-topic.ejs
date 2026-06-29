@@ -1,0 +1,48 @@
+<main class="wiki-page">
+
+  <nav class="wiki-breadcrumb">
+    <a href="/">Home</a> ›
+    <a href="/research">Research</a>
+    › <span><%= topic.icon %> <%= topic.name %></span>
+  </nav>
+
+  <div class="research-topic-header">
+    <span class="rth-icon"><%= topic.icon %></span>
+    <div>
+      <h1 class="rth-title"><%= topic.name %></h1>
+      <% if (topic.description) { %>
+      <p class="rth-desc"><%= topic.description %></p>
+      <% } %>
+      <span class="rth-count"><%= pages.length %> article<%= pages.length !== 1 ? 's' : '' %></span>
+    </div>
+  </div>
+
+  <% if (pages.length) { %>
+  <div class="research-page-list">
+    <% pages.forEach(function(p) { %>
+    <a href="/page/<%= p.slug %>" class="rpl-item">
+      <% if (p.featured_image) { %>
+      <div class="rpl-img">
+        <img src="<%= p.featured_image %>" alt="<%= p.title %>" loading="lazy">
+      </div>
+      <% } else { %>
+      <div class="rpl-img rpl-img--placeholder"></div>
+      <% } %>
+      <div class="rpl-body">
+        <h3 class="rpl-title"><%= p.title %></h3>
+        <% if (p.excerpt) { %>
+        <p class="rpl-excerpt"><%= p.excerpt %></p>
+        <% } %>
+        <span class="rpl-date"><%= new Date(p.updated_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %></span>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <div style="padding:3rem 0;text-align:center;color:#888">
+    <p>No articles in this topic yet.</p>
+    <a href="/research" style="color:#2D6A4F">← Back to Research</a>
+  </div>
+  <% } %>
+
+</main>

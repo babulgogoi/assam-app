@@ -37,6 +37,10 @@ router.get('/author/:username', publicController.authorPage);
 router.get('/search', publicController.searchPage);
 router.get('/page/:slug', publicController.pageDetail);
 
+// Research (page topics)
+router.get('/research', publicController.researchIndex);
+router.get('/research/:topicSlug', publicController.researchTopic);
+
 // Books — specific routes before wildcard
 router.get('/books', publicBooksController.catalogue);
 router.get('/books/search', publicBooksController.searchCatalogue);

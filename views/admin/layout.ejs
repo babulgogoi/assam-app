@@ -6,6 +6,58 @@
   <title><%= typeof title !== 'undefined' ? title : 'Admin' %> — Assam Portal</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/admin.css">
+  <script src="/vendor/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+  tinymce.init({
+    selector: 'textarea.tinymce',
+    license_key: 'gpl',
+    promotion: false,
+    height: 520,
+    menubar: true,
+    plugins: [
+      'advlist','autolink','lists','link','image','charmap','preview',
+      'anchor','searchreplace','visualblocks','code','fullscreen',
+      'insertdatetime','media','table','help','wordcount','codesample'
+    ],
+    toolbar:
+      'undo redo | styles | bold italic underline | ' +
+      'alignleft aligncenter alignright | ' +
+      'bullist numlist outdent indent | ' +
+      'link image media table | ' +
+      'blockquote codesample | ' +
+      'removeformat code fullscreen | help',
+    style_formats: [
+      { title: 'Heading 2', block: 'h2' },
+      { title: 'Heading 3', block: 'h3' },
+      { title: 'Heading 4', block: 'h4' },
+      { title: 'Paragraph', block: 'p' },
+      { title: 'Blockquote', block: 'blockquote' },
+      { title: 'Code', inline: 'code' },
+    ],
+    images_upload_url: '/admin/upload-image',
+    images_upload_handler: async (blobInfo, progress) => {
+      const formData = new FormData();
+      formData.append('file', blobInfo.blob(), blobInfo.filename());
+      const response = await fetch('/admin/upload-image', { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Upload failed');
+      const data = await response.json();
+      return data.location;
+    },
+    content_style: `
+      body { font-family: Georgia, serif; font-size: 16px; line-height: 1.7;
+             max-width: 760px; margin: 16px auto; color: #333; }
+      h2   { font-size: 1.35rem; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-top: 28px; }
+      h3   { font-size: 1.1rem; margin-top: 20px; }
+      blockquote { border-left: 3px solid #2D6A4F; margin: 0; padding: 8px 16px;
+                   background: #f9fbf9; color: #555; }
+      img  { max-width: 100%; height: auto; }
+      table { border-collapse: collapse; width: 100%; }
+      td, th { border: 1px solid #ddd; padding: 8px; }
+    `,
+    forced_root_block: 'p',
+    setup: (editor) => { editor.on('change', () => editor.save()); }
+  });
+  </script>
 </head>
 <body class="admin-body">
 <%
@@ -61,6 +113,8 @@
           <% if (su || perms.pages?.can_create) { %>
           <li><a href="/admin/pages/new"><span class="nav-icon">✏️</span> + New Page</a></li>
           <% } %>
+          <li class="nav-divider"></li>
+          <li><a href="/admin/page-topics"><span class="nav-icon">🏷️</span> Page Topics</a></li>
         </ul>
       </li>
       <% } %>

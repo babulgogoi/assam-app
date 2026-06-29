@@ -13,7 +13,7 @@
 
   <label>Subtitle<input type="text" name="subtitle" value="<%= (book && book.subtitle) || '' %>"></label>
 
-  <label>Description<textarea name="description" rows="6"><%= (book && book.description) || '' %></textarea></label>
+  <label>Description<textarea name="description" class="tinymce" rows="6"><%= (book && book.description) || '' %></textarea></label>
 
   <div class="form-group cover-image-group">
     <label style="display:block;margin-bottom:8px;font-weight:600">Cover Image</label>
