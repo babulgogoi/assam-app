@@ -8,44 +8,99 @@
   <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
+  <%
+    const au = typeof adminUser !== 'undefined' ? adminUser : null;
+    const su = au && au.isSuperAdmin;
+    const p  = (au && au.permissions) || {};
+  %>
   <header class="admin-header">
-    <span class="admin-header__brand">Assam Portal — Admin</span>
+    <a href="/admin/articles" class="admin-header__brand">Assam Portal — Admin</a>
     <nav class="admin-header__nav">
-      <%
-        const au = typeof adminUser !== 'undefined' ? adminUser : null;
-        const su = au && au.isSuperAdmin;
-        const p  = (au && au.permissions) || {};
-      %>
 
       <% if (su || (p.stories && p.stories.can_read)) { %>
-        <a href="/admin/articles">Stories</a>
+      <div class="admin-nav-item">
+        <a href="/admin/articles" class="admin-nav-link">Stories</a>
+        <ul class="admin-dropdown">
+          <li><a href="/admin/articles">All Stories</a></li>
+          <% if (su || (p.stories && p.stories.can_create)) { %>
+          <li><a href="/admin/articles/new">+ New Story</a></li>
+          <% } %>
+        </ul>
+      </div>
       <% } %>
 
       <% if (su || (p.pages && p.pages.can_read)) { %>
-        <a href="/admin/pages">Pages</a>
-      <% } %>
-
-      <% if (su || (p.authors && p.authors.can_read)) { %>
-        <a href="/admin/authors">Authors</a>
-      <% } %>
-
-      <% if (su || (p.settings && p.settings.can_read)) { %>
-        <a href="/admin/menu">Menu</a>
-        <a href="/admin/settings">Settings</a>
+      <div class="admin-nav-item">
+        <a href="/admin/pages" class="admin-nav-link">Pages</a>
+        <ul class="admin-dropdown">
+          <li><a href="/admin/pages">All Pages</a></li>
+          <% if (su || (p.pages && p.pages.can_create)) { %>
+          <li><a href="/admin/pages/new">+ New Page</a></li>
+          <% } %>
+        </ul>
+      </div>
       <% } %>
 
       <% if (su || (p.books && p.books.can_read)) { %>
-        <a href="/admin/books">Books</a>
+      <div class="admin-nav-item">
+        <a href="/admin/books" class="admin-nav-link">Books</a>
+        <ul class="admin-dropdown">
+          <li><a href="/admin/books">All Books</a></li>
+          <% if (su || (p.books && p.books.can_create)) { %>
+          <li><a href="/admin/books/new">+ New Book</a></li>
+          <% } %>
+          <li class="admin-dropdown__divider"></li>
+          <li><a href="/admin/book-authors">Book Authors</a></li>
+          <% if (su || (p.books && p.books.can_create)) { %>
+          <li><a href="/admin/book-authors/new">+ New Author</a></li>
+          <% } %>
+          <li class="admin-dropdown__divider"></li>
+          <li><a href="/admin/book-publishers">Publishers</a></li>
+          <% if (su || (p.books && p.books.can_create)) { %>
+          <li><a href="/admin/book-publishers/new">+ New Publisher</a></li>
+          <% } %>
+        </ul>
+      </div>
       <% } %>
 
-      <% if (su || (p.users && p.users.can_read)) { %>
-        <a href="/admin/users">Users</a>
+      <% if (su || (p.authors && p.authors.can_read)) { %>
+      <div class="admin-nav-item">
+        <a href="/admin/authors" class="admin-nav-link">Authors</a>
+        <ul class="admin-dropdown">
+          <li><a href="/admin/authors">All Authors</a></li>
+          <% if (su || (p.authors && p.authors.can_create)) { %>
+          <li><a href="/admin/authors/new">+ New Author</a></li>
+          <% } %>
+        </ul>
+      </div>
       <% } %>
 
-      <form method="post" action="/admin/logout" class="admin-header__logout">
-        <button type="submit">Logout<% if (au) { %> (<%= au.displayName %>)<% } %></button>
-      </form>
+      <% if (su || (p.settings && p.settings.can_read)) { %>
+      <div class="admin-nav-item">
+        <a href="/admin/settings" class="admin-nav-link">Settings</a>
+        <ul class="admin-dropdown">
+          <li><a href="/admin/settings">Site Settings</a></li>
+          <li><a href="/admin/menu">Menu</a></li>
+          <% if (su || (p.users && p.users.can_read)) { %>
+          <li class="admin-dropdown__divider"></li>
+          <li><a href="/admin/users">Admin Users</a></li>
+          <% } %>
+        </ul>
+      </div>
+      <% } %>
+
     </nav>
+    <div class="admin-header__right">
+      <% if (au) { %>
+      <span class="admin-header__user">
+        <%= au.displayName %>
+        <span class="admin-header__role">(<%= (au.roles && au.roles[0]) || 'admin' %>)</span>
+      </span>
+      <% } %>
+      <form method="post" action="/admin/logout" class="admin-header__logout">
+        <button type="submit">Logout</button>
+      </form>
+    </div>
   </header>
   <main class="admin-main">
     <%- body %>

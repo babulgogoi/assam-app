@@ -286,3 +286,139 @@
   border-radius: 4px;
   margin-bottom: 1rem;
 }
+
+/* ── Dropdown nav ── */
+.admin-header__nav {
+  position: relative;
+}
+
+.admin-nav-item {
+  position: relative;
+  display: inline-block;
+}
+
+.admin-nav-link {
+  display: block;
+  padding: 0.4rem 0.6rem;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.admin-nav-link:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.admin-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  list-style: none;
+  margin: 2px 0 0 0;
+  padding: 4px 0;
+  z-index: 1000;
+}
+
+.admin-nav-item:hover .admin-dropdown {
+  display: block;
+}
+
+.admin-dropdown li a {
+  display: block;
+  padding: 0.45rem 1rem;
+  color: #e8e8e8;
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.admin-dropdown li a:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
+
+.admin-dropdown__divider {
+  border-top: 1px solid #444;
+  margin: 4px 0;
+}
+
+/* ── Flash messages ── */
+.admin-flash {
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.admin-flash--success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.admin-flash--error {
+  background: #fdecea;
+  color: #b00;
+  border: 1px solid #f5c6cb;
+}
+
+/* ── Related books/authors in admin forms ── */
+.admin-related-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.admin-related-section h3 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  color: #444;
+}
+
+.admin-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-related-list li {
+  font-size: 0.875rem;
+}
+
+.admin-related-list li a {
+  color: #2D6A4F;
+  text-decoration: none;
+}
+
+.admin-related-list li a:hover {
+  text-decoration: underline;
+}
+
+/* ── Admin user info in header ── */
+.admin-header__user {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-right: 0.75rem;
+}
+
+.admin-header__role {
+  color: #888;
+  font-size: 0.78rem;
+}
+
+.admin-header__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

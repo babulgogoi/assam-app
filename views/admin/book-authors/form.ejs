@@ -1,26 +1,70 @@
-<h1><%= author ? `Edit Author: ${author.name}` : 'New Book Author' %></h1>
-
+<% if (saved) { %>
+<div class="admin-flash admin-flash--success">✅ Author saved successfully.</div>
+<% } %>
 <% if (errors && errors.length) { %>
 <div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
 <% } %>
 
+<div class="admin-list-header">
+  <h1><%= author && author.id ? `Edit: ${author.name}` : 'New Book Author' %></h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <% if (author && author.id && author.slug) { %>
+    <a class="admin-btn" href="/books/author/<%= author.slug %>" target="_blank" rel="noopener">View on site ↗</a>
+    <% } %>
+    <a class="admin-btn" href="/admin/book-authors">← All Authors</a>
+  </div>
+</div>
+
 <form method="post" action="<%= author && author.id ? `/admin/book-authors/${author.id}` : '/admin/book-authors' %>" class="admin-form">
   <div class="admin-form-row">
     <label>Name *<input type="text" name="name" value="<%= (author && author.name) || '' %>" required></label>
-    <label>Slug<input type="text" name="slug" value="<%= (author && author.slug) || '' %>" placeholder="auto-generated"></label>
+    <label>Slug
+      <input type="text" name="slug" value="<%= (author && author.slug) || '' %>"
+             placeholder="auto-generated"
+             <% if (author && author.id) { %>style="background:#f5f5f5;color:#888"<% } %>>
+      <% if (author && author.id) { %><small style="color:#888;font-size:0.75rem">Slug is used in URLs — edit with care.</small><% } %>
+    </label>
   </div>
-  <label>Bio<textarea name="bio" rows="4"><%= (author && author.bio) || '' %></textarea></label>
+
+  <label>Bio<textarea name="bio" rows="5"><%= (author && author.bio) || '' %></textarea></label>
+
   <div class="admin-form-row">
     <label>Nationality<input type="text" name="nationality" value="<%= (author && author.nationality) || 'Indian' %>"></label>
     <label>Birth Year<input type="number" name="birth_year" min="1800" max="2010" value="<%= (author && author.birth_year) || '' %>"></label>
   </div>
+
   <div class="admin-form-row">
-    <label>Photo URL<input type="url" name="photo" value="<%= (author && author.photo) || '' %>"></label>
-    <label>Website<input type="url" name="website" value="<%= (author && author.website) || '' %>"></label>
+    <label>Photo URL<input type="url" name="photo" value="<%= (author && author.photo) || '' %>" placeholder="https://…"></label>
+    <label>Website<input type="url" name="website" value="<%= (author && author.website) || '' %>" placeholder="https://…"></label>
   </div>
-  <label>Wikipedia URL<input type="url" name="wikipedia_url" value="<%= (author && author.wikipedia_url) || '' %>"></label>
-  <div>
+
+  <label>Wikipedia URL<input type="url" name="wikipedia_url" value="<%= (author && author.wikipedia_url) || '' %>" placeholder="https://en.wikipedia.org/wiki/…"></label>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:1.25rem">
     <button type="submit" class="admin-btn admin-btn--primary"><%= author && author.id ? 'Save Changes' : 'Create Author' %></button>
+    <% if (author && author.id && author.slug) { %>
+    <a class="admin-btn" href="/books/author/<%= author.slug %>" target="_blank" rel="noopener">View on site ↗</a>
+    <% } %>
+    <% if (author && author.id) { %>
+    <form method="post" action="/admin/book-authors/<%= author.id %>/delete" style="display:inline"
+          onsubmit="return confirm('Delete <%= author.name %>? All book links will be removed.')">
+      <button class="admin-btn admin-btn--danger">Delete Author</button>
+    </form>
+    <% } %>
     <a class="admin-btn" href="/admin/book-authors">Cancel</a>
   </div>
 </form>
+
+<% if (typeof authorBooks !== 'undefined' && authorBooks && authorBooks.length > 0) { %>
+<div class="admin-related-section">
+  <h3>Books by this author (<%= authorBooks.length %>)</h3>
+  <ul class="admin-related-list">
+    <% authorBooks.forEach(function(b) { %>
+    <li>
+      <a href="/admin/books/<%= b.id %>/edit"><%= b.title %></a>
+      <a href="/book/<%= b.slug %>" target="_blank" style="color:#888;font-size:0.75rem;margin-left:6px">↗ view</a>
+    </li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>

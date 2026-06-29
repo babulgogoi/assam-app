@@ -1,5 +1,8 @@
+<% if (typeof req !== 'undefined' && req.query && req.query.deleted) { %>
+<div class="admin-flash admin-flash--success">Author deleted.</div>
+<% } %>
 <div class="admin-list-header">
-  <h1>Book Authors</h1>
+  <h1>Book Authors <span style="color:#888;font-weight:400;font-size:1rem">(<%= authors.length %>)</span></h1>
   <a class="admin-btn admin-btn--primary" href="/admin/book-authors/new">+ New Author</a>
 </div>
 

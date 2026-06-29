@@ -243,7 +243,7 @@ async function createBookAuthor(req, res, next) {
     }
     const data = await buildAuthorData(req.body);
     const id = await booksModel.createAuthor(data);
-    res.redirect(`/admin/book-authors/${id}/edit`);
+    res.redirect(`/admin/book-authors/${id}/edit?saved=1`);
   } catch (err) { next(err); }
 }
 
@@ -251,8 +251,13 @@ async function editBookAuthorForm(req, res, next) {
   try {
     const author = await booksModel.getAuthorById(req.params.id);
     if (!author) return res.status(404).send('Author not found');
+    const authorBooks = await booksModel.getByAuthor(author.slug, { limit: 200 });
     res.locals.layout = 'admin/layout';
-    res.render('admin/book-authors/form', { title: `Edit: ${author.name} — Admin`, author, errors: [] });
+    res.render('admin/book-authors/form', {
+      title: `Edit: ${author.name} — Admin`,
+      author, authorBooks, errors: [],
+      saved: !!req.query.saved,
+    });
   } catch (err) { next(err); }
 }
 
@@ -263,18 +268,21 @@ async function updateBookAuthor(req, res, next) {
     const errors = validateAuthorForm(req.body);
     if (errors.length) {
       res.locals.layout = 'admin/layout';
-      return res.status(400).render('admin/book-authors/form', { title: `Edit: ${author.name} — Admin`, author: { ...author, ...req.body }, errors });
+      return res.status(400).render('admin/book-authors/form', {
+        title: `Edit: ${author.name} — Admin`,
+        author: { ...author, ...req.body }, authorBooks: [], errors, saved: false,
+      });
     }
     const data = await buildAuthorData(req.body, author.id);
     await booksModel.updateAuthor(author.id, data);
-    res.redirect(`/admin/book-authors/${author.id}/edit`);
+    res.redirect(`/admin/book-authors/${author.id}/edit?saved=1`);
   } catch (err) { next(err); }
 }
 
 async function deleteBookAuthor(req, res, next) {
   try {
     await booksModel.removeAuthor(req.params.id);
-    res.redirect('/admin/book-authors');
+    res.redirect('/admin/book-authors?deleted=1');
   } catch (err) { next(err); }
 }
 
