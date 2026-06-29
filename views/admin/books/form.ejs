@@ -4,7 +4,7 @@
 <div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
 <% } %>
 
-<form method="post" action="<%= book && book.id ? `/admin/books/${book.id}` : '/admin/books' %>" class="admin-form">
+<form method="post" action="<%= book && book.id ? `/admin/books/${book.id}` : '/admin/books' %>" class="admin-form" enctype="multipart/form-data">
 
   <div class="admin-form-row">
     <label>Title *<input type="text" name="title" value="<%= (book && book.title) || '' %>" required></label>
@@ -15,12 +15,57 @@
 
   <label>Description<textarea name="description" rows="6"><%= (book && book.description) || '' %></textarea></label>
 
-  <div class="admin-form-row">
-    <label>Cover Image URL<input type="url" name="cover_image" value="<%= (book && book.cover_image) || '' %>" placeholder="https://…">
-      <% if (book && book.cover_image) { %><img src="<%= book.cover_image.replace(/\.jpg$/, '-sm.jpg') %>" alt="" style="max-width:60px;max-height:84px;margin-top:6px;display:block;border-radius:2px"><% } %>
+  <div class="form-group cover-image-group">
+    <label style="display:block;margin-bottom:8px;font-weight:600">Cover Image</label>
+
+    <div class="cover-preview" id="coverPreview" style="<%= (book && book.cover_image) ? 'display:flex' : 'display:none' %>">
+      <img src="<%= (book && book.cover_image) ? book.cover_image.replace(/\.jpg$/, '-sm.jpg') : '' %>"
+           alt="" width="80" id="coverPreviewImg" style="border-radius:3px;box-shadow:1px 2px 6px rgba(0,0,0,0.15)">
+      <div class="cover-preview-actions">
+        <span class="cover-filename" id="coverFilename"><%= (book && book.cover_image) ? book.cover_image.split('/').pop() : '' %></span>
+        <button type="button" class="btn-remove-cover" onclick="removeCover()">× Remove</button>
+      </div>
+    </div>
+
+    <input type="hidden" name="cover_image_remove" id="coverImageRemove" value="0">
+
+    <div class="cover-upload-area">
+      <input type="file" name="cover_image" id="coverImageFile"
+             accept="image/jpeg,image/png,image/webp" onchange="previewCover(this)">
+      <label for="coverImageFile" class="cover-upload-label">
+        <%= (book && book.cover_image) ? '📁 Replace cover' : '📁 Upload cover' %>
+      </label>
+      <small style="color:#888;font-size:0.75rem">JPG, PNG or WebP · resized to 800px wide</small>
+    </div>
+
+    <label style="font-size:0.82rem;color:#555;display:block;margin-top:10px">Alt text
+      <input type="text" name="cover_image_alt" value="<%= (book && book.cover_image_alt) || '' %>"
+             placeholder="e.g. Cover of <%= (book && book.title) || 'book title' %>" style="margin-top:4px">
     </label>
-    <label>Cover Alt Text<input type="text" name="cover_image_alt" value="<%= (book && book.cover_image_alt) || '' %>"></label>
   </div>
+
+  <script>
+  (function () {
+    function previewCover(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('coverPreviewImg').src = e.target.result;
+        document.getElementById('coverFilename').textContent = input.files[0].name;
+        document.getElementById('coverPreview').style.display = 'flex';
+        document.getElementById('coverImageRemove').value = '0';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+    function removeCover() {
+      document.getElementById('coverPreview').style.display = 'none';
+      document.getElementById('coverImageFile').value = '';
+      document.getElementById('coverImageRemove').value = '1';
+    }
+    window.previewCover = previewCover;
+    window.removeCover  = removeCover;
+  })();
+  </script>
 
   <div class="admin-form-row">
     <label>Price (INR)<input type="number" name="price" step="0.01" min="0" value="<%= (book && book.price) || '' %>"></label>

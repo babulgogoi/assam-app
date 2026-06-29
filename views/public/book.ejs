@@ -15,6 +15,12 @@
     </form>
   </div>
 
+  <% if (locals.adminUser && (adminUser.isSuperAdmin || (adminUser.permissions && adminUser.permissions.books && adminUser.permissions.books.can_update))) { %>
+  <div class="contextual-edit-bar">
+    <a href="/admin/books/<%= book.id %>/edit" class="contextual-edit-btn">✏️ Edit this book</a>
+  </div>
+  <% } %>
+
   <div class="book-detail__top">
     <div class="book-detail__cover">
       <% if (book.cover_image) { %>

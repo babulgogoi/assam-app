@@ -98,6 +98,17 @@ function deleteUploadedFile(urlPath) {
   }
 }
 
+const memUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (!/^image\//.test(file.mimetype)) return cb(new Error('Image files only'));
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) return cb(new Error('JPG/PNG/WebP only'));
+    cb(null, true);
+  },
+});
+
 module.exports = {
   uploadArticleFiles: upload.fields([
     { name: 'featured_image', maxCount: 1 },
@@ -106,6 +117,7 @@ module.exports = {
     { name: 'pdf_file', maxCount: 1 },
   ]),
   uploadAuthorPhoto: upload.fields([{ name: 'photo', maxCount: 1 }]),
+  uploadBookCover: memUpload.single('cover_image'),
   urlFor,
   deleteUploadedFile,
 };

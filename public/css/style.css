@@ -1618,3 +1618,51 @@ body {
   border-radius: 12px; padding: 2px 10px;
   font-size: 0.8rem; font-weight: 700;
 }
+
+/* ── Admin: book cover upload ──────────────────────────────────────────────── */
+
+.cover-image-group { margin-bottom: 1.25rem; }
+.cover-preview {
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.cover-preview-actions { display: flex; flex-direction: column; gap: 6px; }
+.cover-filename { font-size: 0.75rem; color: #666; word-break: break-all; }
+.btn-remove-cover {
+  background: none; border: 1px solid #e53e3e; color: #e53e3e;
+  padding: 3px 10px; border-radius: 4px; cursor: pointer;
+  font-size: 0.78rem; width: fit-content;
+}
+.btn-remove-cover:hover { background: #e53e3e; color: #fff; }
+.cover-upload-area { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cover-upload-area input[type=file] { display: none; }
+.cover-upload-label {
+  display: inline-block; padding: 7px 14px;
+  background: #2D6A4F; color: #fff; border-radius: 6px;
+  cursor: pointer; font-size: 0.85rem; font-weight: 600;
+}
+.cover-upload-label:hover { background: #1d5238; }
+
+/* ── Contextual edit bar (public pages for admins) ─────────────────────────── */
+
+.contextual-edit-bar {
+  background: #fffbeb;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+.contextual-edit-btn {
+  color: #b45309;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.contextual-edit-btn:hover { text-decoration: underline; }

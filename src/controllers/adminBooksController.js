@@ -1,6 +1,42 @@
 'use strict';
 
+const path = require('path');
+const fs   = require('fs');
+const sharp = require('sharp');
 const booksModel = require('../models/books');
+
+const BOOKS_DIR = process.env.UPLOADS_BOOKS_DIR || '/home/assam/web/assam.org/public_html/uploads/books';
+const BOOKS_URL_PREFIX = '/uploads/books';
+
+const COVER_VARIANTS = [
+  { suffix: '',    width: 800 },
+  { suffix: '-md', width: 300 },
+  { suffix: '-sm', width: 200 },
+];
+
+async function saveCoverImage(buffer, bookId) {
+  const base = `book-${bookId}-${Date.now()}`;
+  for (const { suffix, width } of COVER_VARIANTS) {
+    const filename = `${base}${suffix}.jpg`;
+    const outPath  = path.join(BOOKS_DIR, filename);
+    await sharp(buffer)
+      .resize(width, null, { withoutEnlargement: true, fit: 'inside' })
+      .jpeg({ quality: 85, progressive: true })
+      .toFile(outPath + '.tmp');
+    fs.renameSync(outPath + '.tmp', outPath);
+  }
+  return `${BOOKS_URL_PREFIX}/${base}.jpg`;
+}
+
+function deleteCoverVariants(coverUrl) {
+  if (!coverUrl || !coverUrl.startsWith(BOOKS_URL_PREFIX + '/')) return;
+  const filename = coverUrl.slice(BOOKS_URL_PREFIX.length + 1);
+  const base = filename.replace(/\.jpg$/, '');
+  for (const { suffix } of COVER_VARIANTS) {
+    const p = path.join(BOOKS_DIR, `${base}${suffix}.jpg`);
+    fs.unlink(p, () => {});
+  }
+}
 
 const ADMIN_PAGE_SIZE = 20;
 
@@ -60,6 +96,11 @@ async function createBook(req, res, next) {
     }
     const data = await buildBookData(req.body);
     const id = await booksModel.create(data);
+    // Process cover image after we have the book id
+    if (req.file) {
+      const coverUrl = await saveCoverImage(req.file.buffer, id);
+      await booksModel.update(id, { ...data, cover_image: coverUrl, author_ids: data.author_ids, category_ids: data.category_ids });
+    }
     res.redirect(`/admin/books/${id}/edit`);
   } catch (err) { next(err); }
 }
@@ -107,8 +148,21 @@ async function updateBook(req, res, next) {
         errors,
       });
     }
+
+    // Determine cover_image for this update
+    let coverImage = book.cover_image; // keep existing by default
+    if (req.file) {
+      // New file uploaded — resize and replace
+      deleteCoverVariants(book.cover_image);
+      coverImage = await saveCoverImage(req.file.buffer, book.id);
+    } else if (req.body.cover_image_remove === '1') {
+      // Explicitly removed
+      deleteCoverVariants(book.cover_image);
+      coverImage = null;
+    }
+
     const data = await buildBookData(req.body, book.id);
-    await booksModel.update(book.id, data);
+    await booksModel.update(book.id, { ...data, cover_image: coverImage });
     res.redirect(`/admin/books/${book.id}/edit`);
   } catch (err) { next(err); }
 }
@@ -141,7 +195,6 @@ async function buildBookData(body, excludeId = null) {
     slug,
     subtitle: (body.subtitle || '').trim() || null,
     description: (body.description || '').trim() || null,
-    cover_image: (body.cover_image || '').trim() || null,
     cover_image_alt: (body.cover_image_alt || '').trim() || null,
     price: body.price ? parseFloat(body.price) : null,
     currency: body.currency || 'INR',

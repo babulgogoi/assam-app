@@ -1,24 +1,77 @@
 <main class="books-main">
-  <div class="books-header">
-    <p class="books-breadcrumb"><a href="/books">Books</a> › Publishers</p>
-    <div class="books-author-profile">
-      <% if (publisher.logo) { %>
-      <img src="<%= publisher.logo %>" alt="<%= publisher.name %>" class="books-author-photo">
-      <% } %>
-      <div>
-        <h1><%= publisher.name %></h1>
-        <% if (publisher.location) { %><p class="books-author-meta"><%= publisher.location %><% if (publisher.founded_year) { %> · est. <%= publisher.founded_year %><% } %></p><% } %>
-        <% if (publisher.description) { %><div class="books-author-bio"><%- publisher.description %></div><% } %>
-        <% if (publisher.website) { %><div class="books-author-links"><a href="<%= publisher.website %>" target="_blank" rel="noopener">Website</a></div><% } %>
+  <div class="book-detail-search">
+    <a href="/books" class="book-detail-back">← All Books</a>
+    <form action="/books/search" method="GET" class="books-search-form">
+      <div class="books-search-input-wrap">
+        <input type="text" name="q" placeholder="Search books…" aria-label="Search books">
+        <button type="submit" aria-label="Search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </button>
       </div>
+    </form>
+  </div>
+
+  <% if (locals.adminUser && (adminUser.isSuperAdmin || (adminUser.permissions && adminUser.permissions.books && adminUser.permissions.books.can_update))) { %>
+  <div class="contextual-edit-bar">
+    <a href="/admin/book-publishers/<%= publisher.id %>/edit" class="contextual-edit-btn">✏️ Edit this publisher</a>
+  </div>
+  <% } %>
+
+  <div class="books-author-header">
+    <% if (publisher.logo) { %>
+    <img src="<%= publisher.logo %>" alt="<%= publisher.name %>"
+         class="books-author-photo" width="100" height="100">
+    <% } else { %>
+    <div class="books-author-avatar"><%= publisher.name.slice(0, 2).toUpperCase() %></div>
+    <% } %>
+    <div class="books-author-meta">
+      <h1><%= publisher.name %></h1>
+      <% if (publisher.location) { %>
+      <p class="books-author-nationality"><%= publisher.location %><% if (publisher.founded_year) { %> · est. <%= publisher.founded_year %><% } %></p>
+      <% } %>
+      <% if (publisher.website) { %>
+      <div style="margin-top:8px">
+        <a href="<%= publisher.website %>" target="_blank" rel="noopener" class="books-author-website">🌐 Website</a>
+      </div>
+      <% } %>
     </div>
   </div>
 
-  <h2 class="books-section-heading">Books by <%= publisher.name %> (<%= books.length %>)</h2>
+  <% if (publisher.description) { %>
+  <div class="books-author-bio"><%- publisher.description %></div>
+  <% } %>
+
+  <h2 class="books-author-books-heading">
+    Books by <%= publisher.name %>
+    <span class="books-count-badge"><%= books.length %></span>
+  </h2>
+
   <% if (books.length > 0) { %>
-  <div class="books-grid">
+  <div class="books-catalogue-grid">
     <% books.forEach(function(book) { %>
-      <%- include('../partials/book-card', { book: book }) %>
+    <div class="books-catalogue-item">
+      <a href="/book/<%= book.slug %>" class="books-catalogue-cover">
+        <% if (book.cover_image) { %>
+        <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
+             alt="<%= book.title %>" loading="lazy" width="200" height="280">
+        <% } else { %>
+        <div class="books-catalogue-cover__placeholder"><%= book.title.slice(0, 2).toUpperCase() %></div>
+        <% } %>
+      </a>
+      <div class="books-catalogue-info">
+        <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
+        <% if (book.authors && book.authors.length > 0) { %>
+        <p class="books-catalogue-author"><%= book.authors[0].name %></p>
+        <% } %>
+        <div class="books-catalogue-meta">
+          <% if (book.price) { %><span class="books-catalogue-price">₹<%= book.price %></span><% } %>
+        </div>
+      </div>
+    </div>
     <% }) %>
   </div>
   <% } else { %>

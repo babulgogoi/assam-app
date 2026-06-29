@@ -47,6 +47,7 @@ async function bookDetail(req, res, next) {
     res.render('public/book', {
       title: `${book.title} — Assam Portal Books`,
       book, relatedBooks,
+      adminUser: req.session && req.session.adminUser ? req.session.adminUser : null,
     });
   } catch (err) {
     next(err);
@@ -86,6 +87,7 @@ async function authorPage(req, res, next) {
     res.render('public/books-author', {
       title: `${author.name} — Assam Portal Books`,
       author, books,
+      adminUser: req.session && req.session.adminUser ? req.session.adminUser : null,
     });
   } catch (err) {
     next(err);
@@ -102,6 +104,7 @@ async function publisherPage(req, res, next) {
     res.render('public/books-publisher', {
       title: `${publisher.name} — Assam Portal Books`,
       publisher, books,
+      adminUser: req.session && req.session.adminUser ? req.session.adminUser : null,
     });
   } catch (err) {
     next(err);

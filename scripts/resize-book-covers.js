@@ -20,7 +20,7 @@ const BOOKS_DIR = '/home/assam/web/assam.org/public_html/uploads/books';
 const DRY_RUN   = process.argv.includes('--dry-run');
 
 const VARIANTS = [
-  { suffix: '',    width: 999 },
+  { suffix: '',    width: 800 },
   { suffix: '-md', width: 300 },
   { suffix: '-sm', width: 200 },
 ];

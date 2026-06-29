@@ -9,7 +9,7 @@ const adminSettingsController = require('../controllers/adminSettingsController'
 const adminUsersController = require('../controllers/adminUsersController');
 const adminBooksController = require('../controllers/adminBooksController');
 const { requireAdmin, requirePermission } = require('../middleware/roleAuth');
-const { uploadArticleFiles, uploadAuthorPhoto } = require('../middleware/upload');
+const { uploadArticleFiles, uploadAuthorPhoto, uploadBookCover } = require('../middleware/upload');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -80,9 +80,9 @@ router.post('/users/:id/delete', requirePermission('users', 'can_delete'), admin
 // Books (module: books)
 router.get('/books',                requirePermission('books', 'can_read'),   adminBooksController.listBooks);
 router.get('/books/new',            requirePermission('books', 'can_create'), adminBooksController.newBookForm);
-router.post('/books',               requirePermission('books', 'can_create'), adminBooksController.createBook);
+router.post('/books',               requirePermission('books', 'can_create'), uploadBookCover, adminBooksController.createBook);
 router.get('/books/:id/edit',       requirePermission('books', 'can_read'),   adminBooksController.editBookForm);
-router.post('/books/:id',           requirePermission('books', 'can_update'), adminBooksController.updateBook);
+router.post('/books/:id',           requirePermission('books', 'can_update'), uploadBookCover, adminBooksController.updateBook);
 router.post('/books/:id/delete',    requirePermission('books', 'can_delete'), adminBooksController.deleteBook);
 
 // Book Authors (module: books)
