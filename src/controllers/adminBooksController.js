@@ -231,7 +231,7 @@ async function listBookAuthors(req, res, next) {
 
 async function newBookAuthorForm(req, res, next) {
   res.locals.layout = 'admin/layout';
-  res.render('admin/book-authors/form', { title: 'New Book Author — Admin', author: null, errors: [] });
+  res.render('admin/book-authors/form', { title: 'New Book Author — Admin', author: null, errors: [], saved: false, authorBooks: [] });
 }
 
 async function createBookAuthor(req, res, next) {
@@ -239,7 +239,7 @@ async function createBookAuthor(req, res, next) {
     const errors = validateAuthorForm(req.body);
     if (errors.length) {
       res.locals.layout = 'admin/layout';
-      return res.status(400).render('admin/book-authors/form', { title: 'New Book Author — Admin', author: req.body, errors });
+      return res.status(400).render('admin/book-authors/form', { title: 'New Book Author — Admin', author: req.body, errors, saved: false, authorBooks: [] });
     }
     const data = await buildAuthorData(req.body);
     const id = await booksModel.createAuthor(data);

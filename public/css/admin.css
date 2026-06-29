@@ -52,42 +52,192 @@
   margin: 0;
 }
 
+/* ── Admin header & nav ── */
 .admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
   background: #1a1a1a;
-  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
 
-.admin-header__brand {
-  font-weight: bold;
-}
-
-.admin-header__nav {
+.admin-nav {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  height: 50px;
+  padding: 0 16px;
 }
 
-.admin-header__nav a {
-  color: #fff;
+/* Brand */
+.admin-nav__brand {
   text-decoration: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+.brand-assam  { color: #fff;     font-size: 1rem; font-weight: 900; }
+.brand-portal { color: #2D6A4F; font-size: 1rem; font-weight: 900; }
+.brand-admin  {
+  color: #666;
+  font-size: 0.65rem;
+  font-weight: 400;
+  margin-left: 7px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.admin-header__logout {
+/* Nav list */
+.admin-nav__list {
+  display: flex;
+  list-style: none;
   margin: 0;
+  padding: 0;
+  height: 50px;
+  flex: 1;
+}
+.admin-nav__item {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
-.admin-header__logout button {
-  background: none;
-  border: 1px solid #fff;
+/* Top-level links */
+.admin-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  padding: 0 14px;
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.83rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.admin-nav__link:hover,
+.admin-nav__item:hover > .admin-nav__link {
   color: #fff;
-  padding: 0.3rem 0.75rem;
+  background: rgba(255,255,255,0.06);
+  border-bottom-color: #2D6A4F;
+}
+
+/* Chevron */
+.nav-chevron {
+  opacity: 0.4;
+  transition: transform 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+.admin-nav__item:hover .nav-chevron {
+  transform: rotate(180deg);
+  opacity: 0.9;
+}
+
+/* Dropdown panel */
+.admin-nav__dropdown {
+  display: none;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  min-width: 190px;
+  background: #222;
+  border: 1px solid #333;
+  border-top: 2px solid #2D6A4F;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  z-index: 1001;
+}
+.admin-nav__item:hover .admin-nav__dropdown {
+  display: block;
+}
+.admin-nav__dropdown li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 1rem;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.admin-nav__dropdown li a:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+.nav-icon { font-size: 0.85em; flex-shrink: 0; }
+
+.nav-divider {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 5px 0;
+}
+
+/* Logout inside dropdown */
+.nav-logout-form {
+  margin: 0;
+  padding: 0;
+}
+.nav-logout-form button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0.45rem 1rem;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+.nav-logout-form button:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* User chip + standalone logout (non-settings roles) */
+.admin-nav__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.admin-nav__username {
+  color: #aaa;
+  font-size: 0.78rem;
+}
+.admin-nav__role-badge {
+  background: #2D6A4F;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.admin-nav__logout-btn {
+  background: none;
+  border: 1px solid #444;
+  color: #999;
+  padding: 0.25rem 0.7rem;
   border-radius: 3px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.admin-nav__logout-btn:hover {
+  border-color: #888;
+  color: #fff;
 }
 
 .admin-main {
@@ -287,69 +437,6 @@
   margin-bottom: 1rem;
 }
 
-/* ── Dropdown nav ── */
-.admin-header__nav {
-  position: relative;
-}
-
-.admin-nav-item {
-  position: relative;
-  display: inline-block;
-}
-
-.admin-nav-link {
-  display: block;
-  padding: 0.4rem 0.6rem;
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.9rem;
-  border-radius: 3px;
-  white-space: nowrap;
-}
-
-.admin-nav-link:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.admin-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 180px;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  list-style: none;
-  margin: 2px 0 0 0;
-  padding: 4px 0;
-  z-index: 1000;
-}
-
-.admin-nav-item:hover .admin-dropdown {
-  display: block;
-}
-
-.admin-dropdown li a {
-  display: block;
-  padding: 0.45rem 1rem;
-  color: #e8e8e8;
-  text-decoration: none;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.admin-dropdown li a:hover {
-  background: #3a3a3a;
-  color: #fff;
-}
-
-.admin-dropdown__divider {
-  border-top: 1px solid #444;
-  margin: 4px 0;
-}
-
 /* ── Flash messages ── */
 .admin-flash {
   padding: 0.75rem 1.25rem;
@@ -405,20 +492,3 @@
   text-decoration: underline;
 }
 
-/* ── Admin user info in header ── */
-.admin-header__user {
-  font-size: 0.85rem;
-  color: #ccc;
-  margin-right: 0.75rem;
-}
-
-.admin-header__role {
-  color: #888;
-  font-size: 0.78rem;
-}
-
-.admin-header__right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
