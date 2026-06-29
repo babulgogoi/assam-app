@@ -1,132 +1,165 @@
-<%# ── Section 1: Hero ──────────────────────────────────── %>
-<% if (lead) { %>
-<section class="portal-hero">
-  <a class="portal-hero__link" href="/article/<%= lead.slug %>">
-    <img class="portal-hero__image"
-         src="<%= lead.featured_image || '/uploads/defaults/at-news.png' %>"
-         alt="<%= lead.title %>">
-    <div class="portal-hero__overlay">
-      <% if (lead.category) { %>
-        <span class="portal-hero__cat"><%= lead.category %></span>
+<div class="homepage">
+
+  <%# ── HERO ─────────────────────────────────────────── %>
+  <section class="hero"
+    <% if (settings.hero_image) { %>
+    style="background-image:url('<%= settings.hero_image %>');"
+    <% } else { %>
+    style="background:linear-gradient(135deg,#1a3d2b 0%,#2D6A4F 55%,#3a7a5c 100%);"
+    <% } %>>
+
+    <div class="hero__overlay"
+         style="background:rgba(0,0,0,<%= settings.hero_overlay_opacity || 0.55 %>)"></div>
+
+    <div class="hero__content">
+      <% if (settings.hero_headline) { %>
+      <h1 class="hero__headline"><%= settings.hero_headline %></h1>
       <% } %>
-      <h1 class="portal-hero__title"><%= lead.title %></h1>
-      <% if (lead.excerpt) { %>
-        <p class="portal-hero__excerpt"><%= lead.excerpt.replace(/<[^>]+>/g, '').slice(0, 220) %></p>
+      <% if (settings.hero_subtext) { %>
+      <p class="hero__subtext"><%= settings.hero_subtext %></p>
       <% } %>
-      <p class="portal-hero__meta">
-        <% if (lead.author_name) { %>by <%= lead.author_name %><% } %>
-        <% if (lead.published_at) { %> &middot; <%= new Date(lead.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %><% } %>
-      </p>
-    </div>
-  </a>
-</section>
-<% } %>
 
-<%# ── Section 2: Two-column ────────────────────────────── %>
-<div class="portal-columns">
-  <main class="portal-columns__main">
-    <h2 class="portal-section-title">Latest Stories</h2>
-    <div class="portal-grid">
-      <% grid.slice(0, 6).forEach(function(article) { %>
-        <article class="article-card">
-          <a href="/article/<%= article.slug %>">
-            <img class="article-card__image"
-                 src="<%= article.featured_image || '/uploads/defaults/at-news.png' %>"
-                 alt="<%= article.title %>">
-            <h3 class="article-card__title"><%= article.title %></h3>
-          </a>
-          <p class="article-meta">
-            <% if (article.published_at) { %>
-              <%= new Date(article.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
-            <% } %>
-          </p>
-        </article>
-      <% }) %>
-    </div>
-    <div class="view-all-news">
-      <a class="view-all-news__btn" href="/news">View All Stories</a>
-    </div>
-  </main>
+      <form action="/books/search" method="GET" class="hero-search-form">
+        <input type="text" name="q" placeholder="Search books, topics, research…" aria-label="Search">
+        <button type="submit">Search</button>
+      </form>
 
-  <aside class="portal-columns__sidebar">
-    <% if (typeof onThisDay !== 'undefined' && onThisDay && onThisDay.length) { %>
-      <section class="sidebar-block">
-        <h3 class="sidebar-block__title">On This Day</h3>
-        <ul class="sidebar-block__list">
-          <% onThisDay.slice(0, 4).forEach(function(a) { %>
-            <li>
-              <a href="/article/<%= a.slug %>"><%= a.title %></a>
-              <% if (a.published_at) { %>
-                <span class="sidebar-block__year">(<%= new Date(a.published_at).getFullYear() %>)</span>
-              <% } %>
-            </li>
-          <% }) %>
-        </ul>
-      </section>
-    <% } %>
-
-    <section class="sidebar-block">
-      <h3 class="sidebar-block__title">Most Read</h3>
-      <ol class="sidebar-block__list sidebar-block__list--numbered">
-        <% mostViewed.slice(0, 3).forEach(function(a) { %>
-          <li><a href="/article/<%= a.slug %>"><%= a.title %></a></li>
-        <% }) %>
-      </ol>
-    </section>
-  </aside>
-</div>
-
-<%# ── Section 3: Browse Topics ────────────────────────── %>
-<section class="portal-categories">
-  <h2 class="portal-section-title">Browse Topics</h2>
-  <div class="portal-categories__pills">
-    <% ['Culture', 'Economy', 'Geography', 'History', 'Education', 'Language',
-        'Travel', 'Politics', 'Environment', 'Health', 'Sports', 'Technology',
-        'Society', 'Literature', 'Music', 'Film'].forEach(function(cat) { %>
-      <a href="/category/<%= encodeURIComponent(cat) %>" class="portal-cat-pill"><%= cat %></a>
-    <% }) %>
-  </div>
-</section>
-
-<%# ── Section 4: Books Spotlight ──────────────────────── %>
-<% if (typeof homeBooks !== 'undefined' && homeBooks && homeBooks.length) { %>
-<section class="portal-books">
-  <div class="portal-books__header">
-    <h2 class="portal-section-title">Books About Assam</h2>
-    <a href="/books" class="portal-books__all">Browse all <%= homeBooks.length < 15 ? homeBooks.length : '587' %> books &rarr;</a>
-  </div>
-  <div class="home-books-grid">
-    <% homeBooks.forEach(function(book) { %>
-    <a href="/book/<%= book.slug %>" class="home-book-thumb">
-      <% if (book.cover_image) { %>
-      <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
-           alt="<%= book.cover_image_alt || book.title %>" loading="lazy">
-      <% } else { %>
-      <div class="home-book-no-cover"><%= book.title.slice(0, 2).toUpperCase() %></div>
-      <% } %>
-      <p><%= book.title.length > 40 ? book.title.slice(0, 38) + '…' : book.title %></p>
-    </a>
-    <% }) %>
-  </div>
-</section>
-<% } %>
-
-<%# ── Section 5: In Depth ─────────────────────────────── %>
-<% if (typeof latestPages !== 'undefined' && latestPages && latestPages.length) { %>
-<section class="portal-indepth">
-  <h2 class="portal-section-title">In Depth</h2>
-  <div class="portal-indepth__grid">
-    <% latestPages.forEach(function(page) { %>
-      <article class="indepth-card">
-        <h3 class="indepth-card__title">
-          <a href="/page/<%= page.slug %>"><%= page.title %></a>
-        </h3>
-        <% if (page.body) { %>
-          <p class="indepth-card__excerpt"><%= page.body.replace(/<[^>]+>/g, '').slice(0, 180) %>…</p>
+      <div class="hero__ctas">
+        <% if (settings.hero_cta_text && settings.hero_cta_url) { %>
+        <a href="<%= settings.hero_cta_url %>" class="hero__cta hero__cta--primary"><%= settings.hero_cta_text %></a>
         <% } %>
-        <a href="/page/<%= page.slug %>" class="indepth-card__link">Read more &rarr;</a>
-      </article>
-    <% }) %>
-  </div>
-</section>
-<% } %>
+        <a href="/research" class="hero__cta hero__cta--secondary">Browse Research</a>
+      </div>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat"><strong>587</strong><span>Books</span></div>
+      <div class="hero__stat"><strong>101</strong><span>Research Pages</span></div>
+      <div class="hero__stat"><strong>544</strong><span>Stories</span></div>
+      <div class="hero__stat"><strong>12</strong><span>Topics</span></div>
+    </div>
+  </section>
+
+  <%# ── BOOKS ─────────────────────────────────────────── %>
+  <section class="home-section home-books">
+    <div class="home-section__inner">
+      <div class="home-section__header">
+        <h2 class="home-section__title"><%= settings.books_section_title || 'Books About Assam' %></h2>
+        <a href="/books" class="home-section__viewall">View all books →</a>
+      </div>
+
+      <div class="home-books-row">
+        <% books.slice(0, 5).forEach(function(book) { %>
+        <div class="home-book-card">
+          <a href="/book/<%= book.slug %>" class="home-book-card__cover">
+            <% if (book.cover_image) { %>
+            <img src="<%= book.cover_image.replace(/(\.[^.]+)$/, '-md$1') %>"
+                 alt="<%= book.title %>" loading="lazy">
+            <% } else { %>
+            <div class="home-book-card__placeholder"><%= book.title.slice(0,2).toUpperCase() %></div>
+            <% } %>
+          </a>
+          <div class="home-book-card__info">
+            <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
+            <% if (book.authors && book.authors.length > 0) { %>
+            <p class="home-book-card__author"><%= book.authors[0].name %></p>
+            <% } %>
+            <% if (book.price) { %><p class="home-book-card__price">₹<%= book.price %></p><% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <% if (books.length > 5) { %>
+      <div class="home-books-row">
+        <% books.slice(5, 10).forEach(function(book) { %>
+        <div class="home-book-card">
+          <a href="/book/<%= book.slug %>" class="home-book-card__cover">
+            <% if (book.cover_image) { %>
+            <img src="<%= book.cover_image.replace(/(\.[^.]+)$/, '-md$1') %>"
+                 alt="<%= book.title %>" loading="lazy">
+            <% } else { %>
+            <div class="home-book-card__placeholder"><%= book.title.slice(0,2).toUpperCase() %></div>
+            <% } %>
+          </a>
+          <div class="home-book-card__info">
+            <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
+            <% if (book.authors && book.authors.length > 0) { %>
+            <p class="home-book-card__author"><%= book.authors[0].name %></p>
+            <% } %>
+            <% if (book.price) { %><p class="home-book-card__price">₹<%= book.price %></p><% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <div class="home-books-footer">
+        <a href="/books" class="btn-viewall">Browse all 587 books →</a>
+      </div>
+    </div>
+  </section>
+
+  <%# ── CUSTOM BLOCK 1 ────────────────────────────────── %>
+  <% if (settings.custom_block_1_enabled && settings.custom_block_1_html) { %>
+  <section class="home-custom-block">
+    <div class="home-section__inner"><%- settings.custom_block_1_html %></div>
+  </section>
+  <% } %>
+
+  <%# ── RESEARCH ───────────────────────────────────────── %>
+  <section class="home-section home-research">
+    <div class="home-section__inner">
+      <div class="home-section__header">
+        <h2 class="home-section__title"><%= settings.research_section_title || 'Research & Knowledge' %></h2>
+        <a href="/research" class="home-section__viewall">Browse all topics →</a>
+      </div>
+
+      <% if (topics && topics.length) { %>
+      <div class="home-topics-grid">
+        <% topics.forEach(function(topic) { %>
+        <a href="/research/<%= topic.slug %>" class="home-topic-card">
+          <span class="home-topic-card__icon"><%= topic.icon || '📄' %></span>
+          <span class="home-topic-card__name"><%= topic.name %></span>
+          <span class="home-topic-card__count"><%= topic.page_count %> <%= topic.page_count === 1 ? 'article' : 'articles' %></span>
+        </a>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <% if (latestPages && latestPages.length) { %>
+      <div class="home-research-cards">
+        <% latestPages.forEach(function(page) { %>
+        <article class="home-research-card">
+          <a href="/page/<%= page.slug %>"
+             class="home-research-card__image<%= page.featured_image ? '' : ' home-research-card__image--placeholder' %>">
+            <% if (page.featured_image) { %>
+            <img src="<%= page.featured_image %>" alt="<%= page.title %>" loading="lazy">
+            <% } else { %>
+            <span><%= page.topic_icon || '📄' %></span>
+            <% } %>
+          </a>
+          <div class="home-research-card__body">
+            <% if (page.topic_name) { %>
+            <span class="home-research-card__topic"><%= page.topic_icon %> <%= page.topic_name %></span>
+            <% } %>
+            <h3><a href="/page/<%= page.slug %>"><%= page.title %></a></h3>
+            <% var excerpt = page.excerpt || (page.body || '').replace(/<[^>]+>/g,'').slice(0,120); %>
+            <% if (excerpt) { %><p><%= excerpt %>…</p><% } %>
+            <a href="/page/<%= page.slug %>" class="home-research-card__link">Read more →</a>
+          </div>
+        </article>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </section>
+
+  <%# ── CUSTOM BLOCK 2 ────────────────────────────────── %>
+  <% if (settings.custom_block_2_enabled && settings.custom_block_2_html) { %>
+  <section class="home-custom-block">
+    <div class="home-section__inner"><%- settings.custom_block_2_html %></div>
+  </section>
+  <% } %>
+
+</div>

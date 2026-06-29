@@ -119,6 +119,7 @@ module.exports = {
   uploadAuthorPhoto:   upload.fields([{ name: 'photo', maxCount: 1 }]),
   uploadBookCover:     memUpload.single('cover_image'),
   uploadPageFeatured:  memUpload.single('featured_image'),
+  uploadHeroImage:     memUpload.single('hero_image'),
   urlFor,
   deleteUploadedFile,
 };

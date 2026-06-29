@@ -34,24 +34,64 @@ const FEATURED_ARTICLES_SIZE = 5;
 
 async function home(req, res, next) {
   try {
-    const [latest, mostViewed, onThisDay, latestPages, homeBooks] = await Promise.all([
-      articlesModel.getLatestPublished({ limit: 7 }),
-      articlesModel.getMostViewed({ limit: 3 }),
-      articlesModel.getOnThisDay({ limit: 4 }),
+    const pool = require('../config/db');
+
+    const [settingsRow, featuredBooksResult, latestBooksResult, topicsResult, latestPagesResult] = await Promise.all([
+      siteSettingsModel.getAll(),
+
+      // Featured books (is_featured = true)
+      pool.query(`
+        SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
+               COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
+                 ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
+        FROM books b
+        LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+        LEFT JOIN books_authors ba ON ba.id = bba.author_id
+        WHERE b.status = 'active' AND b.is_featured = true
+        GROUP BY b.id
+        ORDER BY b.created_at DESC
+        LIMIT 10
+      `),
+
+      // Latest books fallback
+      pool.query(`
+        SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
+               COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
+                 ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
+        FROM books b
+        LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+        LEFT JOIN books_authors ba ON ba.id = bba.author_id
+        WHERE b.status = 'active'
+        GROUP BY b.id
+        ORDER BY b.created_at DESC
+        LIMIT 10
+      `),
+
+      // Topics with page counts (published only, at least 1 page)
+      pool.query(`
+        SELECT pt.*, COUNT(p.id)::int AS page_count
+        FROM page_topics pt
+        LEFT JOIN pages p ON p.topic_id = pt.id AND p.status = 'published'
+        GROUP BY pt.id
+        HAVING COUNT(p.id) > 0
+        ORDER BY pt.sort_order, pt.name
+        LIMIT 12
+      `),
+
+      // Latest research pages (3)
       pagesModel.getLatestPublished({ limit: 3 }),
-      booksModel.getLatest({ limit: 15 }),
     ]);
 
-    const [rawLead, ...rawGrid] = latest;
+    const settings = settingsRow;
+    const useFeatured = settings.books_section_show_featured && featuredBooksResult.rows.length >= 5;
+    const books = useFeatured ? featuredBooksResult.rows : latestBooksResult.rows;
 
     res.render('public/home', {
-      title: 'Assam Portal — Gateway to Assam',
-      lead: withExcerpt(rawLead),
-      grid: rawGrid.map(withExcerpt),
-      mostViewed: mostViewed.map(withExcerpt),
-      onThisDay: onThisDay.map(withExcerpt),
-      latestPages,
-      homeBooks,
+      title: `${settings.hero_headline || 'Assam Portal'} | assam.org`,
+      settings,
+      books,
+      topics: topicsResult.rows,
+      latestPages: latestPagesResult,
     });
   } catch (err) {
     next(err);

@@ -16,7 +16,7 @@ const adminSettingsController  = require('../controllers/adminSettingsController
 const adminUsersController     = require('../controllers/adminUsersController');
 const adminBooksController     = require('../controllers/adminBooksController');
 const { requireAdmin, requirePermission } = require('../middleware/roleAuth');
-const { uploadArticleFiles, uploadAuthorPhoto, uploadBookCover, uploadPageFeatured } = require('../middleware/upload');
+const { uploadArticleFiles, uploadAuthorPhoto, uploadBookCover, uploadPageFeatured, uploadHeroImage } = require('../middleware/upload');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -135,8 +135,10 @@ router.post('/menu/:id',         requirePermission('settings', 'can_update'), ad
 router.post('/menu/:id/delete',  requirePermission('settings', 'can_delete'), adminMenuController.deleteMenuItem);
 
 // Site settings (module: settings)
-router.get('/settings',  requirePermission('settings', 'can_read'),   adminSettingsController.editSettingsForm);
-router.post('/settings', requirePermission('settings', 'can_update'), adminSettingsController.updateSettings);
+router.get('/settings',          requirePermission('settings', 'can_read'),   adminSettingsController.editSettingsForm);
+router.post('/settings',         requirePermission('settings', 'can_update'), adminSettingsController.updateSettings);
+router.get('/settings/homepage', requirePermission('settings', 'can_read'),   adminSettingsController.editHomepageForm);
+router.post('/settings/homepage',requirePermission('settings', 'can_update'), uploadHeroImage, adminSettingsController.updateHomepage);
 
 // User management (module: users — superadmin only in practice)
 router.get('/users',             requirePermission('users', 'can_read'),   adminUsersController.listUsers);

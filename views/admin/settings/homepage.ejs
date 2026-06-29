@@ -1,0 +1,134 @@
+<h1>Homepage Settings</h1>
+
+<% if (flash) { %>
+<div class="admin-flash admin-flash--<%= flash.type %>"><%= flash.message %></div>
+<% } %>
+
+<form class="admin-form" method="post" action="/admin/settings/homepage" enctype="multipart/form-data">
+
+  <div class="admin-settings-section">
+    <h2>Hero Banner</h2>
+
+    <% if (settings.hero_image) { %>
+    <div class="admin-form-preview" style="margin-bottom:12px;">
+      <img src="<%= settings.hero_image %>" alt="Current hero" style="max-width:480px;max-height:180px;object-fit:cover;border-radius:4px;display:block;">
+      <label style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer;">
+        <input type="checkbox" name="hero_image_remove" value="1"> Remove hero image (use gradient)
+      </label>
+    </div>
+    <input type="hidden" name="hero_image_existing" value="<%= settings.hero_image %>">
+    <% } %>
+
+    <label>
+      Upload new hero image <span class="admin-form-hint">(1920px wide, JPG/PNG/WebP, max 10 MB)</span>
+      <input type="file" name="hero_image" accept="image/*">
+    </label>
+
+    <label>
+      Headline
+      <input type="text" name="hero_headline" value="<%= settings.hero_headline || '' %>" placeholder="Gateway to Assam">
+    </label>
+
+    <label>
+      Subtext
+      <textarea name="hero_subtext" rows="2" placeholder="Discover the culture, history, books and knowledge of Assam…"><%= settings.hero_subtext || '' %></textarea>
+    </label>
+
+    <div class="admin-form-row">
+      <label>
+        CTA Button Text
+        <input type="text" name="hero_cta_text" value="<%= settings.hero_cta_text || '' %>" placeholder="Explore Books">
+      </label>
+      <label>
+        CTA Button URL
+        <input type="text" name="hero_cta_url" value="<%= settings.hero_cta_url || '' %>" placeholder="/books">
+      </label>
+    </div>
+
+    <label>
+      Overlay opacity
+      <span class="admin-form-hint">(0 = transparent, 1 = fully opaque black. Default 0.55)</span>
+      <input type="number" name="hero_overlay_opacity" value="<%= settings.hero_overlay_opacity || 0.55 %>"
+             min="0" max="1" step="0.05" style="width:100px;">
+    </label>
+  </div>
+
+  <div class="admin-settings-section">
+    <h2>Books Section</h2>
+
+    <label>
+      Section title
+      <input type="text" name="books_section_title" value="<%= settings.books_section_title || 'Books About Assam' %>">
+    </label>
+
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+      <input type="checkbox" name="books_section_show_featured" value="1"
+             <%= settings.books_section_show_featured ? 'checked' : '' %>>
+      Show featured books first (requires at least 5 featured books; falls back to latest)
+    </label>
+  </div>
+
+  <div class="admin-settings-section">
+    <h2>Research Section</h2>
+
+    <label>
+      Section title
+      <input type="text" name="research_section_title" value="<%= settings.research_section_title || 'Research & Knowledge' %>">
+    </label>
+  </div>
+
+  <div class="admin-settings-section">
+    <h2>Custom HTML Block 1</h2>
+    <p class="admin-form-hint" style="margin-bottom:12px;">Shown between the Books section and Research section. Accepts raw HTML.</p>
+
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;">
+      <input type="checkbox" name="custom_block_1_enabled" value="1"
+             <%= settings.custom_block_1_enabled ? 'checked' : '' %>>
+      Enable this block
+    </label>
+
+    <label>
+      HTML
+      <textarea name="custom_block_1_html" rows="8" style="font-family:monospace;font-size:0.82rem;"><%= settings.custom_block_1_html || '' %></textarea>
+    </label>
+  </div>
+
+  <div class="admin-settings-section">
+    <h2>Custom HTML Block 2</h2>
+    <p class="admin-form-hint" style="margin-bottom:12px;">Shown after the Research section. Accepts raw HTML.</p>
+
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;">
+      <input type="checkbox" name="custom_block_2_enabled" value="1"
+             <%= settings.custom_block_2_enabled ? 'checked' : '' %>>
+      Enable this block
+    </label>
+
+    <label>
+      HTML
+      <textarea name="custom_block_2_html" rows="8" style="font-family:monospace;font-size:0.82rem;"><%= settings.custom_block_2_html || '' %></textarea>
+    </label>
+  </div>
+
+  <div style="padding: 20px 0;">
+    <button type="submit" class="admin-btn admin-btn--primary">Save Homepage Settings</button>
+    <a href="/" target="_blank" class="admin-btn" style="margin-left:12px;">View Homepage ↗</a>
+  </div>
+
+</form>
+
+<style>
+.admin-settings-section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.admin-settings-section h2 {
+  font-size: 1rem;
+  margin: 0 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+</style>

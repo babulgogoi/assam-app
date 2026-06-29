@@ -1,9 +1,26 @@
 <footer class="site-footer">
   <% if (typeof footerHtml !== 'undefined' && footerHtml) { %>
-    <%- footerHtml %>
+  <%- footerHtml %>
   <% } else { %>
-    <p><strong>Assam Portal</strong> — Gateway to Assam</p>
-    <p>A community resource about Assam, India</p>
-    <p>&copy; <%= new Date().getFullYear() %> Assam Portal</p>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/" class="footer-logo">assam<strong>.org</strong></a>
+      <p>Gateway to Assam — A community knowledge resource about Assam, India.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Explore</h4>
+      <a href="/books">Books</a>
+      <a href="/research">Research</a>
+      <a href="/search">Search</a>
+    </div>
+    <div class="footer-links">
+      <h4>Info</h4>
+      <a href="/page/about-us">About</a>
+      <a href="/page/contact">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; <%= new Date().getFullYear() %> assam.org &middot; Guwahati, Assam, India</p>
+  </div>
   <% } %>
 </footer>
