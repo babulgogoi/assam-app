@@ -104,14 +104,15 @@ async function countByCategory(categorySlug) {
   return parseInt(rows[0].count, 10);
 }
 
-async function getByAuthor(authorSlug, { limit = 16, offset = 0 } = {}) {
+async function getByAuthor(authorSlug, { limit = 50, offset = 0 } = {}) {
   const { rows } = await db.query(
     `${BOOK_SELECT}
      JOIN books_book_authors bba2 ON bba2.book_id = b.id
      JOIN books_authors ba2 ON ba2.id = bba2.author_id AND ba2.slug = $1
      WHERE b.status = 'active'
      GROUP BY b.id, p.name, p.slug
-     ORDER BY b.published_year DESC NULLS LAST`,
+     ORDER BY b.published_year DESC NULLS LAST
+     LIMIT $2 OFFSET $3`,
     [authorSlug, limit, offset]
   );
   return rows;
