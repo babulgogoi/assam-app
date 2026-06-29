@@ -67,7 +67,7 @@
   const canStories  = su || perms.stories?.can_read;
   const canPages    = su || perms.pages?.can_read;
   const canBooks    = su || perms.books?.can_read;
-  const canSettings = su;
+  const canSettings = su || perms.settings?.can_read;
 %>
 <header class="admin-header">
   <nav class="admin-nav">
