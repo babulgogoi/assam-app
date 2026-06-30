@@ -5,7 +5,7 @@
     <% if (settings.hero_image) { %>
     style="background-image:url('<%= settings.hero_image %>');"
     <% } else { %>
-    style="background:linear-gradient(135deg,#1a3d2b 0%,#2D6A4F 55%,#3a7a5c 100%);"
+    style="background:linear-gradient(135deg,#130082 0%,#1A00AC 55%,#6B5CE0 100%);"
     <% } %>>
 
     <div class="hero__content">
@@ -36,50 +36,6 @@
       <div class="hero__stat"><strong>12</strong><span>Topics</span></div>
     </div>
   </section>
-
-  <%# ── INTRO ─────────────────────────────────────────── %>
-  <% if (settings.intro_summary) { %>
-  <section class="home-intro">
-    <div class="home-section__inner">
-
-      <p class="home-intro__text">
-        assam.org is a community knowledge resource —
-        a digital gateway to the culture, history and
-        people of Assam. Explore our growing catalogue
-        of books and an encyclopedia-style collection of
-        research articles, built collaboratively and
-        maintained for the public good.
-        <a href="/page/assam-land-red-rivers-and-blue-hills"
-           class="home-intro__link">
-          Read more about Assam →
-        </a>
-      </p>
-
-      <div class="home-intro__features">
-
-        <div class="home-intro__feature">
-          <span class="home-intro__feature-icon">📚</span>
-          <div>
-            <h3>Book Catalogue</h3>
-            <p>A curated selection of Assamese books — browse, discover and order online.</p>
-            <a href="/books" class="home-intro__feature-link">Explore Books →</a>
-          </div>
-        </div>
-
-        <div class="home-intro__feature">
-          <span class="home-intro__feature-icon">📖</span>
-          <div>
-            <h3>Research Pages</h3>
-            <p>An encyclopedia-style collection on Assam — open for community contributions.</p>
-            <a href="/research" class="home-intro__feature-link">Browse Research →</a>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-  <% } %>
 
   <%# ── BOOKS ─────────────────────────────────────────── %>
   <section class="home-section home-books">

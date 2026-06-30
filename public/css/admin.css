@@ -78,7 +78,7 @@
   flex-shrink: 0;
 }
 .brand-assam  { color: #fff;     font-size: 1rem; font-weight: 900; }
-.brand-portal { color: #2D6A4F; font-size: 1rem; font-weight: 900; }
+.brand-portal { color: #1A00AC; font-size: 1rem; font-weight: 900; }
 .brand-admin  {
   color: #666;
   font-size: 0.65rem;
@@ -123,7 +123,7 @@
 .admin-nav__item:hover > .admin-nav__link {
   color: #fff;
   background: rgba(255,255,255,0.06);
-  border-bottom-color: #2D6A4F;
+  border-bottom-color: #1A00AC;
 }
 
 /* Chevron */
@@ -146,7 +146,7 @@
   min-width: 190px;
   background: #222;
   border: 1px solid #333;
-  border-top: 2px solid #2D6A4F;
+  border-top: 2px solid #1A00AC;
   border-radius: 0 0 6px 6px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   list-style: none;
@@ -216,7 +216,7 @@
   font-size: 0.78rem;
 }
 .admin-nav__role-badge {
-  background: #2D6A4F;
+  background: #1A00AC;
   color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
@@ -484,7 +484,7 @@
 }
 
 .admin-related-list li a {
-  color: #2D6A4F;
+  color: #1A00AC;
   text-decoration: none;
 }
 
