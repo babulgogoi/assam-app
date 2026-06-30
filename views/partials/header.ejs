@@ -1,28 +1,29 @@
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-logo-link" href="/">
-      <img src="/uploads/branding/assam-logo.png" alt="assam.org" class="site-logo-img" height="44" loading="eager">
+    <a href="/" class="site-logo-link">
+      <img src="/uploads/branding/logo-assam.jpg"
+           alt="assam.org"
+           class="site-logo-img"
+           width="151" height="90">
     </a>
 
-    <button class="site-header__menu-toggle" id="menuToggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="siteNav">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <nav class="site-header__nav" id="siteNav">
-      <% var navItems = (typeof menuItems !== 'undefined' && menuItems) ? menuItems : []; %>
-      <% navItems.forEach(function (item) { %>
-        <% if (item.url) { %>
-        <a href="<%= item.url %>"
-           class="<%= (locals.currentUrl === item.url || (item.url !== '/' && locals.currentUrl && locals.currentUrl.startsWith(item.url))) ? 'nav-active' : '' %>">
-          <%= item.label %>
-        </a>
+    <nav class="main-nav" role="navigation" aria-label="Main navigation">
+      <ul class="main-nav__list">
+        <% if (locals.menuItems && menuItems.length > 0) { %>
+          <% menuItems.forEach(function(item) { %>
+          <li class="main-nav__item">
+            <a href="<%= item.url %>"
+               class="main-nav__link<%= (locals.currentUrl === item.url || (item.url !== '/' && locals.currentUrl && locals.currentUrl.startsWith(item.url))) ? ' active' : '' %>">
+              <%= item.label %>
+            </a>
+          </li>
+          <% }) %>
         <% } %>
-      <% }) %>
+      </ul>
     </nav>
-    <form class="site-header__search" action="/search" method="get">
-      <input type="search" name="q" placeholder="Search..." value="<%= typeof q !== 'undefined' ? q : '' %>">
-    </form>
+
+    <button class="mobile-menu-toggle" aria-label="Toggle menu" id="mobileMenuToggle">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
