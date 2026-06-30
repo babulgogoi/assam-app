@@ -6,7 +6,7 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip (not hidden) — prevents horizontal scroll without creating a scroll container that breaks position:sticky */
 }
 
 .ad-slot {
@@ -44,7 +44,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 500;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.4s ease;
 }
 .site-header.is-stuck {
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
@@ -57,35 +57,50 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: padding 0.2s;
+  transition: padding 0.4s ease;
 }
 .site-header.is-stuck .site-header__inner {
   padding-top: 6px;
   padding-bottom: 6px;
 }
 
+/* Logo wrapper: fixed width (widest logo), height animates between the two */
 .site-logo-link {
-  display: flex;
-  align-items: center;
-  line-height: 0;
+  position: relative;
+  display: block;
   flex-shrink: 0;
   text-decoration: none;
+  line-height: 0;
+  width: 340px;
+  height: 90px;
+  overflow: hidden;
+  transition: height 0.4s ease;
 }
+.site-header.is-stuck .site-logo-link {
+  height: 40px;
+}
+
+/* Both logos absolutely stacked; crossfade with opacity */
 .site-logo-img {
-  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
   object-fit: contain;
+  transition: opacity 0.4s ease;
 }
 .site-logo-img--regular {
   width: 151px;
   height: 90px;
+  opacity: 1;
 }
 .site-logo-img--sticky {
-  display: none;
   width: 340px;
-  height: 50px;
+  height: 40px;
+  opacity: 0;
 }
-.site-header.is-stuck .site-logo-img--regular { display: none; }
-.site-header.is-stuck .site-logo-img--sticky  { display: block; }
+.site-header.is-stuck .site-logo-img--regular { opacity: 0; }
+.site-header.is-stuck .site-logo-img--sticky  { opacity: 1; }
 
 .site-main {
   max-width: 1200px;
@@ -939,8 +954,10 @@ body {
 }
 
 @media (max-width: 768px) {
+  .site-logo-link { width: 255px; height: 67px; }
+  .site-header.is-stuck .site-logo-link { height: 30px; }
   .site-logo-img--regular { width: 113px; height: 67px; }
-  .site-logo-img--sticky  { width: 255px; height: 38px; }
+  .site-logo-img--sticky  { width: 255px; height: 30px; }
   .main-nav {
     display: none;
     position: absolute;
@@ -1925,6 +1942,71 @@ body {
   padding: 0;
 }
 .homepage { width: 100%; overflow-x: hidden; }
+/* ── Homepage intro ── */
+.home-intro {
+  padding: 36px 0 40px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+.home-intro__text {
+  max-width: 760px;
+  margin: 0 auto 32px;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #444;
+}
+.home-intro__link {
+  color: #2D6A4F;
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+.home-intro__link:hover { text-decoration: underline; }
+.home-intro__features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.home-intro__feature {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: #f9fbf9;
+  border: 1px solid #d4e8dd;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.home-intro__feature-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.home-intro__feature h3 {
+  font-size: 1rem;
+  margin: 0 0 6px;
+  color: #1a1a1a;
+}
+.home-intro__feature p {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+.home-intro__feature-link {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2D6A4F;
+  text-decoration: none;
+}
+.home-intro__feature-link:hover { text-decoration: underline; }
+@media (max-width: 700px) {
+  .home-intro__features { grid-template-columns: 1fr; }
+}
+
 .home-section { padding: 48px 0; }
 .home-section__inner { max-width: 1084px; margin: 0 auto; padding: 0 16px; }
 .home-section__header {

@@ -1,0 +1,4 @@
+ALTER TABLE site_settings
+  ADD COLUMN IF NOT EXISTS intro_summary TEXT,
+  ADD COLUMN IF NOT EXISTS intro_link_url VARCHAR(300),
+  ADD COLUMN IF NOT EXISTS intro_link_text VARCHAR(200);
