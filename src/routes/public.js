@@ -69,6 +69,21 @@ router.get('/node/:nid', async (req, res) => {
 
 // Books — specific routes before wildcard
 router.get('/books', publicBooksController.catalogue);
+router.get('/books/publish', async (req, res) => {
+  try {
+    const db = require('../config/db');
+    const result = await db.query(
+      'SELECT publish_contact_email FROM site_settings WHERE id = 1'
+    );
+    res.render('public/books-publish', {
+      settings: result.rows[0] || {},
+      title: 'Publish Your Book | Assam Portal',
+    });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
 router.get('/books/search', publicBooksController.searchCatalogue);
 router.get('/books/category/:slug', publicBooksController.categoryPage);
 router.get('/books/author/:slug', publicBooksController.authorPage);

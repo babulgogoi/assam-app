@@ -8,18 +8,32 @@
       <img src="/uploads/branding/logo-small.jpg"
            alt="assam.org"
            class="site-logo-img site-logo-img--sticky"
-           width="340" height="50">
+           width="340" height="40">
     </a>
 
     <nav class="main-nav" role="navigation" aria-label="Main navigation">
       <ul class="main-nav__list">
         <% if (locals.menuItems && menuItems.length > 0) { %>
-          <% menuItems.forEach(function(item) { %>
-          <li class="main-nav__item">
+          <% var topLevel = menuItems.filter(function(m) { return !m.parent_id; }); %>
+          <% topLevel.forEach(function(item) { %>
+          <% var children = menuItems.filter(function(m) { return m.parent_id === item.id; }); %>
+          <li class="main-nav__item<%= children.length > 0 ? ' has-submenu' : '' %>">
             <a href="<%= item.url %>"
                class="main-nav__link<%= (locals.currentUrl === item.url || (item.url !== '/' && locals.currentUrl && locals.currentUrl.startsWith(item.url))) ? ' active' : '' %>">
               <%= item.label %>
+              <% if (children.length > 0) { %>
+              <svg class="nav-chevron" width="9" height="6" viewBox="0 0 10 6" fill="currentColor">
+                <path d="M0 0l5 6 5-6z"/>
+              </svg>
+              <% } %>
             </a>
+            <% if (children.length > 0) { %>
+            <ul class="main-nav__submenu">
+              <% children.forEach(function(child) { %>
+              <li><a href="<%= child.url %>"><%= child.label %></a></li>
+              <% }) %>
+            </ul>
+            <% } %>
           </li>
           <% }) %>
         <% } %>

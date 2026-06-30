@@ -11,5 +11,12 @@
     <textarea name="footer_html" rows="20" style="font-family: monospace;"><%= footerHtml || '' %></textarea>
   </label>
 
+  <label>
+    Publishing Inquiry Contact Email <span class="admin-form-hint">(shown on the /books/publish page)</span>
+    <input type="email" name="publish_contact_email"
+           value="<%= settings && settings.publish_contact_email ? settings.publish_contact_email : 'webmaster@assam.org' %>"
+           placeholder="webmaster@assam.org">
+  </label>
+
   <button type="submit" class="admin-btn admin-btn--primary">Save</button>
 </form>

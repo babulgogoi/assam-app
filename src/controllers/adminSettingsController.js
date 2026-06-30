@@ -9,15 +9,13 @@ const HERO_URL = '/uploads/hero';
 
 async function editSettingsForm(req, res, next) {
   try {
-    const [footerHtml, featuredCategory] = await Promise.all([
-      siteSettingsModel.getFooterHtml(),
-      siteSettingsModel.getFeaturedCategory(),
-    ]);
+    const settings = await siteSettingsModel.getAll();
     res.locals.layout = 'admin/layout';
     res.render('admin/settings/form', {
       title: 'Settings — Admin',
-      footerHtml,
-      featuredCategory,
+      footerHtml: settings.footer_html,
+      featuredCategory: settings.featured_category,
+      settings,
     });
   } catch (err) {
     next(err);
@@ -29,6 +27,7 @@ async function updateSettings(req, res, next) {
     await Promise.all([
       siteSettingsModel.updateFooterHtml(req.body.footer_html || ''),
       siteSettingsModel.updateFeaturedCategory((req.body.featured_category || '').trim() || 'Features'),
+      siteSettingsModel.updatePublishEmail((req.body.publish_contact_email || '').trim() || 'webmaster@assam.org'),
     ]);
     res.redirect('/admin/settings');
   } catch (err) {
