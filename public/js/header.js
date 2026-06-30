@@ -1,9 +1,26 @@
-document.addEventListener('DOMContentLoaded', function () {
-  var toggle = document.getElementById('mobileMenuToggle');
-  var nav = document.querySelector('.main-nav');
-  if (!toggle || !nav) return;
+(function () {
+  const header = document.getElementById('siteHeader');
+  if (!header) return;
 
-  toggle.addEventListener('click', function () {
-    nav.classList.toggle('is-open');
+  let ticking = false;
+  const STICK_THRESHOLD = 80;
+
+  function updateHeaderState() {
+    header.classList.toggle('is-stuck', window.scrollY > STICK_THRESHOLD);
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeaderState);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateHeaderState();
+})();
+
+document.getElementById('mobileMenuToggle')
+  ?.addEventListener('click', function () {
+    document.querySelector('.main-nav').classList.toggle('is-open');
   });
-});
