@@ -2,6 +2,13 @@
   box-sizing: border-box;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .ad-slot {
   margin: 1.5rem 0;
   text-align: center;
@@ -1898,7 +1905,13 @@ body {
 /* ══════════════════════════════════════════════════════
    HOMEPAGE
    ══════════════════════════════════════════════════════ */
-.homepage { width: 100%; }
+
+/* Break .homepage out of .site-main's max-width/padding */
+.site-main:has(.homepage) {
+  max-width: none;
+  padding: 0;
+}
+.homepage { width: 100%; overflow-x: hidden; }
 .home-section { padding: 48px 0; }
 .home-section__inner { max-width: 1084px; margin: 0 auto; padding: 0 16px; }
 .home-section__header {
