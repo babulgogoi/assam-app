@@ -98,7 +98,7 @@ async function listArticles(req, res, next) {
 
     res.locals.layout = 'admin/layout';
     res.render('admin/articles/list', {
-      title: 'Articles — Admin',
+      title: 'News — Admin',
       
       articles,
       q,
@@ -166,15 +166,19 @@ async function buildArticleData(req, existingArticle = null) {
   const body = req.body;
   const files = req.files || {};
 
-  let baseSlug = slugify(body.slug || body.title || '');
-  if (!baseSlug) baseSlug = `article-${Date.now()}`;
-
   const excludeId = req.params.id ? Number(req.params.id) : null;
-  let slug = baseSlug;
-  let suffix = 2;
-  while (await articlesModel.slugExists(slug, excludeId)) {
-    slug = `${baseSlug}-${suffix}`;
-    suffix += 1;
+  let slug;
+  if (!req.session?.adminUser?.isSuperAdmin && existingArticle) {
+    slug = existingArticle.slug;
+  } else {
+    let baseSlug = slugify(body.slug || body.title || '');
+    if (!baseSlug) baseSlug = `article-${Date.now()}`;
+    slug = baseSlug;
+    let suffix = 2;
+    while (await articlesModel.slugExists(slug, excludeId)) {
+      slug = `${baseSlug}-${suffix}`;
+      suffix += 1;
+    }
   }
 
   const authorId = await resolveAuthorId(body);

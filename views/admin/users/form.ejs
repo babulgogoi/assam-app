@@ -45,11 +45,21 @@
 
   <fieldset class="admin-fieldset">
     <legend>Roles</legend>
+    <%
+      var roleDisplayNames = {
+        'superadmin':     'Super Admin',
+        'editor':         'Editor',
+        'stories_editor': 'News Editor',
+        'pages_editor':   'Pages Editor',
+        'books_editor':   'Books Editor',
+        'contributor':    'Contributor'
+      };
+    %>
     <% roles.forEach(function(role) { %>
       <label class="admin-checkbox">
         <input type="checkbox" name="role_ids" value="<%= role.id %>"
           <%= selectedRoles.includes(role.id) ? 'checked' : '' %>>
-        <span><strong><%= role.name %></strong><% if (role.description) { %> — <%= role.description %><% } %></span>
+        <span><strong><%= roleDisplayNames[role.name] || role.name %></strong><% if (role.description) { %> — <%= role.description %><% } %></span>
       </label>
     <% }) %>
   </fieldset>

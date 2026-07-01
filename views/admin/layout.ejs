@@ -82,16 +82,16 @@
       <% if (canStories) { %>
       <li class="admin-nav__item">
         <a href="/admin/articles" class="admin-nav__link">
-          Stories
+          News
           <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
         </a>
         <ul class="admin-nav__dropdown">
-          <li><a href="/admin/articles"><span class="nav-icon">📄</span> All Stories</a></li>
+          <li><a href="/admin/articles"><span class="nav-icon">📄</span> All News</a></li>
           <% if (su || perms.stories?.can_create) { %>
-          <li><a href="/admin/articles/new"><span class="nav-icon">✏️</span> + New Story</a></li>
+          <li><a href="/admin/articles/new"><span class="nav-icon">✏️</span> + New Article</a></li>
           <% } %>
           <li class="nav-divider"></li>
-          <li><a href="/admin/authors"><span class="nav-icon">👤</span> Story Authors</a></li>
+          <li><a href="/admin/authors"><span class="nav-icon">👤</span> Authors</a></li>
           <% if (su || perms.authors?.can_create) { %>
           <li><a href="/admin/authors/new"><span class="nav-icon">➕</span> + New Author</a></li>
           <% } %>
