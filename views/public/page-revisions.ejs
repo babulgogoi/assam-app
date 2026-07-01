@@ -1,0 +1,109 @@
+<main class="wiki-page">
+
+  <nav class="wiki-breadcrumb">
+    <a href="/">Home</a> ›
+    <a href="/research">Research</a>
+    <% if (page.topic_name) { %>
+    › <a href="/research/<%= page.topic_slug %>"><%= page.topic_icon %> <%= page.topic_name %></a>
+    <% } %>
+    › <a href="/page/<%= page.slug %>"><%= page.title %></a>
+    › <span>Revisions</span>
+  </nav>
+
+  <div class="wiki-page__layout">
+    <div class="wiki-page__main">
+
+      <div class="wiki-page__title-row">
+        <h1 class="wiki-page__title" style="font-size:1.4rem">Revisions: <%= page.title %></h1>
+        <div class="wiki-page__tab-btns">
+          <a href="/page/<%= page.slug %>" class="wiki-tab-btn">Article</a>
+          <a href="/page/<%= page.slug %>/revisions" class="wiki-tab-btn wiki-tab-btn--active">Revisions</a>
+        </div>
+      </div>
+
+      <div class="wiki-revisions__meta">
+        <div class="wiki-revisions__meta-row">
+          <span class="wiki-revisions__meta-label">Originally written</span>
+          <span>
+            <% var origDate = page.d9_created_at || page.created_at; %>
+            <time datetime="<%= new Date(origDate).toISOString() %>"><%= new Date(origDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %></time>
+            <% if (page.d9_created_at) { %><span class="wiki-revisions__meta-source">(Drupal 9)</span><% } %>
+          </span>
+        </div>
+        <div class="wiki-revisions__meta-row">
+          <span class="wiki-revisions__meta-label">Last updated</span>
+          <span>
+            <% var updDate = page.d9_updated_at || page.updated_at; %>
+            <time datetime="<%= new Date(updDate).toISOString() %>"><%= new Date(updDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %></time>
+          </span>
+        </div>
+        <% if (page.d9_created_at) { %>
+        <div class="wiki-revisions__meta-row">
+          <span class="wiki-revisions__meta-label">Migrated to assam.org</span>
+          <span><time><%= new Date(page.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %></time></span>
+        </div>
+        <% } %>
+      </div>
+
+      <% if (page.update_needed) { %>
+      <div class="wiki-update-notice">
+        ⚠️ <strong>This page needs updating.</strong>
+        <% if (page.update_needed_note) { %> <%= page.update_needed_note %><% } %>
+        <% if (locals.adminUser) { %> <a href="/admin/pages/<%= page.id %>/edit">Edit →</a><% } %>
+      </div>
+      <% } %>
+
+      <% if (page.editors_note) { %>
+      <div class="wiki-revisions__editors-note">
+        <span class="wiki-revisions__note-label">📝 Editor's Note</span>
+        <p><%= page.editors_note %></p>
+      </div>
+      <% } %>
+
+      <div class="wiki-revisions__history">
+        <h2>Revision History</h2>
+        <% if (!history.length) { %>
+        <p style="color:#888">No revisions recorded yet.</p>
+        <% } else { %>
+        <table class="wiki-history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Editor</th>
+              <th>Action</th>
+              <th>Note</th>
+              <th>Words</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% history.forEach(function(h) { %>
+            <tr>
+              <td class="wiki-history__date"><%= h.formatted_date %></td>
+              <td><%= h.editor_name || '—' %></td>
+              <td><span class="action-badge action-badge--<%= h.action %>"><%= h.action.replace(/_/g,' ') %></span></td>
+              <td class="wiki-history__note"><%= h.editor_note || '—' %></td>
+              <td class="wiki-history__words">
+                <% if (h.word_count_after !== null) { %>
+                  <%= h.word_count_after %> w
+                  <% if (h.word_count_before !== null) { var d = h.word_count_after - h.word_count_before; %>
+                    <% if (d !== 0) { %><span style="color:<%= d > 0 ? '#2a7a2a' : '#c0392b' %>">(<%= d > 0 ? '+' : '' %><%= d %>)</span><% } %>
+                  <% } %>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+
+      <div class="wiki-talk__back">
+        <a href="/page/<%= page.slug %>">← Back to article</a>
+        <% if (locals.adminUser && (adminUser.isSuperAdmin || adminUser.permissions?.pages?.can_read)) { %>
+        <a href="/admin/pages/<%= page.id %>/revisions">Full revisions (admin) →</a>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</main>

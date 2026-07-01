@@ -4,6 +4,10 @@ const PAGE_SELECT = `
   SELECT p.id, p.slug, p.title, p.body, p.status,
          p.excerpt, p.featured_image, p.featured_image_caption,
          p.references_text, p.tags, p.topic_id, p.author_id,
+         p.pdf_attachment, p.pdf_label,
+         p.update_needed, p.update_needed_note,
+         p.editors_note,
+         p.d9_created_at, p.d9_updated_at,
          p.created_at, p.updated_at,
          pt.name AS topic_name, pt.slug AS topic_slug, pt.icon AS topic_icon,
          a.display_name AS author_name, a.username AS author_username
@@ -41,7 +45,7 @@ function _hydrate(row) {
 
 async function getAllForAdmin() {
   const { rows } = await pool.query(
-    `SELECT p.id, p.slug, p.title, p.status, p.updated_at,
+    `SELECT p.id, p.slug, p.title, p.status, p.updated_at, p.update_needed,
             pt.name AS topic_name, pt.icon AS topic_icon
      FROM pages p
      LEFT JOIN page_topics pt ON pt.id = p.topic_id
@@ -93,33 +97,42 @@ async function slugExists(slug, excludeId = null) {
 }
 
 async function create({ slug, title, body, status, excerpt, featured_image,
-  featured_image_caption, references_text, tags, topic_id, author_id }) {
+  featured_image_caption, references_text, tags, topic_id, author_id,
+  pdf_attachment, pdf_label, update_needed, update_needed_note, editors_note }) {
   const { rows } = await pool.query(
     `INSERT INTO pages
        (slug, title, body, status, excerpt, featured_image,
         featured_image_caption, references_text, tags, topic_id, author_id,
+        pdf_attachment, pdf_label, update_needed, update_needed_note, editors_note,
         created_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now())
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,now(),now())
      RETURNING id`,
     [slug, title, body, status, excerpt || null, featured_image || null,
      featured_image_caption || null, references_text || null,
-     tags || [], topic_id || null, author_id || null]
+     tags || [], topic_id || null, author_id || null,
+     pdf_attachment || null, pdf_label || null,
+     update_needed || false, update_needed_note || null, editors_note || null]
   );
   return rows[0].id;
 }
 
 async function update(id, { slug, title, body, status, excerpt, featured_image,
-  featured_image_caption, references_text, tags, topic_id, author_id }) {
+  featured_image_caption, references_text, tags, topic_id, author_id,
+  pdf_attachment, pdf_label, update_needed, update_needed_note, editors_note }) {
   await pool.query(
     `UPDATE pages SET
        slug=$1, title=$2, body=$3, status=$4,
        excerpt=$5, featured_image=$6, featured_image_caption=$7,
        references_text=$8, tags=$9, topic_id=$10, author_id=$11,
+       pdf_attachment=$12, pdf_label=$13,
+       update_needed=$14, update_needed_note=$15, editors_note=$16,
        updated_at=now()
-     WHERE id=$12`,
+     WHERE id=$17`,
     [slug, title, body, status, excerpt || null, featured_image || null,
      featured_image_caption || null, references_text || null,
-     tags || [], topic_id || null, author_id || null, id]
+     tags || [], topic_id || null, author_id || null,
+     pdf_attachment || null, pdf_label || null,
+     update_needed || false, update_needed_note || null, editors_note || null, id]
   );
 }
 
