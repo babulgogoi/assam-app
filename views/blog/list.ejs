@@ -1,0 +1,84 @@
+<div class="blog-list-page">
+
+  <div class="blog-header">
+    <p class="section-label">Blogs</p>
+    <h1>The Assam Review</h1>
+    <p class="blog-subtitle">Film, music, books, interviews, and writing from across Assam and the Northeast.</p>
+  </div>
+
+  <% if (tags && tags.length) { %>
+  <div class="blog-tag-filters">
+    <span class="filter-label">Browse by:</span>
+    <a href="/blog" class="blog-tag<%= !activeTag ? ' blog-tag--active' : '' %>">All</a>
+    <% tags.forEach(function(tag) { %>
+    <a href="/blog?tag=<%= encodeURIComponent(tag) %>" class="blog-tag<%= activeTag === tag ? ' blog-tag--active' : '' %>"
+       data-track-filter data-filter-type="blog_tag" data-filter-value="<%= tag %>"><%= tag %></a>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <div class="blog-contribute-banner">
+    <span>✍️</span>
+    <p>
+      We welcome articles in English and Assamese — film, music, literature, interviews, and more.
+      <strong>Submit your piece:</strong>
+      <a href="mailto:webmaster@assam.org">webmaster@assam.org</a>
+    </p>
+  </div>
+
+  <% if (!posts.length) { %>
+  <div class="blog-empty">
+    <p>No posts yet. Check back soon.</p>
+  </div>
+  <% } else { %>
+  <div class="blog-grid">
+    <% posts.forEach(function(post) { %>
+    <article class="blog-card">
+      <% if (post.featured_image) { %>
+      <a href="/blog/<%= post.slug %>" class="blog-card__img-wrap"
+         data-track-click data-content-type="blog_post" data-content-id="<%= post.id %>"
+         data-content-slug="<%= post.slug %>" data-content-title="<%= post.title %>">
+        <img src="<%= post.featured_image.replace(/\.jpg$/, '-sm.jpg') %>" alt="<%= post.title %>" class="blog-card__img" loading="lazy">
+      </a>
+      <% } else { %>
+      <a href="/blog/<%= post.slug %>" class="blog-card__img-wrap blog-card__img-placeholder"
+         data-track-click data-content-type="blog_post" data-content-id="<%= post.id %>"
+         data-content-slug="<%= post.slug %>" data-content-title="<%= post.title %>">📝</a>
+      <% } %>
+      <div class="blog-card__body">
+        <% if (post.tags && post.tags.length) { %>
+        <div class="blog-card__tags">
+          <% post.tags.slice(0, 2).forEach(function(tag) { %><a href="/blog?tag=<%= encodeURIComponent(tag) %>" class="blog-tag blog-tag--sm"><%= tag %></a><% }) %>
+        </div>
+        <% } %>
+        <h2 class="blog-card__title"><a href="/blog/<%= post.slug %>"
+          data-track-click data-content-type="blog_post" data-content-id="<%= post.id %>"
+          data-content-slug="<%= post.slug %>" data-content-title="<%= post.title %>"><%= post.title %></a></h2>
+        <% if (post.excerpt) { %><p class="blog-card__excerpt"><%= post.excerpt %></p><% } %>
+        <div class="blog-card__footer">
+          <% if (post.published_at) { %>
+          <time class="blog-card__date" datetime="<%= new Date(post.published_at).toISOString() %>">
+            <%= new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+          </time>
+          <% } else { %><span></span><% } %>
+          <a href="/blog/<%= post.slug %>" class="blog-card__read-more">Read more →</a>
+        </div>
+      </div>
+    </article>
+    <% }) %>
+  </div>
+
+  <% if (totalPages > 1) { %>
+  <div class="blog-pagination">
+    <% if (page > 1) { %>
+    <a href="/blog?page=<%= page - 1 %><%= activeTag ? '&tag=' + encodeURIComponent(activeTag) : '' %>" class="page-btn">← Previous</a>
+    <% } %>
+    <span class="page-info">Page <%= page %> of <%= totalPages %></span>
+    <% if (page < totalPages) { %>
+    <a href="/blog?page=<%= page + 1 %><%= activeTag ? '&tag=' + encodeURIComponent(activeTag) : '' %>" class="page-btn">Next →</a>
+    <% } %>
+  </div>
+  <% } %>
+  <% } %>
+
+</div>

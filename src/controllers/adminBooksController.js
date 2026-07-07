@@ -4,6 +4,7 @@ const path = require('path');
 const fs   = require('fs');
 const sharp = require('sharp');
 const booksModel = require('../models/books');
+const adminUsersModel = require('../models/adminUsers');
 
 const BOOKS_DIR = process.env.UPLOADS_BOOKS_DIR || '/home/assam/web/assam.org/public_html/uploads/books';
 const BOOKS_URL_PREFIX = '/uploads/books';
@@ -24,6 +25,7 @@ async function saveCoverImage(buffer, bookId) {
       .jpeg({ quality: 85, progressive: true })
       .toFile(outPath + '.tmp');
     fs.renameSync(outPath + '.tmp', outPath);
+    fs.chmodSync(outPath, 0o644);
   }
   return `${BOOKS_URL_PREFIX}/${base}.jpg`;
 }
@@ -36,6 +38,29 @@ function deleteCoverVariants(coverUrl) {
     const p = path.join(BOOKS_DIR, `${base}${suffix}.jpg`);
     fs.unlink(p, () => {});
   }
+}
+
+const AUTHORS_DIR    = process.env.UPLOADS_AUTHORS_DIR    || '/home/assam/web/assam.org/public_html/uploads/authors';
+const PUBLISHERS_DIR = process.env.UPLOADS_PUBLISHERS_DIR || '/home/assam/web/assam.org/public_html/uploads/publishers';
+
+async function saveResizedImage(buffer, dir, urlPrefix, filenameBase, width) {
+  const filename = `${filenameBase}.jpg`;
+  const outPath = path.join(dir, filename);
+  await sharp(buffer)
+    .resize(width, null, { withoutEnlargement: true, fit: 'inside' })
+    .jpeg({ quality: 80, progressive: true })
+    .toFile(outPath + '.tmp');
+  fs.renameSync(outPath + '.tmp', outPath);
+  fs.chmodSync(outPath, 0o644);
+  return `${urlPrefix}/${filename}`;
+}
+
+function saveAuthorPhoto(buffer) {
+  return saveResizedImage(buffer, AUTHORS_DIR, '/uploads/authors', `author-${Date.now()}`, 400);
+}
+
+function savePublisherLogo(buffer) {
+  return saveResizedImage(buffer, PUBLISHERS_DIR, '/uploads/publishers', `publisher-${Date.now()}`, 600);
 }
 
 const ADMIN_PAGE_SIZE = 20;
@@ -162,6 +187,7 @@ async function updateBook(req, res, next) {
     }
 
     const data = await buildBookData(req.body, book.id);
+    if (!req.session?.adminUser?.isSuperAdmin) data.slug = book.slug;
     await booksModel.update(book.id, { ...data, cover_image: coverImage });
     res.redirect(`/admin/books/${book.id}/edit`);
   } catch (err) { next(err); }
@@ -215,6 +241,7 @@ async function buildBookData(body, excludeId = null) {
     author_interview_url: (body.author_interview_url || '').trim() || null,
     blog_url: (body.blog_url || '').trim() || null,
     video_url: (body.video_url || '').trim() || null,
+    amazon_url: (body.amazon_url || '').trim() || null,
   };
 }
 
@@ -231,7 +258,8 @@ async function listBookAuthors(req, res, next) {
 
 async function newBookAuthorForm(req, res, next) {
   res.locals.layout = 'admin/layout';
-  res.render('admin/book-authors/form', { title: 'New Book Author — Admin', author: null, errors: [], saved: false, authorBooks: [] });
+  const adminUsers = await adminUsersModel.listBasic();
+  res.render('admin/book-authors/form', { title: 'New Book Author — Admin', author: null, errors: [], saved: false, authorBooks: [], adminUsers });
 }
 
 async function createBookAuthor(req, res, next) {
@@ -239,9 +267,11 @@ async function createBookAuthor(req, res, next) {
     const errors = validateAuthorForm(req.body);
     if (errors.length) {
       res.locals.layout = 'admin/layout';
-      return res.status(400).render('admin/book-authors/form', { title: 'New Book Author — Admin', author: req.body, errors, saved: false, authorBooks: [] });
+      const adminUsers = await adminUsersModel.listBasic();
+      return res.status(400).render('admin/book-authors/form', { title: 'New Book Author — Admin', author: req.body, errors, saved: false, authorBooks: [], adminUsers });
     }
     const data = await buildAuthorData(req.body);
+    if (req.file) data.photo = await saveAuthorPhoto(req.file.buffer);
     const id = await booksModel.createAuthor(data);
     res.redirect(`/admin/book-authors/${id}/edit?saved=1`);
   } catch (err) { next(err); }
@@ -252,10 +282,11 @@ async function editBookAuthorForm(req, res, next) {
     const author = await booksModel.getAuthorById(req.params.id);
     if (!author) return res.status(404).send('Author not found');
     const authorBooks = await booksModel.getByAuthor(author.slug, { limit: 200 });
+    const adminUsers = await adminUsersModel.listBasic();
     res.locals.layout = 'admin/layout';
     res.render('admin/book-authors/form', {
       title: `Edit: ${author.name} — Admin`,
-      author, authorBooks, errors: [],
+      author, authorBooks, errors: [], adminUsers,
       saved: !!req.query.saved,
     });
   } catch (err) { next(err); }
@@ -268,12 +299,16 @@ async function updateBookAuthor(req, res, next) {
     const errors = validateAuthorForm(req.body);
     if (errors.length) {
       res.locals.layout = 'admin/layout';
+      const adminUsers = await adminUsersModel.listBasic();
       return res.status(400).render('admin/book-authors/form', {
         title: `Edit: ${author.name} — Admin`,
-        author: { ...author, ...req.body }, authorBooks: [], errors, saved: false,
+        author: { ...author, ...req.body }, authorBooks: [], errors, saved: false, adminUsers,
       });
     }
     const data = await buildAuthorData(req.body, author.id);
+    // File input replaced the old URL field — keep the current photo unless a new one is uploaded.
+    data.photo = req.file ? await saveAuthorPhoto(req.file.buffer) : author.photo;
+    if (!req.session?.adminUser?.isSuperAdmin) data.slug = author.slug;
     await booksModel.updateAuthor(author.id, data);
     res.redirect(`/admin/book-authors/${author.id}/edit?saved=1`);
   } catch (err) { next(err); }
@@ -310,6 +345,7 @@ async function buildAuthorData(body, excludeId = null) {
     nationality: body.nationality || 'Indian',
     website: (body.website || '').trim() || null,
     wikipedia_url: (body.wikipedia_url || '').trim() || null,
+    admin_user_id: body.admin_user_id ? parseInt(body.admin_user_id, 10) : null,
   };
 }
 
@@ -336,6 +372,7 @@ async function createPublisher(req, res, next) {
       return res.status(400).render('admin/book-publishers/form', { title: 'New Publisher — Admin', publisher: req.body, errors });
     }
     const data = await buildPublisherData(req.body);
+    if (req.file) data.logo = await savePublisherLogo(req.file.buffer);
     const id = await booksModel.createPublisher(data);
     res.redirect(`/admin/book-publishers/${id}/edit`);
   } catch (err) { next(err); }
@@ -360,6 +397,8 @@ async function updatePublisher(req, res, next) {
       return res.status(400).render('admin/book-publishers/form', { title: `Edit: ${publisher.name} — Admin`, publisher: { ...publisher, ...req.body }, errors });
     }
     const data = await buildPublisherData(req.body, publisher.id);
+    data.logo = req.file ? await savePublisherLogo(req.file.buffer) : publisher.logo;
+    if (!req.session?.adminUser?.isSuperAdmin) data.slug = publisher.slug;
     await booksModel.updatePublisher(publisher.id, data);
     res.redirect(`/admin/book-publishers/${publisher.id}/edit`);
   } catch (err) { next(err); }

@@ -1,0 +1,3 @@
+ALTER TABLE pages
+  ADD COLUMN IF NOT EXISTS update_needed      BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS update_needed_note VARCHAR(500);

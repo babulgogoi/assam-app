@@ -34,6 +34,14 @@ async function listWithRoles() {
   return rows;
 }
 
+// Lightweight list for "link admin user" dropdowns.
+async function listBasic() {
+  const { rows } = await pool.query(
+    `SELECT id, username, email FROM admin_users WHERE status = 'active' ORDER BY username`
+  );
+  return rows;
+}
+
 async function getRoles() {
   const { rows } = await pool.query(
     `SELECT id, name, description FROM admin_roles ORDER BY name`
@@ -142,7 +150,7 @@ async function usernameExists(username, excludeId = null) {
 }
 
 module.exports = {
-  getByUsername, getById, listWithRoles,
+  getByUsername, getById, listWithRoles, listBasic,
   getRoles, getRolesForUser, loadPermissions,
   create, update, remove, updateLastLogin, usernameExists,
 };

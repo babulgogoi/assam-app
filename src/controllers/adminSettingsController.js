@@ -27,7 +27,10 @@ async function updateSettings(req, res, next) {
     await Promise.all([
       siteSettingsModel.updateFooterHtml(req.body.footer_html || ''),
       siteSettingsModel.updateFeaturedCategory((req.body.featured_category || '').trim() || 'Features'),
-      siteSettingsModel.updatePublishEmail((req.body.publish_contact_email || '').trim() || 'webmaster@assam.org'),
+      siteSettingsModel.updatePublishCustomHtml(
+        req.body.publish_custom_html || null,
+        req.body.publish_custom_html_enabled === '1'
+      ),
     ]);
     res.redirect('/admin/settings');
   } catch (err) {

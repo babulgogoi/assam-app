@@ -16,15 +16,17 @@
   </div>
 </div>
 
-<form method="post" action="<%= author && author.id ? `/admin/book-authors/${author.id}` : '/admin/book-authors' %>" class="admin-form">
+<form method="post" enctype="multipart/form-data" action="<%= author && author.id ? `/admin/book-authors/${author.id}` : '/admin/book-authors' %>" class="admin-form">
   <div class="admin-form-row">
     <label>Name *<input type="text" name="name" value="<%= (author && author.name) || '' %>" required></label>
+    <% if (locals.adminUser?.isSuperAdmin) { %>
     <label>Slug
-      <input type="text" name="slug" value="<%= (author && author.slug) || '' %>"
-             placeholder="auto-generated"
-             <% if (author && author.id) { %>style="background:#f5f5f5;color:#888"<% } %>>
-      <% if (author && author.id) { %><small style="color:#888;font-size:0.75rem">Slug is used in URLs — edit with care.</small><% } %>
+      <input type="text" name="slug" value="<%= (author && author.slug) || '' %>" placeholder="auto-generated">
+      <small style="color:#c0392b;font-size:0.75rem">⚠️ Changing slug will break existing links and redirects.</small>
     </label>
+    <% } else { %>
+    <input type="hidden" name="slug" value="<%= (author && author.slug) || '' %>">
+    <% } %>
   </div>
 
   <label>Bio<textarea name="bio" class="tinymce" rows="5"><%= (author && author.bio) || '' %></textarea></label>
@@ -34,12 +36,32 @@
     <label>Birth Year<input type="number" name="birth_year" min="1800" max="2010" value="<%= (author && author.birth_year) || '' %>"></label>
   </div>
 
-  <div class="admin-form-row">
-    <label>Photo URL<input type="url" name="photo" value="<%= (author && author.photo) || '' %>" placeholder="https://…"></label>
-    <label>Website<input type="url" name="website" value="<%= (author && author.website) || '' %>" placeholder="https://…"></label>
-  </div>
+  <label>Author Photo
+    <% if (author && author.photo) { %>
+    <span style="display:block;margin-bottom:8px">
+      <img src="<%= author.photo %>" alt="Current photo" style="height:80px;border-radius:4px;display:block;margin-bottom:4px">
+      <small style="font-size:0.8rem;color:#888">Current photo — upload a new one to replace</small>
+    </span>
+    <% } %>
+    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp">
+    <small>JPEG, PNG or WebP. Max 5MB. Resized to 400px wide.</small>
+  </label>
+
+  <label>Website<input type="url" name="website" value="<%= (author && author.website) || '' %>" placeholder="https://…"></label>
 
   <label>Wikipedia URL<input type="url" name="wikipedia_url" value="<%= (author && author.wikipedia_url) || '' %>" placeholder="https://en.wikipedia.org/wiki/…"></label>
+
+  <label>Linked Admin User <small style="color:#888">(optional)</small>
+    <select name="admin_user_id">
+      <option value="">— None —</option>
+      <% (typeof adminUsers !== 'undefined' ? adminUsers : []).forEach(function(u) { %>
+      <option value="<%= u.id %>" <%= author && author.admin_user_id == u.id ? 'selected' : '' %>>
+        <%= u.username %><% if (u.email) { %> (<%= u.email %>)<% } %>
+      </option>
+      <% }) %>
+    </select>
+    <small style="color:#888;font-size:0.8rem">Link this author profile to an admin login account — their blog posts will carry this profile's byline and photo.</small>
+  </label>
 
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:1.25rem">
     <button type="submit" class="admin-btn admin-btn--primary"><%= author && author.id ? 'Save Changes' : 'Create Author' %></button>

@@ -67,9 +67,16 @@
 
       <% if (book.price) { %><p class="book-detail__price">₹<%= book.price %></p><% } %>
 
-      <% if (book.buy_url) { %>
-      <a href="<%= book.buy_url %>" target="_blank" rel="noopener noreferrer" class="btn-buy">Buy Now →</a>
-      <% } %>
+      <div class="book-buy-actions"
+           data-content-type="book" data-content-id="<%= book.id %>"
+           data-content-slug="<%= book.slug %>" data-content-title="<%= book.title %>">
+        <% if (book.amazon_url) { %>
+        <a href="<%= book.amazon_url %>" target="_blank" rel="noopener nofollow sponsored" class="btn-buy-now">🛒 Buy on Amazon</a>
+        <% } %>
+        <% if (book.buy_url) { %>
+        <a href="<%= book.buy_url %>" target="_blank" rel="noopener noreferrer" class="btn-buy">Buy Now →</a>
+        <% } %>
+      </div>
 
       <% if (book.author_interview_url || book.blog_url || book.video_url) { %>
       <div class="book-extra-links">

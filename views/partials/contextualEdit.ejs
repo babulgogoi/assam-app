@@ -1,0 +1,8 @@
+<%# Contextual quick-edit bar on public pages.
+    Params: editModule (RBAC module), editUrl (admin edit form), editLabel ("article"/"page"/…)
+    Shown only to admins whose role can update the module. %>
+<% if (locals.adminUser && (adminUser.isSuperAdmin || adminUser.permissions?.[editModule]?.can_update)) { %>
+<div class="contextual-edit-bar">
+  <a href="<%= editUrl %>" class="contextual-edit-btn">✏️ Edit this <%= editLabel %></a>
+</div>
+<% } %>

@@ -14,13 +14,15 @@ function slugify(text) {
 
 const BOOK_SELECT = `
   SELECT b.*,
-    COALESCE(
-      json_agg(
-        json_build_object('id', ba.id, 'name', ba.name, 'slug', ba.slug, 'role', bba.role)
-        ORDER BY bba.sort_order
-      ) FILTER (WHERE ba.id IS NOT NULL),
-      '[]'
-    ) AS authors,
+    COALESCE((
+      SELECT json_agg(
+        json_build_object('id', ba_a.id, 'name', ba_a.name, 'slug', ba_a.slug, 'role', bba_a.role)
+        ORDER BY bba_a.sort_order
+      )
+      FROM books_book_authors bba_a
+      JOIN books_authors ba_a ON ba_a.id = bba_a.author_id
+      WHERE bba_a.book_id = b.id
+    ), '[]') AS authors,
     COALESCE(
       json_agg(
         DISTINCT jsonb_build_object('id', bc.id, 'name', bc.name, 'slug', bc.slug)
@@ -40,21 +42,84 @@ const BOOK_SELECT = `
   LEFT JOIN books_publishers p ON p.id = b.publisher_id
 `;
 
-async function getLatest({ limit = 16, offset = 0 } = {}) {
+async function getLatest({ limit = 16, offset = 0, language = null } = {}) {
+  const conds  = [`b.status = 'active'`];
+  const params = [];
+  if (language) conds.push(`b.language = $${params.push(language)}`);
+  params.push(limit);
+  params.push(offset);
   const { rows } = await db.query(
     `${BOOK_SELECT}
-     WHERE b.status = 'active'
+     WHERE ${conds.join(' AND ')}
      GROUP BY b.id, p.name, p.slug
      ORDER BY b.created_at DESC
-     LIMIT $1 OFFSET $2`,
-    [limit, offset]
+     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params
   );
   return rows;
 }
 
-async function countActive() {
-  const { rows } = await db.query("SELECT COUNT(*) FROM books WHERE status = 'active'");
+async function countActive({ language = null } = {}) {
+  const conds  = [`status = 'active'`];
+  const params = [];
+  if (language) conds.push(`language = $${params.push(language)}`);
+  const { rows } = await db.query(
+    `SELECT COUNT(*) FROM books WHERE ${conds.join(' AND ')}`,
+    params
+  );
   return parseInt(rows[0].count, 10);
+}
+
+async function getLanguages() {
+  const { rows } = await db.query(
+    `SELECT language, COUNT(*)::int AS count
+     FROM books
+     WHERE status = 'active' AND language IS NOT NULL AND language <> ''
+     GROUP BY language
+     ORDER BY count DESC, language`
+  );
+  return rows;
+}
+
+// Lightweight list for the homepage language blocks. Same `authors` shape as
+// the home() inline queries so views/partials/book-card.ejs renders it as-is.
+// exclude:true inverts the match ("all books EXCEPT this language", NULLs included).
+async function getLatestByLanguage(language, limit = 12, { exclude = false } = {}) {
+  const langCond = exclude ? 'b.language IS DISTINCT FROM $1' : 'b.language = $1';
+  const { rows } = await db.query(
+    `SELECT b.id, b.title, b.slug, b.language, b.cover_image, b.cover_image_alt,
+            b.price, b.amazon_url,
+            COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
+              ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
+     FROM books b
+     LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+     LEFT JOIN books_authors ba ON ba.id = bba.author_id
+     WHERE b.status = 'active' AND ${langCond}
+     GROUP BY b.id
+     ORDER BY b.created_at DESC
+     LIMIT $2`,
+    [language, limit]
+  );
+  return rows;
+}
+
+// Latest books, all languages — same row shape as getLatestByLanguage.
+async function getLatestAll(limit = 6) {
+  const { rows } = await db.query(
+    `SELECT b.id, b.title, b.slug, b.language, b.cover_image, b.cover_image_alt,
+            b.price, b.amazon_url,
+            COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
+              ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
+     FROM books b
+     LEFT JOIN books_book_authors bba ON bba.book_id = b.id
+     LEFT JOIN books_authors ba ON ba.id = bba.author_id
+     WHERE b.status = 'active'
+     GROUP BY b.id
+     ORDER BY b.created_at DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return rows;
 }
 
 async function getFeatured({ limit = 4 } = {}) {
@@ -131,15 +196,20 @@ async function getByPublisher(publisherSlug, { limit = 16, offset = 0 } = {}) {
   return rows;
 }
 
-async function search(query, { limit = 20, offset = 0 } = {}) {
+async function search(query, { limit = 20, offset = 0, language = null } = {}) {
+  const params = [`%${query}%`];
+  const langFilter = language ? `AND b.language = $${params.push(language)}` : '';
+  params.push(limit);
+  params.push(offset);
   const { rows } = await db.query(
     `${BOOK_SELECT}
      WHERE b.status = 'active'
        AND (b.title ILIKE $1 OR b.description ILIKE $1 OR b.isbn ILIKE $1 OR ba.name ILIKE $1)
+       ${langFilter}
      GROUP BY b.id, p.name, p.slug
      ORDER BY b.title
-     LIMIT $2 OFFSET $3`,
-    [`%${query}%`, limit, offset]
+     LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params
   );
   return rows;
 }
@@ -169,8 +239,8 @@ async function create(data) {
         price, currency, buy_url, isbn, isbn13, pages, language,
         published_year, edition, format, tags, publisher_id,
         status, is_featured, woo_product_id,
-        author_interview_url, blog_url, video_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+        author_interview_url, blog_url, video_url, amazon_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
      RETURNING id`,
     [
       data.title, data.slug, data.subtitle || null, data.description || null,
@@ -183,6 +253,7 @@ async function create(data) {
       data.status || 'active', data.is_featured || false,
       data.woo_product_id || null,
       data.author_interview_url || null, data.blog_url || null, data.video_url || null,
+      data.amazon_url || null,
     ]
   );
   const bookId = rows[0].id;
@@ -198,9 +269,9 @@ async function update(id, data) {
        cover_image_alt=$6, price=$7, currency=$8, buy_url=$9, isbn=$10,
        isbn13=$11, pages=$12, language=$13, published_year=$14, edition=$15,
        format=$16, tags=$17, publisher_id=$18, status=$19, is_featured=$20,
-       author_interview_url=$21, blog_url=$22, video_url=$23,
+       author_interview_url=$21, blog_url=$22, video_url=$23, amazon_url=$24,
        updated_at=NOW()
-     WHERE id=$24`,
+     WHERE id=$25`,
     [
       data.title, data.slug, data.subtitle || null, data.description || null,
       data.cover_image || null, data.cover_image_alt || null,
@@ -211,6 +282,7 @@ async function update(id, data) {
       data.tags || [], data.publisher_id || null,
       data.status || 'active', data.is_featured || false,
       data.author_interview_url || null, data.blog_url || null, data.video_url || null,
+      data.amazon_url || null,
       id,
     ]
   );
@@ -312,11 +384,11 @@ async function listAuthors({ limit = 50, offset = 0, q = '' } = {}) {
 
 async function createAuthor(data) {
   const { rows } = await db.query(
-    `INSERT INTO books_authors (name, slug, bio, photo, birth_year, nationality, website, wikipedia_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+    `INSERT INTO books_authors (name, slug, bio, photo, birth_year, nationality, website, wikipedia_url, admin_user_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
     [data.name, data.slug, data.bio || null, data.photo || null,
      data.birth_year || null, data.nationality || 'Indian',
-     data.website || null, data.wikipedia_url || null]
+     data.website || null, data.wikipedia_url || null, data.admin_user_id || null]
   );
   return rows[0].id;
 }
@@ -324,10 +396,10 @@ async function createAuthor(data) {
 async function updateAuthor(id, data) {
   await db.query(
     `UPDATE books_authors SET name=$1, slug=$2, bio=$3, photo=$4, birth_year=$5,
-     nationality=$6, website=$7, wikipedia_url=$8 WHERE id=$9`,
+     nationality=$6, website=$7, wikipedia_url=$8, admin_user_id=$9 WHERE id=$10`,
     [data.name, data.slug, data.bio || null, data.photo || null,
      data.birth_year || null, data.nationality || 'Indian',
-     data.website || null, data.wikipedia_url || null, id]
+     data.website || null, data.wikipedia_url || null, data.admin_user_id || null, id]
   );
 }
 
@@ -411,14 +483,17 @@ async function listCategories() {
   return rows;
 }
 
-async function searchCount(query) {
+async function searchCount(query, { language = null } = {}) {
+  const params = [`%${query}%`];
+  const langFilter = language ? `AND b.language = $${params.push(language)}` : '';
   const { rows } = await db.query(
     `SELECT COUNT(DISTINCT b.id) FROM books b
      LEFT JOIN books_book_authors bba ON bba.book_id = b.id
      LEFT JOIN books_authors ba ON ba.id = bba.author_id
      WHERE b.status = 'active'
-       AND (b.title ILIKE $1 OR b.isbn ILIKE $1 OR ba.name ILIKE $1)`,
-    [`%${query}%`]
+       AND (b.title ILIKE $1 OR b.isbn ILIKE $1 OR ba.name ILIKE $1)
+       ${langFilter}`,
+    params
   );
   return parseInt(rows[0].count, 10);
 }
@@ -498,4 +573,5 @@ module.exports = {
   getPublisherBySlug, getPublisherById, listPublishers,
   createPublisher, updatePublisher, removePublisher, publisherSlugExists,
   listCategories, searchCount, getCategoryBySlug, searchAuthors, getRelatedBooks,
+  getLanguages, getLatestByLanguage, getLatestAll,
 };

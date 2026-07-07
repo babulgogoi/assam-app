@@ -9,7 +9,14 @@
 
   <div class="admin-form-row">
     <label>Title *<input type="text" name="title" value="<%= (book && book.title) || '' %>" required></label>
-    <label>Slug<input type="text" name="slug" value="<%= (book && book.slug) || '' %>" placeholder="auto-generated"></label>
+    <% if (locals.adminUser?.isSuperAdmin) { %>
+    <label>Slug
+      <input type="text" name="slug" value="<%= (book && book.slug) || '' %>" placeholder="auto-generated">
+      <small style="color:#c0392b;font-size:0.75rem">⚠️ Changing slug will break existing links and redirects.</small>
+    </label>
+    <% } else { %>
+    <input type="hidden" name="slug" value="<%= (book && book.slug) || '' %>">
+    <% } %>
   </div>
 
   <label>Subtitle<input type="text" name="subtitle" value="<%= (book && book.subtitle) || '' %>"></label>
@@ -73,6 +80,12 @@
     <label>Buy URL<input type="url" name="buy_url" value="<%= (book && book.buy_url) || '' %>" placeholder="https://…"></label>
   </div>
 
+  <label>Amazon Affiliate Link
+    <input type="url" name="amazon_url" value="<%= (book && book.amazon_url) || '' %>"
+           placeholder="https://www.amazon.in/dp/XXXXXXXXXX?tag=assamorg-21">
+    <small style="color:#888;font-size:0.8rem">Paste full Amazon affiliate URL (with your tag). Leave blank if not available.</small>
+  </label>
+
   <label>Author Interview URL
     <input type="url" name="author_interview_url" value="<%= (book && book.author_interview_url) || '' %>" placeholder="https://…">
     <small style="color:#888;font-size:0.8rem">Link to an interview with the author about this book</small>
@@ -100,7 +113,17 @@
 
   <div class="admin-form-row">
     <label>Language
-      <input type="text" name="language" value="<%= (book && book.language) || 'English' %>">
+      <select name="language">
+        <%
+          var langs = ['Assamese', 'English', 'Hindi', 'Bengali', 'Bodo', 'Khasi', 'Mising', 'Karbi', 'Dimasa', 'Other'];
+          var currentLang = (book && book.language) || 'English';
+          // Keep a legacy/unlisted value selectable so saving doesn't silently change it
+          if (currentLang && langs.indexOf(currentLang) === -1) langs.push(currentLang);
+        %>
+        <% langs.forEach(function(lang) { %>
+        <option value="<%= lang %>" <%= currentLang === lang ? 'selected' : '' %>><%= lang %></option>
+        <% }) %>
+      </select>
     </label>
     <label>Edition<input type="text" name="edition" value="<%= (book && book.edition) || '' %>"></label>
   </div>

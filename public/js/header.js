@@ -3,10 +3,19 @@
   if (!header) return;
 
   let ticking = false;
-  const STICK_THRESHOLD = 80;
+  let isStuck = false;
+  const STICK_AT   = 80; // px — stick when scrolled past this
+  const UNSTICK_AT = 50; // px — unstick only when scroll comes back below this (hysteresis)
 
   function updateHeaderState() {
-    header.classList.toggle('is-stuck', window.scrollY > STICK_THRESHOLD);
+    const y = window.scrollY;
+    if (!isStuck && y > STICK_AT) {
+      isStuck = true;
+      header.classList.add('is-stuck');
+    } else if (isStuck && y < UNSTICK_AT) {
+      isStuck = false;
+      header.classList.remove('is-stuck');
+    }
     ticking = false;
   }
 

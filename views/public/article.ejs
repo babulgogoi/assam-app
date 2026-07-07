@@ -1,9 +1,7 @@
 <div class="home-layout">
   <div class="home-main">
     <article class="article-detail">
-      <% if (isAdmin) { %>
-        <a class="admin-edit-link" href="/admin/articles/<%= article.id %>/edit">Edit this page</a>
-      <% } %>
+      <%- include('../partials/contextualEdit', { editModule: 'stories', editUrl: `/admin/articles/${article.id}/edit`, editLabel: 'article' }) %>
 
       <% if (article.category) { %>
         <a href="/category/<%= encodeURIComponent(article.category) %>" class="article-category"><%= article.category %></a>

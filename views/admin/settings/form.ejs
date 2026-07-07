@@ -11,11 +11,15 @@
     <textarea name="footer_html" rows="20" style="font-family: monospace;"><%= footerHtml || '' %></textarea>
   </label>
 
+  <label class="admin-form-checkbox">
+    <input type="checkbox" name="publish_custom_html_enabled" value="1"
+           <%= settings && settings.publish_custom_html_enabled ? 'checked' : '' %>>
+    Show custom HTML block on /books/publish page
+  </label>
+
   <label>
-    Publishing Inquiry Contact Email <span class="admin-form-hint">(shown on the /books/publish page)</span>
-    <input type="email" name="publish_contact_email"
-           value="<%= settings && settings.publish_contact_email ? settings.publish_contact_email : 'webmaster@assam.org' %>"
-           placeholder="webmaster@assam.org">
+    Publish Page — Custom HTML Block <span class="admin-form-hint">(raw HTML/CSS/Bootstrap — rendered just above the contact CTA)</span>
+    <textarea name="publish_custom_html" rows="16" style="font-family:monospace;font-size:0.85rem;"><%= settings && settings.publish_custom_html ? settings.publish_custom_html : '' %></textarea>
   </label>
 
   <button type="submit" class="admin-btn admin-btn--primary">Save</button>

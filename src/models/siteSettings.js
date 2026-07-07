@@ -69,8 +69,15 @@ async function updatePublishEmail(email) {
   await pool.query('UPDATE site_settings SET publish_contact_email = $1 WHERE id = 1', [email]);
 }
 
+async function updatePublishCustomHtml(html, enabled) {
+  await pool.query(
+    'UPDATE site_settings SET publish_custom_html = $1, publish_custom_html_enabled = $2 WHERE id = 1',
+    [html || null, enabled]
+  );
+}
+
 module.exports = {
   getAll, getFooterHtml, updateFooterHtml,
   getFeaturedCategory, updateFeaturedCategory,
-  updateHomepage, updatePublishEmail,
+  updateHomepage, updatePublishEmail, updatePublishCustomHtml,
 };

@@ -40,22 +40,38 @@
     </div>
   </div>
 
-  <% if (!q) { %>
   <div class="books-filter-bar">
-    <a href="/books" class="books-filter-pill active">All</a>
+    <% if (!q) { %>
+    <a href="/books<%= language ? '?lang=' + encodeURIComponent(language) : '' %>" class="books-filter-pill<%= !q ? ' active' : '' %>">All</a>
     <% categories.forEach(function(cat) { %>
-    <a href="/books/category/<%= cat.slug %>" class="books-filter-pill">
+    <a href="/books/category/<%= cat.slug %>" class="books-filter-pill"
+       data-track-filter data-filter-type="book_category" data-filter-value="<%= cat.name %>">
       <%= cat.name %> <span class="pill-count"><%= cat.book_count %></span>
     </a>
     <% }) %>
+    <% } %>
+    <% if (languages && languages.length >= 1) { %>
+    <span class="books-filter-sep">|</span>
+    <% languages.forEach(function(lang) { %>
+    <a href="/books?<%= q ? 'q=' + encodeURIComponent(q) + '&' : '' %>lang=<%= encodeURIComponent(lang.language) %>"
+       class="books-filter-pill<%= language === lang.language ? ' active' : '' %>"
+       data-track-filter data-filter-type="book_language" data-filter-value="<%= lang.language %>">
+      <%= lang.language %> <span class="pill-count"><%= lang.count %></span>
+    </a>
+    <% }) %>
+    <% if (language) { %>
+    <a href="/books<%= q ? '?q=' + encodeURIComponent(q) : '' %>" class="books-filter-pill books-filter-clear">✕ Clear</a>
+    <% } %>
+    <% } %>
   </div>
-  <% } %>
 
   <% if (books.length > 0) { %>
   <div class="books-catalogue-grid">
     <% books.forEach(function(book) { %>
     <div class="books-catalogue-item">
-      <a href="/book/<%= book.slug %>" class="books-catalogue-cover">
+      <a href="/book/<%= book.slug %>" class="books-catalogue-cover"
+         data-track-click data-content-type="book" data-content-id="<%= book.id %>"
+         data-content-slug="<%= book.slug %>" data-content-title="<%= book.title %>">
         <% if (book.cover_image) { %>
         <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
              alt="<%= book.title %>" loading="lazy" width="200" height="280">
@@ -89,8 +105,13 @@
 
   <% if (totalPages > 1) { %>
   <nav class="books-pagination" aria-label="Books pages">
+    <%
+      var langParam   = language ? '&lang=' + encodeURIComponent(language) : '';
+      var qParam      = q ? '&q=' + encodeURIComponent(q) : '';
+      var filterParams = qParam + langParam;
+    %>
     <% if (currentPage > 1) { %>
-    <a href="/books?page=<%= currentPage - 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+    <a href="/books?page=<%= currentPage - 1 %><%= filterParams %>"
        class="books-page-btn">← Prev</a>
     <% } else { %>
     <span class="books-page-btn books-page-btn--disabled">← Prev</span>
@@ -111,13 +132,13 @@
         <% if (prevP !== null && p - prevP > 1) { %>
         <span class="books-page-ellipsis">…</span>
         <% } %>
-        <a href="/books?page=<%= p %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+        <a href="/books?page=<%= p %><%= filterParams %>"
            class="books-page-num <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
         <% prevP = p; }) %>
     </div>
 
     <% if (currentPage < totalPages) { %>
-    <a href="/books?page=<%= currentPage + 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+    <a href="/books?page=<%= currentPage + 1 %><%= filterParams %>"
        class="books-page-btn">Next →</a>
     <% } else { %>
     <span class="books-page-btn books-page-btn--disabled">Next →</span>

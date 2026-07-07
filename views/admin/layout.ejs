@@ -64,124 +64,135 @@
 <%
   const su    = locals.adminUser?.isSuperAdmin;
   const perms = locals.adminUser?.permissions || {};
+  const ap    = locals.activePath || '';
   const canStories  = su || perms.stories?.can_read;
   const canPages    = su || perms.pages?.can_read;
   const canBooks    = su || perms.books?.can_read;
+  const canBlog     = su || perms.blog?.can_read;
+  const canAuthors  = su || perms.authors?.can_read;
+  const canUsers    = su || perms.users?.can_read;
   const canSettings = su || perms.settings?.can_read;
 %>
 <header class="admin-header">
   <nav class="admin-nav">
 
-    <a href="/admin/articles" class="admin-nav__brand">
-      <span class="brand-assam">Assam</span><span class="brand-portal">.org</span>
-      <span class="brand-admin">Admin</span>
+    <a href="/admin" class="admin-nav__brand">
+      Assam<span class="brand-dot">.org</span>
+      <span class="brand-chip">ADMIN</span>
     </a>
 
-    <ul class="admin-nav__list">
-
-      <% if (canStories) { %>
-      <li class="admin-nav__item">
-        <a href="/admin/articles" class="admin-nav__link">
-          News
-          <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+    <% if (canPages || canStories || canBlog) { %>
+    <div class="admin-nav__dropdown">
+      <button type="button" class="admin-nav__trigger <%= ['/admin/pages','/admin/page-topics','/admin/articles','/admin/blog'].some(p => ap.startsWith(p)) ? 'active' : '' %>">
+        Content <span class="caret">▾</span>
+      </button>
+      <div class="admin-nav__menu">
+        <% if (canPages) { %>
+        <a href="/admin/pages" class="<%= ap.startsWith('/admin/pages') ? 'active' : '' %>">
+          📄 Pages
+          <small>Encyclopedia</small>
         </a>
-        <ul class="admin-nav__dropdown">
-          <li><a href="/admin/articles"><span class="nav-icon">📄</span> All News</a></li>
-          <% if (su || perms.stories?.can_create) { %>
-          <li><a href="/admin/articles/new"><span class="nav-icon">✏️</span> + New Article</a></li>
-          <% } %>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/authors"><span class="nav-icon">👤</span> Authors</a></li>
-          <% if (su || perms.authors?.can_create) { %>
-          <li><a href="/admin/authors/new"><span class="nav-icon">➕</span> + New Author</a></li>
-          <% } %>
-          <% if (su || perms.comments?.can_read) { %>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/comments"><span class="nav-icon">💬</span> Comments</a></li>
-          <% } %>
-        </ul>
-      </li>
-      <% } %>
-
-      <% if (canPages) { %>
-      <li class="admin-nav__item">
-        <a href="/admin/pages" class="admin-nav__link">
-          Pages
-          <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+        <a href="/admin/page-topics" class="<%= ap.startsWith('/admin/page-topics') ? 'active' : '' %>">
+          🗂 Topics
+          <small>Page categories</small>
         </a>
-        <ul class="admin-nav__dropdown">
-          <li><a href="/admin/pages"><span class="nav-icon">📃</span> All Pages</a></li>
-          <% if (su || perms.pages?.can_create) { %>
-          <li><a href="/admin/pages/new"><span class="nav-icon">✏️</span> + New Page</a></li>
-          <% } %>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/page-topics"><span class="nav-icon">🏷️</span> Page Topics</a></li>
-        </ul>
-      </li>
-      <% } %>
-
-      <% if (canBooks) { %>
-      <li class="admin-nav__item">
-        <a href="/admin/books" class="admin-nav__link">
-          Books
-          <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+        <% } %>
+        <% if (canStories) { %>
+        <a href="/admin/articles" class="<%= ap.startsWith('/admin/articles') ? 'active' : '' %>">
+          📰 News
+          <small>Articles</small>
         </a>
-        <ul class="admin-nav__dropdown">
-          <li><a href="/admin/books"><span class="nav-icon">📚</span> All Books</a></li>
-          <% if (su || perms.books?.can_create) { %>
-          <li><a href="/admin/books/new"><span class="nav-icon">✏️</span> + New Book</a></li>
-          <% } %>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/book-authors"><span class="nav-icon">👤</span> Book Authors</a></li>
-          <% if (su || perms.books?.can_create) { %>
-          <li><a href="/admin/book-authors/new"><span class="nav-icon">➕</span> + New Author</a></li>
-          <% } %>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/book-publishers"><span class="nav-icon">🏢</span> Publishers</a></li>
-          <% if (su || perms.books?.can_create) { %>
-          <li><a href="/admin/book-publishers/new"><span class="nav-icon">➕</span> + New Publisher</a></li>
-          <% } %>
-        </ul>
-      </li>
-      <% } %>
-
-      <% if (canSettings) { %>
-      <li class="admin-nav__item">
-        <a href="/admin/settings" class="admin-nav__link">
-          Settings
-          <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+        <% } %>
+        <% if (canBlog) { %>
+        <a href="/admin/blog" class="<%= ap.startsWith('/admin/blog') ? 'active' : '' %>">
+          ✍️ The Assam Review
+          <small>Blog posts</small>
         </a>
-        <ul class="admin-nav__dropdown">
-          <li><a href="/admin/settings/homepage"><span class="nav-icon">🏠</span> Homepage</a></li>
-          <li><a href="/admin/settings"><span class="nav-icon">⚙️</span> Site Settings</a></li>
-          <li><a href="/admin/menu"><span class="nav-icon">☰</span> Menu Items</a></li>
-          <li><a href="/admin/redirects"><span class="nav-icon">↪️</span> URL Redirects</a></li>
-          <li class="nav-divider"></li>
-          <li><a href="/admin/users"><span class="nav-icon">👥</span> Admin Users</a></li>
-          <li class="nav-divider"></li>
-          <li>
-            <form method="post" action="/admin/logout" class="nav-logout-form">
-              <button type="submit"><span class="nav-icon">🚪</span> Logout</button>
-            </form>
-          </li>
-        </ul>
-      </li>
-      <% } %>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
 
-    </ul>
+    <% if (canBooks) { %>
+    <div class="admin-nav__dropdown">
+      <button type="button" class="admin-nav__trigger <%= ap.startsWith('/admin/book') ? 'active' : '' %>">
+        Books <span class="caret">▾</span>
+      </button>
+      <div class="admin-nav__menu">
+        <a href="/admin/books" class="<%= ap.startsWith('/admin/books') ? 'active' : '' %>">
+          📚 All Books
+          <small>Catalogue</small>
+        </a>
+        <a href="/admin/book-authors" class="<%= ap.startsWith('/admin/book-authors') ? 'active' : '' %>">
+          👤 Authors
+          <small>Book authors</small>
+        </a>
+        <a href="/admin/book-publishers" class="<%= ap.startsWith('/admin/book-publishers') ? 'active' : '' %>">
+          🏢 Publishers
+          <small>Book publishers</small>
+        </a>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (canUsers || canAuthors) { %>
+    <div class="admin-nav__dropdown">
+      <button type="button" class="admin-nav__trigger <%= ['/admin/users','/admin/authors'].some(p => ap.startsWith(p)) ? 'active' : '' %>">
+        People <span class="caret">▾</span>
+      </button>
+      <div class="admin-nav__menu">
+        <% if (canUsers) { %>
+        <a href="/admin/users" class="<%= ap.startsWith('/admin/users') ? 'active' : '' %>">
+          🔑 Users
+          <small>Admin accounts</small>
+        </a>
+        <% } %>
+        <% if (canAuthors) { %>
+        <a href="/admin/authors" class="<%= ap.startsWith('/admin/authors') ? 'active' : '' %>">
+          ✍️ Authors
+          <small>Byline authors</small>
+        </a>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (canSettings) { %>
+    <div class="admin-nav__dropdown">
+      <button type="button" class="admin-nav__trigger <%= ['/admin/settings','/admin/menu','/admin/redirects'].some(p => ap.startsWith(p)) ? 'active' : '' %>">
+        System <span class="caret">▾</span>
+      </button>
+      <div class="admin-nav__menu">
+        <a href="/admin/analytics" class="<%= ap.startsWith('/admin/analytics') ? 'active' : '' %>">
+          📊 Analytics
+          <small>Views &amp; clicks</small>
+        </a>
+        <a href="/admin/settings" class="<%= ap.startsWith('/admin/settings') ? 'active' : '' %>">
+          ⚙️ Settings
+          <small>Site configuration</small>
+        </a>
+        <a href="/admin/menu" class="<%= ap.startsWith('/admin/menu') ? 'active' : '' %>">
+          🔗 Menu
+          <small>Navigation items</small>
+        </a>
+        <a href="/admin/redirects" class="<%= ap.startsWith('/admin/redirects') ? 'active' : '' %>">
+          ↪️ Redirects
+          <small>URL redirects</small>
+        </a>
+      </div>
+    </div>
+    <% } %>
 
     <div class="admin-nav__user">
       <% if (locals.adminUser) { %>
-      <span class="admin-nav__username"><%= locals.adminUser.displayName %></span>
+      <span class="admin-nav__username"><%= locals.adminUser.displayName || locals.adminUser.username %></span>
       <% if (locals.adminUser.roles && locals.adminUser.roles[0]) { %>
-      <span class="admin-nav__role-badge"><%= locals.adminUser.roles[0] %></span>
+      <span class="admin-nav__role"><%= locals.adminUser.roles[0] %></span>
       <% } %>
       <% } %>
-      <% if (!canSettings) { %>
       <form method="post" action="/admin/logout" class="nav-logout-form">
-        <button type="submit" class="admin-nav__logout-btn">Logout</button>
+        <button type="submit" class="admin-nav__logout">Logout</button>
       </form>
-      <% } %>
     </div>
 
   </nav>

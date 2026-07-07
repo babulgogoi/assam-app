@@ -1,0 +1,64 @@
+<div class="admin-list-header">
+  <h1>The Assam Review</h1>
+  <% if (locals.adminUser?.isSuperAdmin || locals.adminUser?.permissions?.blog?.can_create) { %>
+  <a class="admin-btn admin-btn--primary" href="/admin/blog/new">+ New Post</a>
+  <% } %>
+</div>
+
+<% if (typeof deleted !== 'undefined' && deleted) { %>
+<div class="admin-flash admin-flash--success">Post deleted.</div>
+<% } %>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Tags</th>
+      <th>Published</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% posts.forEach(function(post) { %>
+    <tr>
+      <td>
+        <strong><%= post.title %></strong>
+        <% if (post.featured_image) { %><br><small style="color:#999">Has image</small><% } %>
+      </td>
+      <td>
+        <span class="admin-badge admin-badge--<%= post.status === 'published' ? 'published' : 'draft' %>"><%= post.status %></span>
+      </td>
+      <td>
+        <% if (post.tags && post.tags.length) { %>
+        <%= post.tags.join(', ') %>
+        <% } else { %>
+        <span style="color:#bbb">—</span>
+        <% } %>
+      </td>
+      <td>
+        <% if (post.published_at) { %>
+        <time datetime="<%= new Date(post.published_at).toISOString() %>">
+          <%= new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+        </time>
+        <% } else { %>
+        <span style="color:#bbb">—</span>
+        <% } %>
+      </td>
+      <td style="white-space:nowrap">
+        <a class="admin-btn" href="/admin/blog/<%= post.id %>/edit">Edit</a>
+        <% if (post.status === 'published') { %>
+        <a class="admin-btn" href="/blog/<%= post.slug %>" target="_blank" rel="noopener">View ↗</a>
+        <% } %>
+        <form method="post" action="/admin/blog/<%= post.id %>/delete" style="display:inline"
+              onsubmit="return confirm('Delete this post?')">
+          <button class="admin-btn admin-btn--danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!posts.length) { %>
+    <tr><td colspan="5" style="text-align:center;color:#888;padding:2rem">No posts yet. <a href="/admin/blog/new">Write the first one.</a></td></tr>
+    <% } %>
+  </tbody>
+</table>

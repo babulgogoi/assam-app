@@ -19,13 +19,12 @@
   <div class="wiki-page__layout">
     <div class="wiki-page__main">
 
-      <h1 class="wiki-page__title"><%= page.title %></h1>
-
-      <div class="wiki-page__byline">
-        <% if (page.author_name || page.author_username) { %>
-        By <a href="/author/<%= page.author_username %>"><%= page.author_name || page.author_username %></a> ·
-        <% } %>
-        <%= new Date(page.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+      <div class="wiki-page__title-row">
+        <h1 class="wiki-page__title"><%= page.title %></h1>
+        <div class="wiki-page__tab-btns">
+          <a href="/page/<%= page.slug %>" class="wiki-tab-btn wiki-tab-btn--active">Article</a>
+          <a href="/page/<%= page.slug %>/revisions" class="wiki-tab-btn">Revisions</a>
+        </div>
       </div>
 
       <% if (page.featured_image) { %>
@@ -37,14 +36,18 @@
       </figure>
       <% } %>
 
-      <div id="tocContainer" class="page-toc" style="display:none">
-        <h4>Contents</h4>
-        <ol id="tocList"></ol>
-      </div>
-
-      <div class="wiki-page__body page-body-content">
+      <div class="wiki-page__body page-body-content" id="pageBody">
         <%- page.body %>
       </div>
+
+      <% if (page.pdf_attachment) { %>
+      <div class="wiki-page__pdf-download">
+        <span class="pdf-download-prefix">PDF / Document:</span>
+        <a href="<%= page.pdf_attachment %>" target="_blank" rel="noopener" class="pdf-download-link">
+          <%= page.pdf_label || page.pdf_attachment.split('/').pop() %>
+        </a>
+      </div>
+      <% } %>
 
       <% if (page.references_text && page.references_text.trim()) { %>
       <section class="wiki-page__references">
@@ -66,32 +69,44 @@
       </div>
       <% } %>
 
-      <div class="wiki-page__footer">
-        Last updated: <%= new Date(page.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-      </div>
-
     </div>
   </div>
 </main>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var body    = document.querySelector('.page-body-content');
-  var tocList = document.getElementById('tocList');
-  var tocCont = document.getElementById('tocContainer');
-  if (!body || !tocList) return;
+  var body = document.getElementById('pageBody');
+  if (!body) return;
 
   var headings = body.querySelectorAll('h2, h3');
   if (headings.length < 3) return;
 
-  tocCont.style.display = 'block';
+  var ol = document.createElement('ol');
   headings.forEach(function (h, i) {
     var id = 'section-' + (i + 1);
     h.id = id;
     var li = document.createElement('li');
     li.className = h.tagName === 'H3' ? 'toc-sub' : 'toc-main';
-    li.innerHTML = '<a href="#' + id + '">' + h.textContent + '</a>';
-    tocList.appendChild(li);
+    var a = document.createElement('a');
+    a.href = '#' + id;
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    ol.appendChild(li);
   });
+
+  var heading = document.createElement('p');
+  heading.className = 'page-toc__heading';
+  heading.textContent = 'Contents';
+
+  var toc = document.createElement('div');
+  toc.className = 'page-toc';
+  toc.appendChild(heading);
+  toc.appendChild(ol);
+
+  // Insert before the first H2 so any intro text above it renders
+  // at full width; the TOC then floats beside the section content.
+  // Fallback to firstChild if no H2 exists.
+  var firstH2 = body.querySelector('h2');
+  body.insertBefore(toc, firstH2 || body.firstChild);
 });
 </script>

@@ -4,20 +4,35 @@
 <div class="admin-form-errors"><% errors.forEach(function(e) { %><p><%= e %></p><% }) %></div>
 <% } %>
 
-<form method="post" action="<%= publisher && publisher.id ? `/admin/book-publishers/${publisher.id}` : '/admin/book-publishers' %>" class="admin-form">
+<form method="post" enctype="multipart/form-data" action="<%= publisher && publisher.id ? `/admin/book-publishers/${publisher.id}` : '/admin/book-publishers' %>" class="admin-form">
   <div class="admin-form-row">
     <label>Name *<input type="text" name="name" value="<%= (publisher && publisher.name) || '' %>" required></label>
-    <label>Slug<input type="text" name="slug" value="<%= (publisher && publisher.slug) || '' %>" placeholder="auto-generated"></label>
+    <% if (locals.adminUser?.isSuperAdmin) { %>
+    <label>Slug
+      <input type="text" name="slug" value="<%= (publisher && publisher.slug) || '' %>" placeholder="auto-generated">
+      <small style="color:#c0392b;font-size:0.75rem">⚠️ Changing slug will break existing links and redirects.</small>
+    </label>
+    <% } else { %>
+    <input type="hidden" name="slug" value="<%= (publisher && publisher.slug) || '' %>">
+    <% } %>
   </div>
   <label>Description<textarea name="description" class="tinymce" rows="3"><%= (publisher && publisher.description) || '' %></textarea></label>
   <div class="admin-form-row">
     <label>Location<input type="text" name="location" value="<%= (publisher && publisher.location) || '' %>"></label>
     <label>Founded Year<input type="number" name="founded_year" min="1700" max="2100" value="<%= (publisher && publisher.founded_year) || '' %>"></label>
   </div>
-  <div class="admin-form-row">
-    <label>Website<input type="url" name="website" value="<%= (publisher && publisher.website) || '' %>"></label>
-    <label>Logo URL<input type="url" name="logo" value="<%= (publisher && publisher.logo) || '' %>"></label>
-  </div>
+  <label>Website<input type="url" name="website" value="<%= (publisher && publisher.website) || '' %>"></label>
+
+  <label>Publisher Logo
+    <% if (publisher && publisher.logo) { %>
+    <span style="display:block;margin-bottom:8px">
+      <img src="<%= publisher.logo %>" alt="Current logo" style="height:80px;border-radius:4px;display:block;margin-bottom:4px">
+      <small style="font-size:0.8rem;color:#888">Current logo — upload a new one to replace</small>
+    </span>
+    <% } %>
+    <input type="file" name="logo" accept="image/jpeg,image/png,image/webp">
+    <small>JPEG, PNG or WebP. Max 5MB. Resized to 600px wide.</small>
+  </label>
   <div>
     <button type="submit" class="admin-btn admin-btn--primary"><%= publisher && publisher.id ? 'Save Changes' : 'Create Publisher' %></button>
     <a class="admin-btn" href="/admin/book-publishers">Cancel</a>

@@ -3,6 +3,8 @@ const authorsModel = require('../models/authors');
 const pagesModel = require('../models/pages');
 const siteSettingsModel = require('../models/siteSettings');
 const booksModel = require('../models/books');
+const { trackView, BOT_RE } = require('../middleware/trackPageView');
+const clickEvents = require('../models/clickEvents');
 
 function cleanExcerpt(text, maxLen = 200) {
   if (!text) return '';
@@ -36,36 +38,8 @@ async function home(req, res, next) {
   try {
     const pool = require('../config/db');
 
-    const [settingsRow, featuredBooksResult, latestBooksResult, topicsResult, latestPagesResult] = await Promise.all([
+    const [settingsRow, topicsResult, latestPagesResult, assameseBooks, latestBooks, totalBooks] = await Promise.all([
       siteSettingsModel.getAll(),
-
-      // Featured books (is_featured = true)
-      pool.query(`
-        SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
-               COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
-                 ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
-        FROM books b
-        LEFT JOIN books_book_authors bba ON bba.book_id = b.id
-        LEFT JOIN books_authors ba ON ba.id = bba.author_id
-        WHERE b.status = 'active' AND b.is_featured = true
-        GROUP BY b.id
-        ORDER BY b.created_at DESC
-        LIMIT 10
-      `),
-
-      // Latest books fallback
-      pool.query(`
-        SELECT b.id, b.title, b.slug, b.cover_image, b.price, b.published_year,
-               COALESCE(json_agg(json_build_object('name', ba.name, 'slug', ba.slug)
-                 ORDER BY bba.sort_order) FILTER (WHERE ba.id IS NOT NULL), '[]') AS authors
-        FROM books b
-        LEFT JOIN books_book_authors bba ON bba.book_id = b.id
-        LEFT JOIN books_authors ba ON ba.id = bba.author_id
-        WHERE b.status = 'active'
-        GROUP BY b.id
-        ORDER BY b.created_at DESC
-        LIMIT 10
-      `),
 
       // Topics with page counts (published only, at least 1 page)
       pool.query(`
@@ -80,18 +54,23 @@ async function home(req, res, next) {
 
       // Latest research pages (3)
       pagesModel.getLatestPublished({ limit: 3 }),
+
+      // Homepage book blocks: Assamese row, then latest-all row (6 books each)
+      booksModel.getLatestByLanguage('Assamese', 6),
+      booksModel.getLatestAll(6),
+      booksModel.countActive(),
     ]);
 
     const settings = settingsRow;
-    const useFeatured = settings.books_section_show_featured && featuredBooksResult.rows.length >= 5;
-    const books = useFeatured ? featuredBooksResult.rows : latestBooksResult.rows;
 
     res.render('public/home', {
       title: `${settings.hero_headline || 'Assam Portal'} | assam.org`,
       settings,
-      books,
       topics: topicsResult.rows,
       latestPages: latestPagesResult,
+      assameseBooks,
+      latestBooks,
+      totalBooks,
     });
   } catch (err) {
     next(err);
@@ -140,6 +119,7 @@ async function articleDetail(req, res, next) {
     articlesModel.incrementViewCount(article.id).catch((err) => {
       console.error('Failed to increment view count for article', article.id, err);
     });
+    trackView('article', article, req);
 
     res.render('public/article', {
       title: article.title,
@@ -253,6 +233,19 @@ async function searchPage(req, res, next) {
 
     const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
 
+    const ua = req.headers['user-agent'] || '';
+    if (page === 1 && !BOT_RE.test(ua) && req.headers.dnt !== '1' && !req.session?.adminUser) {
+      clickEvents.record({
+        event_type: 'search',
+        search_query: q.slice(0, 500),
+        result_count: total,
+        session_id: req.sessionID,
+        referrer: req.headers.referer || null,
+        user_agent: ua.slice(0, 500),
+        ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip,
+      });
+    }
+
     res.render('public/search', {
       title: `Search: ${q} — Assam Portal`,
       q,
@@ -273,6 +266,7 @@ async function pageDetail(req, res, next) {
     if (!page || page.status !== 'published') {
       return res.status(404).render('public/404', { title: 'Page Not Found' });
     }
+    trackView('page', page, req);
     res.render('public/page', {
       title: page.title,
       page,

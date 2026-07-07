@@ -98,6 +98,17 @@ function deleteUploadedFile(urlPath) {
   }
 }
 
+const blogUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (!/^image\//.test(file.mimetype)) return cb(new Error('Image files only'));
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext)) return cb(new Error('JPG/PNG/WebP/GIF only'));
+    cb(null, true);
+  },
+});
+
 const memUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -105,6 +116,37 @@ const memUpload = multer({
     if (!/^image\//.test(file.mimetype)) return cb(new Error('Image files only'));
     const ext = path.extname(file.originalname).toLowerCase();
     if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) return cb(new Error('JPG/PNG/WebP only'));
+    cb(null, true);
+  },
+});
+
+// Book-author photos and publisher logos — processed by sharp in adminBooksController,
+// so buffer-only here (no GIF: sharp re-encodes to JPEG).
+const bookImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+      return cb(new Error('JPEG, PNG or WebP images only'));
+    }
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) return cb(new Error('JPG/PNG/WebP only'));
+    cb(null, true);
+  },
+});
+
+const pageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (file.fieldname === 'featured_image') {
+      if (!/^image\//.test(file.mimetype)) return cb(new Error('Image files only for featured_image'));
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) return cb(new Error('JPG/PNG/WebP only'));
+    } else if (file.fieldname === 'pdf_attachment') {
+      if (file.mimetype !== 'application/pdf') return cb(new Error('PDF files only for pdf_attachment'));
+      if (path.extname(file.originalname).toLowerCase() !== '.pdf') return cb(new Error('.pdf extension required'));
+    }
     cb(null, true);
   },
 });
@@ -119,7 +161,14 @@ module.exports = {
   uploadAuthorPhoto:   upload.fields([{ name: 'photo', maxCount: 1 }]),
   uploadBookCover:     memUpload.single('cover_image'),
   uploadPageFeatured:  memUpload.single('featured_image'),
+  uploadPageFiles:     pageUpload.fields([
+    { name: 'featured_image', maxCount: 1 },
+    { name: 'pdf_attachment', maxCount: 1 },
+  ]),
   uploadHeroImage:     memUpload.single('hero_image'),
+  uploadBlogImage:     blogUpload.single('featured_image'),
+  uploadAuthorImage:   bookImageUpload.single('photo'),
+  uploadPublisherLogo: bookImageUpload.single('logo'),
   urlFor,
   deleteUploadedFile,
 };

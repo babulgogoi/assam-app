@@ -1,0 +1,23 @@
+<% if (!rows.length) { %>
+<p class="analytics-empty">No views recorded yet.</p>
+<% } else { %>
+<table class="dash-table">
+  <thead><tr><th>#</th><th>Title</th><th>Views</th><th>Uniq</th></tr></thead>
+  <tbody>
+    <% rows.forEach(function(r, i) { %>
+    <tr>
+      <td class="dash-date"><%= i + 1 %></td>
+      <td>
+        <% if (r.content_slug) { %>
+        <a href="<%= urlPrefix %><%= r.content_slug %>" target="_blank"><%= r.content_title || r.content_slug %></a>
+        <% } else { %>
+        <%= r.content_title || '—' %>
+        <% } %>
+      </td>
+      <td><%= r.views %></td>
+      <td class="dash-date"><%= r.unique_views %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

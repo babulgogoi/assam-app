@@ -78,4 +78,23 @@
   <% } else { %>
   <p class="books-empty">No books listed for this author yet.</p>
   <% } %>
+
+  <% if (typeof blogPostsByAuthor !== 'undefined' && blogPostsByAuthor.length > 0) { %>
+  <h2 class="books-author-books-heading">
+    Blog posts by <%= author.name %>
+    <span class="books-count-badge"><%= blogPostsByAuthor.length %></span>
+  </h2>
+  <ul class="books-author-posts">
+    <% blogPostsByAuthor.forEach(function(p) { %>
+    <li>
+      <a href="/blog/<%= p.slug %>"><%= p.title %></a>
+      <% if (p.published_at) { %>
+      <time datetime="<%= new Date(p.published_at).toISOString() %>">
+        <%= new Date(p.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+      </time>
+      <% } %>
+    </li>
+    <% }) %>
+  </ul>
+  <% } %>
 </main>

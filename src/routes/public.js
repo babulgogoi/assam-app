@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const publicController = require('../controllers/publicController');
 const publicBooksController = require('../controllers/publicBooksController');
+const blogController = require('../controllers/blogController');
 const menuItemsModel = require('../models/menuItems');
 const siteSettingsModel = require('../models/siteSettings');
 
@@ -14,8 +15,49 @@ const likeLimiter = rateLimit({
   message: 'Too many requests. Please try again later.',
 });
 
+const trackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: false,
+  legacyHeaders: false,
+});
+
+// Click tracking beacon. Registered BEFORE the menu/footer middleware below —
+// beacons must not pay for two DB queries per hit.
+const { record: recordEvent } = require('../models/clickEvents');
+const { BOT_RE } = require('../middleware/trackPageView');
+const TRACK_EVENT_TYPES = ['outbound_click', 'content_click', 'filter_click', 'nav_click'];
+
+router.post('/api/track', trackLimiter, (req, res) => {
+  if (req.headers.dnt === '1') return res.json({ ok: true });
+
+  const ua = req.headers['user-agent'] || '';
+  if (BOT_RE.test(ua)) return res.json({ ok: true });
+
+  const b = req.body || {};
+  if (!TRACK_EVENT_TYPES.includes(b.event_type)) return res.json({ ok: false });
+
+  const contentId = parseInt(b.content_id, 10);
+  recordEvent({
+    event_type: b.event_type,
+    content_type: (b.content_type || '').toString().slice(0, 50) || null,
+    content_id: Number.isNaN(contentId) ? null : contentId,
+    content_slug: (b.content_slug || '').toString().slice(0, 600) || null,
+    content_title: (b.content_title || '').toString().slice(0, 500) || null,
+    target_url: (b.target_url || '').toString().slice(0, 2000) || null,
+    session_id: req.sessionID,
+    referrer: req.headers.referer || null,
+    user_agent: ua.slice(0, 500),
+    ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip,
+  });
+
+  res.json({ ok: true });
+});
+
 router.use(async (req, res, next) => {
   res.locals.currentUrl = req.path;
+  // Logged-in admin (if any) — drives the contextual "Edit this …" bars on public pages.
+  res.locals.adminUser = req.session?.adminUser || null;
   res.locals.adsenseClientId = process.env.ADSENSE_CLIENT_ID;
   res.locals.adsenseSlotHeader = process.env.ADSENSE_SLOT_HEADER;
   res.locals.adsenseSlotSidebar = process.env.ADSENSE_SLOT_SIDEBAR;
@@ -43,6 +85,34 @@ router.get('/category/:category', publicController.categoryPage);
 router.get('/author/:username', publicController.authorPage);
 router.get('/search', publicController.searchPage);
 router.get('/page/:slug', publicController.pageDetail);
+router.get('/page/:slug/revisions', async (req, res, next) => {
+  try {
+    const db = require('../config/db');
+    const [pageRes, historyRes] = await Promise.all([
+      db.query(
+        `SELECT p.*, pt.name AS topic_name, pt.slug AS topic_slug, pt.icon AS topic_icon
+         FROM pages p
+         LEFT JOIN page_topics pt ON pt.id = p.topic_id
+         WHERE p.slug=$1 AND p.status='published'`,
+        [req.params.slug]
+      ),
+      db.query(
+        `SELECT editor_name, action, editor_note, word_count_before, word_count_after,
+                TO_CHAR(created_at, 'DD Mon YYYY, HH24:MI') AS formatted_date
+         FROM page_history WHERE page_id=(SELECT id FROM pages WHERE slug=$1)
+         ORDER BY created_at DESC`,
+        [req.params.slug]
+      ),
+    ]);
+    if (!pageRes.rows.length) return res.status(404).render('public/404', { title: 'Not Found' });
+    res.render('public/page-revisions', {
+      page: pageRes.rows[0],
+      history: historyRes.rows,
+      title: `Revisions: ${pageRes.rows[0].title} | Assam Portal`,
+      adminUser: req.session?.adminUser || null,
+    });
+  } catch (err) { next(err); }
+});
 
 // Research (page topics)
 router.get('/research', publicController.researchIndex);
@@ -67,13 +137,17 @@ router.get('/node/:nid', async (req, res) => {
   }
 });
 
+// Blog
+router.get('/blog',       blogController.listPosts);
+router.get('/blog/:slug', blogController.showPost);
+
 // Books — specific routes before wildcard
 router.get('/books', publicBooksController.catalogue);
 router.get('/books/publish', async (req, res) => {
   try {
     const db = require('../config/db');
     const result = await db.query(
-      'SELECT publish_contact_email FROM site_settings WHERE id = 1'
+      'SELECT publish_custom_html, publish_custom_html_enabled FROM site_settings WHERE id = 1'
     );
     res.render('public/books-publish', {
       settings: result.rows[0] || {},

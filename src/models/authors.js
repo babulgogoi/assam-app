@@ -57,17 +57,35 @@ async function getById(id) {
   return rows[0] || null;
 }
 
-async function getAllWithCounts() {
+async function getAllWithCounts({ q = null, limit = 50, offset = 0 } = {}) {
+  const params = [];
+  const where  = q ? `WHERE au.username ILIKE $${params.push(`%${q}%`)} OR au.display_name ILIKE $${params.push(`%${q}%`)}` : '';
   const { rows } = await pool.query(
     `SELECT au.id, au.username, au.display_name, au.photo,
             (au.password_hash IS NOT NULL) AS can_login,
-            COUNT(a.id) AS article_count
+            COUNT(DISTINCT a.id)::int  AS article_count,
+            COUNT(DISTINCT bp.id)::int AS blog_count
      FROM authors au
-     LEFT JOIN articles a ON a.author_id = au.id
+     LEFT JOIN articles a  ON a.author_id  = au.id
+     LEFT JOIN blog_posts bp ON bp.author_id = au.id
+     ${where}
      GROUP BY au.id, au.username, au.display_name, au.photo, au.password_hash
-     ORDER BY au.display_name NULLS LAST, au.username`
+     ORDER BY au.display_name NULLS LAST, au.username
+     LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
+    params
   );
   return rows;
+}
+
+async function countAll({ q = null } = {}) {
+  const params = [];
+  const where  = q ? `WHERE username ILIKE $${params.push(`%${q}%`)} OR display_name ILIKE $${params.push(`%${q}%`)}` : '';
+  const { rows } = await pool.query(`SELECT COUNT(*)::int AS n FROM authors ${where}`, params);
+  return rows[0].n;
+}
+
+async function deleteById(id) {
+  await pool.query('DELETE FROM authors WHERE id = $1', [id]);
 }
 
 async function isUsernameTaken(username, excludeId = null) {
@@ -102,7 +120,9 @@ module.exports = {
   findOrCreate,
   getById,
   getAllWithCounts,
+  countAll,
   isUsernameTaken,
   create,
   update,
+  deleteById,
 };

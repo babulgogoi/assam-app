@@ -27,10 +27,15 @@
     <input type="text" name="title" value="<%= article ? article.title : '' %>" required>
   </label>
 
+  <% if (locals.adminUser?.isSuperAdmin) { %>
   <label>
     Slug <span class="admin-form-hint">(leave blank to auto-generate from title)</span>
     <input type="text" name="slug" value="<%= article ? article.slug : '' %>">
+    <small style="color:#c0392b;font-size:0.75rem">⚠️ Changing slug will break existing links and redirects.</small>
   </label>
+  <% } else { %>
+  <input type="hidden" name="slug" value="<%= article ? article.slug : '' %>">
+  <% } %>
 
   <label>
     Body

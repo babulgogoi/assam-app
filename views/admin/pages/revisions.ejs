@@ -1,0 +1,52 @@
+<div class="admin-list-header">
+  <h1>Revisions <span style="font-weight:400;color:#888;font-size:0.85rem">— <%= page.title %></span></h1>
+  <div style="display:flex;gap:8px">
+    <a class="admin-btn" href="/admin/pages/<%= page.id %>/edit">← Back to Edit</a>
+    <a class="admin-btn" href="/page/<%= page.slug %>/revisions" target="_blank" rel="noopener">Public view ↗</a>
+  </div>
+</div>
+
+<% if (!history.length) { %>
+<p style="color:#888;padding:20px 0">No revisions recorded yet. Entries are created on each save.</p>
+<% } else { %>
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Admin User</th>
+      <th>Action</th>
+      <th>Revision Note</th>
+      <th>Words</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% history.forEach(function(h) { %>
+    <tr>
+      <td style="white-space:nowrap;color:#888;font-size:0.78rem"><%= h.formatted_date %></td>
+      <td>
+        <strong><%= h.admin_display_name || h.admin_username || h.editor_name || '—' %></strong>
+        <% if (h.admin_username) { %><br><span style="color:#aaa;font-size:0.72rem">@<%= h.admin_username %></span><% } %>
+      </td>
+      <td><span class="action-badge action-badge--<%= h.action %>"><%= h.action.replace(/_/g,' ') %></span></td>
+      <td style="color:#555;font-size:0.82rem"><%- h.editor_note || '<span style="color:#ccc">—</span>' %></td>
+      <td style="font-size:0.78rem;white-space:nowrap">
+        <% if (h.word_count_after !== null) { %>
+          <%= h.word_count_after %> words
+          <% if (h.word_count_before !== null) { var d = h.word_count_after - h.word_count_before; %>
+            <% if (d !== 0) { %><span style="color:<%= d > 0 ? '#2a7a2a' : '#c0392b' %>">(<%= d > 0 ? '+' : '' %><%= d %>)</span><% } %>
+          <% } %>
+        <% } else { %>—<% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<style>
+.action-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:700; text-transform:capitalize; }
+.action-badge--edited                { background:#e3f2fd; color:#1565c0; }
+.action-badge--created               { background:#e8f5e9; color:#2e7d32; }
+.action-badge--reviewed              { background:#f3e5f5; color:#6a1b9a; }
+.action-badge--update_needed_flagged { background:#fff3e0; color:#e65100; }
+</style>

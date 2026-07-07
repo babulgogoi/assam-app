@@ -1,0 +1,106 @@
+<%
+  const su = locals.adminUser?.isSuperAdmin;
+  const perms = locals.adminUser?.permissions || {};
+%>
+<div class="dash-wrap">
+
+  <div class="dash-stats">
+    <% if (su || perms.pages?.can_read) { %>
+    <a href="/admin/pages" class="stat-card">
+      <span class="stat-num"><%= stats.pages %></span>
+      <span class="stat-label">Pages</span>
+    </a>
+    <% } %>
+    <% if (su || perms.stories?.can_read) { %>
+    <a href="/admin/articles" class="stat-card">
+      <span class="stat-num"><%= stats.articles %></span>
+      <span class="stat-label">Published Articles</span>
+    </a>
+    <% } %>
+    <% if (su || perms.blog?.can_read) { %>
+    <a href="/admin/blog" class="stat-card">
+      <span class="stat-num"><%= stats.blogPosts %></span>
+      <span class="stat-label">Blog Posts</span>
+    </a>
+    <% } %>
+    <% if (su || perms.books?.can_read) { %>
+    <a href="/admin/books" class="stat-card">
+      <span class="stat-num"><%= stats.books %></span>
+      <span class="stat-label">Books</span>
+    </a>
+    <% } %>
+    <% if (su) { %>
+    <a href="/admin/authors" class="stat-card">
+      <span class="stat-num"><%= stats.authors.toLocaleString('en-IN') %></span>
+      <span class="stat-label">Authors</span>
+    </a>
+    <% } %>
+  </div>
+
+  <div class="dash-body">
+
+    <div class="dash-section">
+      <h2 class="dash-section__title">Recent Activity</h2>
+      <% if (activity.length === 0) { %>
+      <p style="color:#888;font-size:0.88rem">No content yet.</p>
+      <% } else { %>
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% activity.forEach(function(item) { %>
+          <tr>
+            <td>
+              <a href="/admin/<%= item.type === 'news' ? 'articles' : 'blog' %>/<%= item.id %>/edit">
+                <%= item.title %>
+              </a>
+            </td>
+            <td>
+              <span class="type-badge type-badge--<%= item.type %>">
+                <%= item.type === 'news' ? 'News' : 'Blog' %>
+              </span>
+            </td>
+            <td>
+              <span class="status-badge status-badge--<%= item.status %>">
+                <%= item.status %>
+              </span>
+            </td>
+            <td class="dash-date">
+              <% if (item.updated_at) { %>
+              <%= new Date(item.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+
+    <div class="dash-section dash-actions">
+      <h2 class="dash-section__title">Quick Actions</h2>
+      <div class="action-grid">
+        <% if (su || perms.pages?.can_create) { %>
+        <a href="/admin/pages/new" class="action-btn">📄 New Page</a>
+        <% } %>
+        <% if (su || perms.stories?.can_create) { %>
+        <a href="/admin/articles/new" class="action-btn">✏️ New Article</a>
+        <% } %>
+        <% if (su || perms.blog?.can_create) { %>
+        <a href="/admin/blog/new" class="action-btn">📝 New Blog Post</a>
+        <% } %>
+        <% if (su || perms.books?.can_create) { %>
+        <a href="/admin/books/new" class="action-btn">📚 Add Book</a>
+        <% } %>
+        <a href="/" target="_blank" rel="noopener" class="action-btn action-btn--ghost">🌐 View Site ↗</a>
+      </div>
+    </div>
+
+  </div>
+</div>

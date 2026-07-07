@@ -37,63 +37,44 @@
     </div>
   </section>
 
-  <%# ── BOOKS ─────────────────────────────────────────── %>
-  <section class="home-section home-books">
+  <%# ════ BLOCK 1: Assamese Books (one row of 6) ════ %>
+  <section class="home-book-block">
     <div class="home-section__inner">
-      <div class="home-section__header">
-        <h2 class="home-section__title"><%= settings.books_section_title || 'Books About Assam' %></h2>
-        <a href="/books" class="home-section__viewall">View all books →</a>
+      <div class="home-book-block__head">
+        <h2 class="home-book-block__title">অসমীয়া কিতাপ
+          <span class="home-book-block__en">Assamese Books</span>
+        </h2>
+        <a href="/books?lang=Assamese" class="home-book-block__viewall">View all →</a>
       </div>
-
-      <div class="home-books-row">
-        <% books.slice(0, 5).forEach(function(book) { %>
-        <div class="home-book-card">
-          <a href="/book/<%= book.slug %>" class="home-book-card__cover">
-            <% if (book.cover_image) { %>
-            <img src="<%= book.cover_image.replace(/(\.[^.]+)$/, '-md$1') %>"
-                 alt="<%= book.title %>" loading="lazy">
-            <% } else { %>
-            <div class="home-book-card__placeholder"><%= book.title.slice(0,2).toUpperCase() %></div>
-            <% } %>
-          </a>
-          <div class="home-book-card__info">
-            <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
-            <% if (book.authors && book.authors.length > 0) { %>
-            <p class="home-book-card__author"><%= book.authors[0].name %></p>
-            <% } %>
-            <% if (book.price) { %><p class="home-book-card__price">₹<%= book.price %></p><% } %>
-          </div>
-        </div>
+      <% if (assameseBooks && assameseBooks.length) { %>
+      <div class="home-book-row">
+        <% assameseBooks.slice(0, 6).forEach(function(book) { %>
+        <%- include('../partials/book-card', { book: book }) %>
         <% }) %>
       </div>
+      <% } else { %>
+      <p class="home-book-block__empty">
+        Assamese books coming soon.
+        <a href="/books?lang=Assamese">Browse catalogue</a>
+      </p>
+      <% } %>
+    </div>
+  </section>
 
-      <% if (books.length > 5) { %>
-      <div class="home-books-row">
-        <% books.slice(5, 10).forEach(function(book) { %>
-        <div class="home-book-card">
-          <a href="/book/<%= book.slug %>" class="home-book-card__cover">
-            <% if (book.cover_image) { %>
-            <img src="<%= book.cover_image.replace(/(\.[^.]+)$/, '-md$1') %>"
-                 alt="<%= book.title %>" loading="lazy">
-            <% } else { %>
-            <div class="home-book-card__placeholder"><%= book.title.slice(0,2).toUpperCase() %></div>
-            <% } %>
-          </a>
-          <div class="home-book-card__info">
-            <h3><a href="/book/<%= book.slug %>"><%= book.title %></a></h3>
-            <% if (book.authors && book.authors.length > 0) { %>
-            <p class="home-book-card__author"><%= book.authors[0].name %></p>
-            <% } %>
-            <% if (book.price) { %><p class="home-book-card__price">₹<%= book.price %></p><% } %>
-          </div>
-        </div>
+  <%# ════ BLOCK 2: Latest Books, all languages (one row of 6) ════ %>
+  <section class="home-book-block">
+    <div class="home-section__inner">
+      <div class="home-book-block__head">
+        <h2 class="home-book-block__title">Books on Assam</h2>
+        <a href="/books" class="home-book-block__viewall">Browse all <%= totalBooks.toLocaleString('en-IN') %> books →</a>
+      </div>
+      <% if (latestBooks && latestBooks.length) { %>
+      <div class="home-book-row">
+        <% latestBooks.slice(0, 6).forEach(function(book) { %>
+        <%- include('../partials/book-card', { book: book }) %>
         <% }) %>
       </div>
       <% } %>
-
-      <div class="home-books-footer">
-        <a href="/books" class="btn-viewall">Browse all 587 books →</a>
-      </div>
     </div>
   </section>
 

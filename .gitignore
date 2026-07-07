@@ -1,5 +1,7 @@
 node_modules/
 .env
+# 2.6GB WordPress dump + reference docs for the books module — not source
+migrations/books/
 *.log
 npm-debug.log*
 .DS_Store

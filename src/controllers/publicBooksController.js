@@ -1,28 +1,32 @@
 'use strict';
 
 const booksModel = require('../models/books');
+const blogPostsModel = require('../models/blogPosts');
+const { trackView } = require('../middleware/trackPageView');
 
 const PAGE_SIZE = 15; // 3 rows × 5 columns
 
 async function catalogue(req, res, next) {
   try {
     const currentPage = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const q = (req.query.q || '').trim();
-    const offset = (currentPage - 1) * PAGE_SIZE;
+    const q        = (req.query.q    || '').trim();
+    const language = (req.query.lang || '').trim() || null;
+    const offset   = (currentPage - 1) * PAGE_SIZE;
 
-    const [books, total, categories] = await Promise.all([
-      q ? booksModel.search(q, { limit: PAGE_SIZE, offset })
-        : booksModel.getLatest({ limit: PAGE_SIZE, offset }),
-      q ? booksModel.searchCount(q)
-        : booksModel.countActive(),
+    const [books, total, categories, languages] = await Promise.all([
+      q ? booksModel.search(q, { limit: PAGE_SIZE, offset, language })
+        : booksModel.getLatest({ limit: PAGE_SIZE, offset, language }),
+      q ? booksModel.searchCount(q, { language })
+        : booksModel.countActive({ language }),
       booksModel.listCategories(),
+      booksModel.getLanguages(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
     res.render('public/books', {
       title: q ? `"${q}" — Books — Assam Portal` : 'Books About Assam — Assam Portal',
-      books, categories, total, currentPage, totalPages, q,
+      books, categories, languages, total, currentPage, totalPages, q, language,
     });
   } catch (err) {
     next(err);
@@ -39,6 +43,7 @@ async function bookDetail(req, res, next) {
   try {
     const book = await booksModel.getBySlug(req.params.slug);
     if (!book) return res.status(404).render('public/404', { title: 'Book Not Found' });
+    trackView('book', book, req);
 
     const authorIds   = (book.authors   || []).map(a => a.id);
     const categoryIds = (book.categories || []).map(c => c.id);
@@ -83,10 +88,13 @@ async function authorPage(req, res, next) {
     if (!author) return res.status(404).render('public/404', { title: 'Author Not Found' });
 
     const books = await booksModel.getByAuthor(req.params.slug, { limit: 50 });
+    const blogPostsByAuthor = author.admin_user_id
+      ? await blogPostsModel.getByAdminUser(author.admin_user_id, { limit: 20 })
+      : [];
 
     res.render('public/books-author', {
       title: `${author.name} — Assam Portal Books`,
-      author, books,
+      author, books, blogPostsByAuthor,
       adminUser: req.session && req.session.adminUser ? req.session.adminUser : null,
     });
   } catch (err) {

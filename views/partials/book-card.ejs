@@ -1,5 +1,7 @@
 <div class="book-card">
-  <a href="/book/<%= book.slug %>" class="book-card__cover">
+  <a href="/book/<%= book.slug %>" class="book-card__cover"
+     data-track-click data-content-type="book" data-content-id="<%= book.id %>"
+     data-content-slug="<%= book.slug %>" data-content-title="<%= book.title %>">
     <% if (book.cover_image) { %>
     <img src="<%= book.cover_image.replace(/\.jpg$/, '-md.jpg') %>"
          alt="<%= book.cover_image_alt || book.title %>" loading="lazy">
@@ -11,7 +13,9 @@
   </a>
   <div class="book-card__info">
     <h3 class="book-card__title">
-      <a href="/book/<%= book.slug %>"><%= book.title %></a>
+      <a href="/book/<%= book.slug %>"
+         data-track-click data-content-type="book" data-content-id="<%= book.id %>"
+         data-content-slug="<%= book.slug %>" data-content-title="<%= book.title %>"><%= book.title %></a>
     </h3>
     <% if (book.authors && book.authors.length > 0) { %>
     <p class="book-card__authors">

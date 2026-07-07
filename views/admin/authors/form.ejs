@@ -1,21 +1,37 @@
 <div class="admin-list-header">
-  <h1><%= author ? 'Edit Author' : 'New Author' %></h1>
-  <% if (author && author.username) { %>
-    <a class="admin-btn admin-btn--primary" href="/author/<%= encodeURIComponent(author.username) %>" target="_blank" rel="noopener">View Author</a>
-  <% } %>
+  <h1><%= author ? (author.display_name || author.username || 'Edit Author') : 'New Author' %></h1>
+  <div style="display:flex;gap:8px">
+    <% if (author && author.username) { %>
+    <a class="admin-btn" href="/author/<%= encodeURIComponent(author.username) %>" target="_blank" rel="noopener">View public page ↗</a>
+    <% } %>
+    <a class="admin-btn" href="/admin/authors">← All Authors</a>
+  </div>
 </div>
 
-<% if (errors && errors.length) { %>
-  <ul class="admin-form-errors">
-    <% errors.forEach(function (e) { %><li><%= e %></li><% }) %>
-  </ul>
+<% if (typeof saved !== 'undefined' && saved) { %>
+<div class="admin-flash admin-flash--success">Author saved.</div>
 <% } %>
 
-<form class="admin-form" method="post" action="<%= author && author.id ? '/admin/authors/' + author.id : '/admin/authors' %>" enctype="multipart/form-data">
-  <label>
-    Username
-    <input type="text" name="username" value="<%= author ? author.username : '' %>" required>
-  </label>
+<% if (errors && errors.length) { %>
+<ul class="admin-form-errors">
+  <% errors.forEach(function(e) { %><li><%= e %></li><% }) %>
+</ul>
+<% } %>
+
+<form class="admin-form" method="post"
+      action="<%= author && author.id ? '/admin/authors/' + author.id : '/admin/authors' %>"
+      enctype="multipart/form-data">
+
+  <div class="admin-form-row">
+    <label>
+      Display Name
+      <input type="text" name="display_name" value="<%= author ? (author.display_name || '') : '' %>">
+    </label>
+    <label>
+      Username *
+      <input type="text" name="username" value="<%= author ? author.username : '' %>" required>
+    </label>
+  </div>
 
   <label>
     Email
@@ -23,30 +39,39 @@
   </label>
 
   <label>
-    Display Name
-    <input type="text" name="display_name" value="<%= author ? (author.display_name || '') : '' %>">
-  </label>
-
-  <label>
     Bio
     <textarea name="bio" rows="4"><%= author ? (author.bio || '') : '' %></textarea>
   </label>
 
-  <label>
-    Photo
+  <div class="form-group">
+    <label style="display:block;margin-bottom:6px;font-weight:600">Photo</label>
     <% if (author && author.photo) { %>
-      <img class="admin-thumb" src="<%= author.photo %>" alt="">
-      <label class="admin-checkbox"><input type="checkbox" name="remove_photo" value="1"> Remove current photo</label>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <img src="<%= author.photo %>" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid #eee">
+      <label style="font-size:0.85rem;cursor:pointer;font-weight:normal">
+        <input type="checkbox" name="remove_photo" value="1"> Remove photo
+      </label>
       <input type="hidden" name="existing_photo" value="<%= author.photo %>">
+    </div>
     <% } %>
     <input type="file" name="photo" accept="image/*">
-  </label>
+  </div>
 
-  <p class="admin-form-hint">
-    Login access isn't managed here. Use
-    <code>node scripts/set-admin-password.js &lt;username&gt; &lt;password&gt;</code>
-    on the server to grant or change admin login for an author.
-  </p>
+  <div style="margin-top:1.5rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button type="submit" class="admin-btn admin-btn--primary"><%= author ? 'Save Changes' : 'Create Author' %></button>
+    <a class="admin-btn" href="/admin/authors">Cancel</a>
+    <% if (author && author.id) { %>
+    <form method="post" action="/admin/authors/<%= author.id %>/delete" style="margin-left:auto"
+          onsubmit="return confirm('Delete this author? This cannot be undone.')">
+      <button type="submit" class="admin-btn admin-btn--danger">Delete Author</button>
+    </form>
+    <% } %>
+  </div>
 
-  <button type="submit" class="admin-btn admin-btn--primary"><%= author ? 'Save Changes' : 'Create Author' %></button>
 </form>
+
+<% if (!author) { %>
+<p class="admin-form-hint" style="margin-top:1.5rem">
+  After creating an author, use the blog or article form to assign them as a byline.
+</p>
+<% } %>

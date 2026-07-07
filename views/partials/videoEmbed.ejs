@@ -1,0 +1,53 @@
+<% if (typeof videoEmbed !== 'undefined' && videoEmbed) { %>
+<div class="post-video-embed">
+
+  <% if (videoEmbed.type === 'iframe') { %>
+    <%# YouTube %>
+    <div class="video-wrapper">
+      <iframe
+        src="<%= videoEmbed.embedUrl %>"
+        frameborder="0"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        loading="lazy"
+        title="Embedded video">
+      </iframe>
+    </div>
+
+  <% } else if (videoEmbed.type === 'twitter') { %>
+    <%# X / Twitter %>
+    <div class="twitter-embed-wrap">
+      <blockquote class="twitter-tweet" data-dnt="true">
+        <a href="<%= videoEmbed.tweetUrl %>"></a>
+      </blockquote>
+    </div>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+  <% } else if (videoEmbed.type === 'facebook') { %>
+    <%# Facebook %>
+    <div id="fb-root"></div>
+    <div class="fb-embed-wrap">
+      <div class="fb-video"
+           data-href="<%= videoEmbed.originalUrl %>"
+           data-width="800"
+           data-allowfullscreen="true"
+           data-show-captions="false">
+      </div>
+    </div>
+    <script async defer crossorigin="anonymous"
+      src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0">
+    </script>
+  <% } %>
+
+  <%# Platform label + fallback link — always shown %>
+  <p class="video-source-label">
+    <%= videoEmbed.label %> &nbsp;·&nbsp;
+    <a href="<%= videoEmbed.originalUrl %>"
+       target="_blank" rel="noopener nofollow">
+      Watch on <%= videoEmbed.platform === 'youtube' ? 'YouTube' : videoEmbed.platform === 'twitter' ? 'X' : 'Facebook' %> ↗
+    </a>
+  </p>
+
+</div>
+<% } %>

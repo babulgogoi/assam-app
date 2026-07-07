@@ -47,7 +47,11 @@ app.set('layout', 'layout');
 
 // CSP stays off: AdSense's actual domain allowlist depends on which ad features are enabled in the
 // dashboard (auto ads, matched content, etc.) and can't be pinned down accurately with placeholder IDs.
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  // no-referrer breaks YouTube embeds (Error 153) — the player requires a Referer to validate the embedding site
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -78,6 +82,9 @@ app.use('/uploads/authors', express.static(process.env.UPLOADS_AUTHORS_DIR));
 app.use('/uploads/books', express.static(process.env.UPLOADS_BOOKS_DIR || '/home/assam/web/assam.org/public_html/uploads/books'));
 app.use('/uploads/pages', express.static(process.env.UPLOADS_PAGES_DIR || '/home/assam/web/assam.org/public_html/uploads/pages'));
 app.use('/uploads/hero', express.static(process.env.UPLOADS_HERO_DIR || '/home/assam/web/assam.org/public_html/uploads/hero'));
+app.use('/uploads/pdfs', express.static(process.env.UPLOADS_PDFS_DIR || '/home/assam/web/assam.org/public_html/uploads/pdfs'));
+app.use('/uploads/blog', express.static(process.env.UPLOADS_BLOG_DIR || '/home/assam/web/assam.org/public_html/uploads/blog'));
+app.use('/uploads/publishers', express.static(process.env.UPLOADS_PUBLISHERS_DIR || '/home/assam/web/assam.org/public_html/uploads/publishers'));
 // D9 migrated files — body HTML was rewritten to /uploads/legacy/ during migration.
 app.use('/uploads/legacy', express.static(process.env.UPLOADS_LEGACY_DIR));
 // Fallback: serve D9 original path directly for any URLs that were not rewritten.

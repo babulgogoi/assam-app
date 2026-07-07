@@ -15,8 +15,11 @@ const adminMenuController      = require('../controllers/adminMenuController');
 const adminSettingsController  = require('../controllers/adminSettingsController');
 const adminUsersController     = require('../controllers/adminUsersController');
 const adminBooksController     = require('../controllers/adminBooksController');
+const adminBlogController      = require('../controllers/adminBlogController');
+const adminDashboardController = require('../controllers/adminDashboardController');
+const adminAnalyticsController = require('../controllers/adminAnalyticsController');
 const { requireAdmin, requirePermission } = require('../middleware/roleAuth');
-const { uploadArticleFiles, uploadAuthorPhoto, uploadBookCover, uploadPageFeatured, uploadHeroImage } = require('../middleware/upload');
+const { uploadArticleFiles, uploadAuthorPhoto, uploadBookCover, uploadPageFeatured, uploadPageFiles, uploadHeroImage, uploadBlogImage, uploadAuthorImage, uploadPublisherLogo } = require('../middleware/upload');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -43,24 +46,18 @@ router.post('/logout', adminController.logout);
 // All routes below require a logged-in admin.
 router.use(requireAdmin);
 
-// Expose adminUser to every admin template.
+// Expose adminUser + current path (for nav active states) to every admin template.
 router.use((req, res, next) => {
   res.locals.adminUser = req.session.adminUser;
+  res.locals.activePath = req.baseUrl + req.path;
   next();
 });
 
-router.get('/', (req, res) => {
-  const u = req.session.adminUser;
-  if (!u) return res.redirect('/admin/login');
-  if (u.isSuperAdmin) return res.redirect('/admin/articles');
-  const p = u.permissions || {};
-  if (p.stories?.can_read)  return res.redirect('/admin/articles');
-  if (p.pages?.can_read)    return res.redirect('/admin/pages');
-  if (p.books?.can_read)    return res.redirect('/admin/books');
-  if (p.settings?.can_read) return res.redirect('/admin/settings');
-  if (p.users?.can_read)    return res.redirect('/admin/users');
-  return res.redirect('/admin/articles'); // fallback
-});
+// Dashboard for content roles; books-focused roles are redirected to their
+// section inside the controller.
+router.get('/', adminDashboardController.show);
+
+router.get('/analytics', requirePermission('settings', 'can_read'), adminAnalyticsController.show);
 
 // TinyMCE inline image upload endpoint — module-aware
 const INLINE_UPLOAD_TARGETS = {
@@ -120,8 +117,9 @@ router.post('/articles/:id/delete', requirePermission('stories', 'can_delete'), 
 router.get('/authors',          requirePermission('authors', 'can_read'),   adminAuthorsController.listAuthors);
 router.get('/authors/new',      requirePermission('authors', 'can_create'), adminAuthorsController.newAuthorForm);
 router.post('/authors',         requirePermission('authors', 'can_create'), uploadAuthorPhoto, adminAuthorsController.createAuthor);
-router.get('/authors/:id/edit', requirePermission('authors', 'can_read'),   adminAuthorsController.editAuthorForm);
-router.post('/authors/:id',     requirePermission('authors', 'can_update'), uploadAuthorPhoto, adminAuthorsController.updateAuthor);
+router.get('/authors/:id/edit',    requirePermission('authors', 'can_read'),   adminAuthorsController.editAuthorForm);
+router.post('/authors/:id',        requirePermission('authors', 'can_update'), uploadAuthorPhoto, adminAuthorsController.updateAuthor);
+router.post('/authors/:id/delete', requirePermission('authors', 'can_delete'), adminAuthorsController.deleteAuthor);
 
 // Page Topics (module: pages) — before /pages/:id to avoid conflict
 router.get('/page-topics',             requirePermission('pages', 'can_read'),   adminPageTopicsController.listTopics);
@@ -132,10 +130,37 @@ router.post('/page-topics/:id/delete', requirePermission('pages', 'can_delete'),
 // Pages (module: pages)
 router.get('/pages',             requirePermission('pages', 'can_read'),   adminPagesController.listPages);
 router.get('/pages/new',         requirePermission('pages', 'can_create'), adminPagesController.newPageForm);
-router.post('/pages',            requirePermission('pages', 'can_create'), uploadPageFeatured, adminPagesController.createPage);
+router.post('/pages',            requirePermission('pages', 'can_create'), uploadPageFiles, adminPagesController.createPage);
 router.get('/pages/:id/edit',    requirePermission('pages', 'can_read'),   adminPagesController.editPageForm);
-router.post('/pages/:id',        requirePermission('pages', 'can_update'), uploadPageFeatured, adminPagesController.updatePage);
+router.post('/pages/:id',        requirePermission('pages', 'can_update'), uploadPageFiles, adminPagesController.updatePage);
 router.post('/pages/:id/delete', requirePermission('pages', 'can_delete'), adminPagesController.deletePage);
+router.get('/pages/:id/revisions', requirePermission('pages', 'can_read'), async (req, res, next) => {
+  try {
+    const db = require('../config/db');
+    const [pageRes, historyRes] = await Promise.all([
+      db.query('SELECT id, title, slug FROM pages WHERE id=$1', [req.params.id]),
+      db.query(
+        `SELECT ph.id, ph.editor_name, ph.action, ph.editor_note,
+                ph.word_count_before, ph.word_count_after,
+                ph.admin_user_id,
+                au.username AS admin_username,
+                au.display_name AS admin_display_name,
+                TO_CHAR(ph.created_at, 'DD Mon YYYY, HH24:MI') AS formatted_date
+         FROM page_history ph
+         LEFT JOIN admin_users au ON au.id = ph.admin_user_id
+         WHERE ph.page_id=$1 ORDER BY ph.created_at DESC`,
+        [req.params.id]
+      ),
+    ]);
+    if (!pageRes.rows.length) return res.status(404).send('Page not found');
+    res.locals.layout = 'admin/layout';
+    res.render('admin/pages/revisions', {
+      title: `Revisions: ${pageRes.rows[0].title} — Admin`,
+      page: pageRes.rows[0],
+      history: historyRes.rows,
+    });
+  } catch (err) { next(err); }
+});
 
 // Menu (module: settings)
 router.get('/menu',              requirePermission('settings', 'can_read'),   adminMenuController.listMenuItems);
@@ -231,17 +256,25 @@ router.post('/books/:id/delete', requirePermission('books', 'can_delete'), admin
 router.get('/book-authors/search',      requirePermission('books', 'can_read'),   adminBooksController.searchBookAuthors);
 router.get('/book-authors',             requirePermission('books', 'can_read'),   adminBooksController.listBookAuthors);
 router.get('/book-authors/new',         requirePermission('books', 'can_create'), adminBooksController.newBookAuthorForm);
-router.post('/book-authors',            requirePermission('books', 'can_create'), adminBooksController.createBookAuthor);
+router.post('/book-authors',            requirePermission('books', 'can_create'), uploadAuthorImage, adminBooksController.createBookAuthor);
 router.get('/book-authors/:id/edit',    requirePermission('books', 'can_read'),   adminBooksController.editBookAuthorForm);
-router.post('/book-authors/:id',        requirePermission('books', 'can_update'), adminBooksController.updateBookAuthor);
+router.post('/book-authors/:id',        requirePermission('books', 'can_update'), uploadAuthorImage, adminBooksController.updateBookAuthor);
 router.post('/book-authors/:id/delete', requirePermission('books', 'can_delete'), adminBooksController.deleteBookAuthor);
 
 // Book Publishers (module: books)
 router.get('/book-publishers',             requirePermission('books', 'can_read'),   adminBooksController.listPublishers);
 router.get('/book-publishers/new',         requirePermission('books', 'can_create'), adminBooksController.newPublisherForm);
-router.post('/book-publishers',            requirePermission('books', 'can_create'), adminBooksController.createPublisher);
+router.post('/book-publishers',            requirePermission('books', 'can_create'), uploadPublisherLogo, adminBooksController.createPublisher);
 router.get('/book-publishers/:id/edit',    requirePermission('books', 'can_read'),   adminBooksController.editPublisherForm);
-router.post('/book-publishers/:id',        requirePermission('books', 'can_update'), adminBooksController.updatePublisher);
+router.post('/book-publishers/:id',        requirePermission('books', 'can_update'), uploadPublisherLogo, adminBooksController.updatePublisher);
 router.post('/book-publishers/:id/delete', requirePermission('books', 'can_delete'), adminBooksController.deletePublisher);
+
+// Blog (module: blog)
+router.get('/blog',             requirePermission('blog', 'can_read'),   adminBlogController.list);
+router.get('/blog/new',         requirePermission('blog', 'can_create'), adminBlogController.newForm);
+router.post('/blog',            requirePermission('blog', 'can_create'), uploadBlogImage, adminBlogController.create);
+router.get('/blog/:id/edit',    requirePermission('blog', 'can_read'),   adminBlogController.editForm);
+router.post('/blog/:id',        requirePermission('blog', 'can_update'), uploadBlogImage, adminBlogController.update);
+router.post('/blog/:id/delete', requirePermission('blog', 'can_delete'), adminBlogController.del);
 
 module.exports = router;

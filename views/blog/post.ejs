@@ -1,0 +1,86 @@
+<article class="blog-post">
+
+  <%- include('../partials/contextualEdit', { editModule: 'blog', editUrl: `/admin/blog/${post.id}/edit`, editLabel: 'post' }) %>
+
+  <% if (post.featured_image) { %>
+  <div class="post-hero">
+    <img src="<%= post.featured_image %>" alt="<%= post.featured_image_caption || post.title %>" class="post-hero__img">
+    <% if (post.featured_image_caption) { %>
+    <p class="post-hero__caption"><%= post.featured_image_caption %></p>
+    <% } %>
+  </div>
+  <% } %>
+
+  <div class="post-hero-meta">
+    <% if (post.tags && post.tags.length) { %>
+    <div class="post-hero-tags">
+      <% post.tags.forEach(function(tag) { %><a href="/blog?tag=<%= encodeURIComponent(tag) %>" class="tag-pill"><%= tag %></a><% }) %>
+    </div>
+    <% } %>
+    <h1 class="post-title"><%= post.title %></h1>
+    <%# Byline: explicit author, else linked book-author profile, else NOTHING
+        (never the saving admin's display name). %>
+    <% if (post.author_name) { %>
+    <p class="post-byline">By <%= post.author_name %></p>
+    <% } else if (post.linked_author_name) { %>
+    <div class="post-byline post-byline--profile">
+      <% if (post.linked_author_photo) { %>
+      <img src="<%= post.linked_author_photo %>" alt="<%= post.linked_author_name %>" class="post-byline__photo" width="36" height="36">
+      <% } %>
+      <span>By <a href="/books/author/<%= post.linked_author_slug %>"><%= post.linked_author_name %></a></span>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="post-body">
+    <%- post.body %>
+  </div>
+
+  <%- include('../partials/videoEmbed', { videoEmbed }) %>
+
+  <div class="post-footer">
+    <hr class="post-divider">
+
+    <div class="post-meta-footer">
+      <% if (post.published_at) { %>
+      <span class="post-date-label">
+        Published: <%= new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+      </span>
+      <% } %>
+
+      <% if (post.tags && post.tags.length) { %>
+      <div class="post-tags-footer">
+        Tags:
+        <% post.tags.forEach(function(tag) { %>
+        <a href="/blog?tag=<%= encodeURIComponent(tag) %>" class="tag-pill"><%= tag %></a>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+
+    <nav class="post-nav">
+      <% if (prevPost) { %>
+      <a href="/blog/<%= prevPost.slug %>" class="post-nav-btn prev">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title"><%= prevPost.title %></span>
+      </a>
+      <% } else { %>
+      <div></div>
+      <% } %>
+
+      <% if (nextPost) { %>
+      <a href="/blog/<%= nextPost.slug %>" class="post-nav-btn next">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title"><%= nextPost.title %></span>
+      </a>
+      <% } else { %>
+      <div></div>
+      <% } %>
+    </nav>
+
+    <div class="post-back">
+      <a href="/blog">← Back to The Assam Review</a>
+    </div>
+  </div>
+
+</article>

@@ -1,0 +1,117 @@
+<div class="dash-wrap analytics-wrap">
+
+  <div class="admin-list-header">
+    <h1>Analytics</h1>
+    <div class="analytics-period">
+      <a href="/admin/analytics?days=7"  class="period-tab <%= days === 7  ? 'active' : '' %>">7 days</a>
+      <a href="/admin/analytics?days=30" class="period-tab <%= days === 30 ? 'active' : '' %>">30 days</a>
+      <a href="/admin/analytics?days=90" class="period-tab <%= days === 90 ? 'active' : '' %>">90 days</a>
+    </div>
+  </div>
+
+  <div class="dash-stats">
+    <div class="stat-card">
+      <span class="stat-num"><%= (summary.total_views || 0).toLocaleString('en-IN') %></span>
+      <span class="stat-label">Total Views</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num"><%= (summary.unique_visitors || 0).toLocaleString('en-IN') %></span>
+      <span class="stat-label">Unique Visitors</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num"><%= (summary.outbound_clicks || 0).toLocaleString('en-IN') %></span>
+      <span class="stat-label">Outbound Clicks</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num"><%= (summary.searches || 0).toLocaleString('en-IN') %></span>
+      <span class="stat-label">Searches</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num"><%= (summary.unique_queries || 0).toLocaleString('en-IN') %></span>
+      <span class="stat-label">Unique Queries</span>
+    </div>
+  </div>
+
+  <div class="dash-section" style="margin-bottom:28px">
+    <h2 class="dash-section__title">Daily Views</h2>
+    <% if (!daily.length) { %>
+    <p class="analytics-empty">No view data yet — check back once visitors arrive.</p>
+    <% } else { %>
+    <%
+      const maxViews = Math.max(...daily.map(d => d.total_views), 1);
+      const chartDays = daily.slice().reverse(); // oldest → newest
+    %>
+    <div class="views-chart">
+      <% chartDays.forEach(function(d) { %>
+      <div class="views-chart__col" title="<%= new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %>: <%= d.total_views %> views, <%= d.unique_visitors %> visitors">
+        <div class="views-chart__bar" style="height:<%= Math.max(2, Math.round(d.total_views / maxViews * 100)) %>%"></div>
+        <span class="views-chart__label"><%= new Date(d.date).getDate() %></span>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="analytics-cols">
+    <div class="dash-section">
+      <h2 class="dash-section__title">Top Pages</h2>
+      <%- include('analytics-table', { rows: topPages, urlPrefix: '/page/' }) %>
+    </div>
+    <div class="dash-section">
+      <h2 class="dash-section__title">Top News Articles</h2>
+      <%- include('analytics-table', { rows: topArticles, urlPrefix: '/article/' }) %>
+    </div>
+    <div class="dash-section">
+      <h2 class="dash-section__title">Top Blog Posts</h2>
+      <%- include('analytics-table', { rows: topBlog, urlPrefix: '/blog/' }) %>
+    </div>
+  </div>
+
+  <div class="analytics-cols analytics-cols--two">
+    <div class="dash-section">
+      <h2 class="dash-section__title">Top Books</h2>
+      <%- include('analytics-table', { rows: topBooks, urlPrefix: '/book/' }) %>
+    </div>
+
+    <div class="dash-section">
+      <h2 class="dash-section__title">Top Searches</h2>
+      <% if (!searches.length) { %>
+      <p class="analytics-empty">No searches recorded yet.</p>
+      <% } else { %>
+      <table class="dash-table">
+        <thead><tr><th>Query</th><th>Count</th><th>Avg results</th></tr></thead>
+        <tbody>
+          <% searches.forEach(function(s) { %>
+          <tr>
+            <td><a href="/search?q=<%= encodeURIComponent(s.search_query) %>" target="_blank"><%= s.search_query %></a></td>
+            <td><%= s.searches %></td>
+            <td class="dash-date"><%= s.avg_results ?? '—' %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <h2 class="dash-section__title">Top Outbound Clicks</h2>
+    <% if (!outbound.length) { %>
+    <p class="analytics-empty">No outbound clicks recorded yet.</p>
+    <% } else { %>
+    <table class="dash-table">
+      <thead><tr><th>Destination</th><th>From</th><th>Clicks</th></tr></thead>
+      <tbody>
+        <% outbound.forEach(function(o) { %>
+        <tr>
+          <td class="analytics-url"><a href="<%= o.target_url %>" target="_blank" rel="noopener nofollow"><%= o.target_url %></a></td>
+          <td><%= o.content_title || '—' %></td>
+          <td><%= o.clicks %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+</div>
