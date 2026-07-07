@@ -321,14 +321,15 @@ async function addRating(bookId, rating) {
   );
 }
 
-async function listForAdmin({ limit = 20, offset = 0, q = '', status = '' } = {}) {
+async function listForAdmin({ limit = 20, offset = 0, q = '', status = '', lang = '' } = {}) {
   const params = [];
   let where = 'WHERE 1=1';
   if (q) { params.push(`%${q}%`); where += ` AND (b.title ILIKE $${params.length} OR b.isbn ILIKE $${params.length})`; }
   if (status) { params.push(status); where += ` AND b.status = $${params.length}`; }
+  if (lang) { params.push(lang); where += ` AND b.language = $${params.length}`; }
   params.push(limit, offset);
   const { rows } = await db.query(
-    `SELECT b.id, b.title, b.slug, b.status, b.is_featured, b.price, b.format, b.cover_image,
+    `SELECT b.id, b.title, b.slug, b.status, b.is_featured, b.price, b.format, b.language, b.cover_image,
             b.created_at, p.name AS publisher_name,
             COALESCE(string_agg(DISTINCT ba.name, ', '), '—') AS author_names
      FROM books b
@@ -344,11 +345,12 @@ async function listForAdmin({ limit = 20, offset = 0, q = '', status = '' } = {}
   return rows;
 }
 
-async function countForAdmin({ q = '', status = '' } = {}) {
+async function countForAdmin({ q = '', status = '', lang = '' } = {}) {
   const params = [];
   let where = 'WHERE 1=1';
   if (q) { params.push(`%${q}%`); where += ` AND (title ILIKE $${params.length} OR isbn ILIKE $${params.length})`; }
   if (status) { params.push(status); where += ` AND status = $${params.length}`; }
+  if (lang) { params.push(lang); where += ` AND language = $${params.length}`; }
   const { rows } = await db.query(`SELECT COUNT(*) FROM books ${where}`, params);
   return parseInt(rows[0].count, 10);
 }

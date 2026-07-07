@@ -72,16 +72,17 @@ async function listBooks(req, res, next) {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const q = (req.query.q || '').trim();
     const status = req.query.status || '';
+    const lang = (req.query.lang || '').trim();
     const offset = (page - 1) * ADMIN_PAGE_SIZE;
 
     const [books, total] = await Promise.all([
-      booksModel.listForAdmin({ limit: ADMIN_PAGE_SIZE, offset, q, status }),
-      booksModel.countForAdmin({ q, status }),
+      booksModel.listForAdmin({ limit: ADMIN_PAGE_SIZE, offset, q, status, lang }),
+      booksModel.countForAdmin({ q, status, lang }),
     ]);
     const totalPages = Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE));
 
     res.locals.layout = 'admin/layout';
-    res.render('admin/books/list', { title: 'Books — Admin', books, q, status, page, totalPages });
+    res.render('admin/books/list', { title: 'Books — Admin', books, q, status, lang, page, totalPages });
   } catch (err) { next(err); }
 }
 

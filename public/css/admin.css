@@ -749,3 +749,27 @@
   white-space: nowrap;
   vertical-align: bottom;
 }
+
+/* ── Admin books list: language badges ───────────────────────────────────── */
+
+.lang-badge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-weight: 500;
+  /* grey default so unlisted legacy languages (e.g. Swedish) still render as a badge */
+  background: #F3F4F6;
+  color: #374151;
+}
+.lang-badge--assamese { background: #FEF3C7; color: #92400E; }
+.lang-badge--english  { background: #DBEAFE; color: #1E40AF; }
+.lang-badge--hindi    { background: #FCE7F3; color: #9D174D; }
+.lang-badge--bengali  { background: #D1FAE5; color: #065F46; }
+.lang-badge--bodo     { background: #EDE9FE; color: #5B21B6; }
+.lang-badge--khasi    { background: #FEE2E2; color: #991B1B; }
+/* fallback for any other language */
+.lang-badge--other,
+.lang-badge--mising,
+.lang-badge--karbi,
+.lang-badge--dimasa   { background: #F3F4F6; color: #374151; }

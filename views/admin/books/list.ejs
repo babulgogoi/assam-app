@@ -10,13 +10,19 @@
     <option value="active"   <%= status === 'active'   ? 'selected' : '' %>>Active</option>
     <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>Inactive</option>
   </select>
+  <select name="lang" id="lang-filter">
+    <option value="">All languages</option>
+    <% ['Assamese','English','Hindi','Bengali','Bodo','Khasi','Mising','Karbi','Dimasa','Other'].forEach(function(l) { %>
+    <option value="<%= l %>" <%= lang === l ? 'selected' : '' %>><%= l %></option>
+    <% }) %>
+  </select>
   <button type="submit" class="admin-btn">Filter</button>
   <a class="admin-btn" href="/admin/books">Reset</a>
 </form>
 
 <table class="admin-table">
   <thead>
-    <tr><th>Cover</th><th>Title / Author</th><th>Format</th><th>Price</th><th>Status</th><th></th></tr>
+    <tr><th>Cover</th><th>Title / Author</th><th>Format</th><th>Language</th><th>Price</th><th>Status</th><th></th></tr>
   </thead>
   <tbody>
     <% books.forEach(function(book) { %>
@@ -34,6 +40,13 @@
         <% if (book.is_featured) { %> <span class="admin-badge admin-badge--published">Featured</span><% } %>
       </td>
       <td><%= book.format || '—' %></td>
+      <td>
+        <% if (book.language) { %>
+        <span class="lang-badge lang-badge--<%= book.language.toLowerCase().replace(/\s+/g,'-') %>"><%= book.language %></span>
+        <% } else { %>
+        <span style="color:#ccc;">—</span>
+        <% } %>
+      </td>
       <td><%= book.price ? '₹' + book.price : '—' %></td>
       <td>
         <span class="admin-badge admin-badge--<%= book.status === 'active' ? 'published' : 'draft' %>"><%= book.status %></span>
@@ -48,16 +61,16 @@
     </tr>
     <% }) %>
     <% if (!books.length) { %>
-    <tr><td colspan="6">No books yet. <a href="/admin/books/new">Add one</a> or run the WooCommerce migration.</td></tr>
+    <tr><td colspan="7">No books yet. <a href="/admin/books/new">Add one</a> or run the WooCommerce migration.</td></tr>
     <% } %>
   </tbody>
 </table>
 
 <% if (totalPages > 1) { %>
 <div class="admin-pagination">
-  <% if (page > 1) { %><a class="admin-btn" href="/admin/books?page=<%= page - 1 %>&q=<%= q %>&status=<%= status %>">← Prev</a><% } %>
+  <% if (page > 1) { %><a class="admin-btn" href="/admin/books?page=<%= page - 1 %>&q=<%= q %>&status=<%= status %>&lang=<%= encodeURIComponent(lang) %>">← Prev</a><% } %>
   <span>Page <%= page %> of <%= totalPages %></span>
-  <% if (page < totalPages) { %><a class="admin-btn" href="/admin/books?page=<%= page + 1 %>&q=<%= q %>&status=<%= status %>">Next →</a><% } %>
+  <% if (page < totalPages) { %><a class="admin-btn" href="/admin/books?page=<%= page + 1 %>&q=<%= q %>&status=<%= status %>&lang=<%= encodeURIComponent(lang) %>">Next →</a><% } %>
 </div>
 <% } %>
 
